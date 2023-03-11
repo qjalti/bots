@@ -25,10 +25,10 @@ const SEND_TO = 738829247;
 
 /**
  * Блок Open AI API
- * @param {string} model AI model
  * @param {string} prompt API request text
+ * @param {string} model AI model
  */
-const sendOpenAIAPI = async (model, prompt) => {
+const sendOpenAIAPI = async (prompt, model = 'new') => {
   const OPENAI_API_KEY = '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';
   const CONFIGURATION = new Configuration({
     apiKey: OPENAI_API_KEY,
@@ -46,12 +46,9 @@ const sendOpenAIAPI = async (model, prompt) => {
       });
       return COMPLETION.data.choices[0].message.content;
     } else if (model === 'old') {
-      const TEMPLATE = `Напиши текст по шаблону:
-Шаблон: ${prompt}
-Текст:`;
       const COMPLETION = await openai.createCompletion({
         model: 'text-davinci-003',
-        prompt: TEMPLATE,
+        prompt,
         temperature: 0.8,
         max_tokens: 1024,
       });
@@ -250,16 +247,17 @@ let aiModel = false;
  */
 BOT.on('message', async (msg) => {
   const CHAT_ID = msg.chat.id;
-  botSendMessage(msg.text + '; ' + msg.from.first_name);
+  botSendMessage(msg.text + ' — ' + msg.from.first_name);
   if (aiReq && msg.chat.id === aiInitiator) {
-    const REQ_RESULT = await sendOpenAIAPI(aiModel, msg.text);
+    await BOT.sendChatAction(CHAT_ID, 'typing');
+    const REQ_RESULT = await sendOpenAIAPI(msg.text, aiModel);
     botSendMessage(REQ_RESULT, CHAT_ID);
     botSendMessage(REQ_RESULT);
     aiReq = false;
     aiInitiator = false;
   } else if (msg.text === '/ai') {
     botSendMessage(
-        `Напиши своё сообщение искуственному интеллекту ChatGPT (gpt-3.5-turbo):`,
+        `Напиши своё сообщение ниже:`,
         CHAT_ID,
     );
     aiReq = true;
@@ -267,7 +265,7 @@ BOT.on('message', async (msg) => {
     aiModel = 'new';
   } else if (msg.text === '/ai_di') {
     botSendMessage(
-        `Напиши своё сообщение искуственному интеллекту GPT-3.5 (text-davinci-003):`,
+        `Напиши своё сообщение ниже:`,
         CHAT_ID,
     );
     aiReq = true;
