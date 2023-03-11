@@ -1,0 +1,26 @@
+{
+  "name": "bots",
+  "version": "1.0.0",
+  "description": "Bots handlers and CRON",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "NikitaGuriev <stig.guriev@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.2.1",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "moment": "^2.29.3",
+    "node-cron": "^3.0.0",
+    "node-telegram-api": "^0.4.0",
+    "node-telegram-bot-api": "^0.54.0",
+    "node-vk-bot-api": "^3.5.0",
+    "openai": "^3.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.36.0",
+    "eslint-config-google": "^0.14.0"
+  }
+}
