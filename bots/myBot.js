@@ -26,8 +26,9 @@ const SEND_TO = 738829247;
  * Блок Open AI API
  * @param {string} prompt API request text
  * @param {string} model AI model
+ * @param {string} userData User data
  */
-const sendOpenAIAPI = async (prompt, model = 'new') => {
+const sendOpenAIAPI = async (prompt, model = 'new', userData) => {
   const OPENAI_API_KEY = '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';
   const CONFIGURATION = new Configuration({
     apiKey: OPENAI_API_KEY,
@@ -38,7 +39,10 @@ const sendOpenAIAPI = async (prompt, model = 'new') => {
     if (model === 'new') {
       const COMPLETION = await openai.createChatCompletion({
         model: 'gpt-3.5-turbo',
-        messages: [{'role': 'user', 'content': prompt}],
+        messages: [
+          {'role': 'system', 'content': `The user's name is ${userData}`},
+          {'role': 'user', 'content': prompt},
+        ],
       });
       return COMPLETION.data.choices[0].message.content;
     } else if (model === 'old') {
@@ -237,13 +241,15 @@ const sendAlyaMessage = async () => {
 BOT.on('message', async (msg) => {
   const CHAT_ID = msg.chat.id;
   const CURRENT_DATE = new Date();
+  const USER_NAME = `${msg.from.first_name ? msg.from.first_name : ' '} ${msg.from.last_name ? msg.from.last_name : ' '}`;
   console.log('--------------------------------');
   console.log(CURRENT_DATE.toLocaleString());
   console.log('----------------');
-  console.log(msg.from.username, msg.from.first_name, msg.from.last_name, msg.from.id);
+  console.log(msg.from.username, USER_NAME, msg.from.id);
   console.log('----------------');
   console.log('I_REQUEST: ', msg.text);
-  if (msg.text === '/start') {
+
+  if (msg.text === '/start') { // Если отправлена команда /start
     botSendMessage(`Привет! Этот бот перенаправляет сообщения чат-боту с искусственным интеллектом ChatGPT (GPT-3.5-TURBO)
 
 Бот Telegram имеет не полный функционал взаимодействия с ChatGPT, например бот не умеет:
@@ -251,7 +257,7 @@ BOT.on('message', async (msg) => {
 - напоминать
 - запоминать прошлые сообщения/узнавать пользователей
 `, CHAT_ID);
-  } else if (msg.text === '/ai_di') {
+  } else if (msg.text === '/ai_di') { // Если отправлена команда /ai_di
     botSendMessage(
         `Напиши своё сообщение ниже:`,
         CHAT_ID,
@@ -260,7 +266,7 @@ BOT.on('message', async (msg) => {
     const REQ_RESULT = await sendOpenAIAPI(msg.text, 'old');
     botSendMessage(REQ_RESULT, CHAT_ID);
     console.log('O_D_RESPONSE: ', REQ_RESULT);
-  } else if (msg.text === '/author') {
+  } else if (msg.text === '/author') { // Если отправлена команда /author
     BOT.sendMessage(
         CHAT_ID,
         `Привет!
@@ -274,9 +280,9 @@ BOT.on('message', async (msg) => {
           'Qjalti',
       ).then(() => false);
     });
-  } else {
+  } else { // Обращение к ChatGPT
     BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
-    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new');
+    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new', USER_NAME);
     botSendMessage(REQ_RESULT, CHAT_ID);
     console.log('O_RESPONSE:', REQ_RESULT);
   }
