@@ -14,7 +14,6 @@ const {Configuration, OpenAIApi} = require('openai');
 const API_URI = 'http://data.fixer.io/api/latest?access_key=e0822236ff493bffebc732cbfc84eb8d&format=1';
 const TEST_MODE = false;
 const LOG = false;
-const OPEN_AI_MODEL = 'gpt-3.5-turbo';
 
 /**
  * Telegram bot
@@ -38,11 +37,8 @@ const sendOpenAIAPI = async (prompt, model = 'new') => {
   try {
     if (model === 'new') {
       const COMPLETION = await openai.createChatCompletion({
-        model: OPEN_AI_MODEL,
-        // prompt,
+        model: 'gpt-3.5-turbo',
         messages: [{'role': 'user', 'content': prompt}],
-        // temperature: 0.8,
-        // max_tokens: 1024 // 1024
       });
       return COMPLETION.data.choices[0].message.content;
     } else if (model === 'old') {
@@ -230,48 +226,41 @@ ${formatNumber(EXCHANGE_RATES.EUR, 'EUR')}
  * Send Alya notify to drink pills (and copy to bot author)
  */
 const sendAlyaMessage = async () => {
-  const TEXT = await sendOpenAIAPI(
-      `Напомни моему дедушке выпить таблетки в стиле произведений Виктора Пелевина`,
-  );
   const ALYA_TELEGRAM_ID = 272337232;
 
-  botSendMessage(TEXT, ALYA_TELEGRAM_ID);
-  botSendMessage(TEXT);
+  botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', ALYA_TELEGRAM_ID);
 };
 
-let aiReq = false;
-let aiInitiator = false;
-let aiModel = false;
 /**
  * New message event
  */
 BOT.on('message', async (msg) => {
   const CHAT_ID = msg.chat.id;
-  botSendMessage(msg.text + ' — ' + msg.from.first_name);
-  if (aiReq && msg.chat.id === aiInitiator) {
-    await BOT.sendChatAction(CHAT_ID, 'typing');
-    const REQ_RESULT = await sendOpenAIAPI(msg.text, aiModel);
-    botSendMessage(REQ_RESULT, CHAT_ID);
-    botSendMessage(REQ_RESULT);
-    aiReq = false;
-    aiInitiator = false;
-  } else if (msg.text === '/ai') {
-    botSendMessage(
-        `Напиши своё сообщение ниже:`,
-        CHAT_ID,
-    );
-    aiReq = true;
-    aiInitiator = msg.chat.id;
-    aiModel = 'new';
+  const CURRENT_DATE = new Date();
+  console.log('--------------------------------');
+  console.log(CURRENT_DATE.toLocaleString());
+  console.log('----------------');
+  console.log(msg.from.username, msg.from.first_name, msg.from.last_name, msg.from.id);
+  console.log('----------------');
+  console.log('I_REQUEST: ', msg.text);
+  if (msg.text === '/start') {
+    botSendMessage(`Привет! Этот бот перенаправляет сообщения чат-боту с искусственным интеллектом ChatGPT (GPT-3.5-TURBO)
+
+Бот Telegram имеет не полный функционал взаимодействия с ChatGPT, например бот не умеет:
+- обрабатывать голосовые сообщения/видеосообщения/вложения
+- напоминать
+- запоминать прошлые сообщения/узнавать пользователей
+`, CHAT_ID);
   } else if (msg.text === '/ai_di') {
     botSendMessage(
         `Напиши своё сообщение ниже:`,
         CHAT_ID,
     );
-    aiReq = true;
-    aiInitiator = msg.chat.id;
-    aiModel = 'old';
-  } else {
+    BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
+    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'old');
+    botSendMessage(REQ_RESULT, CHAT_ID);
+    console.log('O_D_RESPONSE: ', REQ_RESULT);
+  } else if (msg.text === '/author') {
     BOT.sendMessage(
         CHAT_ID,
         `Привет!
@@ -285,7 +274,13 @@ BOT.on('message', async (msg) => {
           'Qjalti',
       ).then(() => false);
     });
+  } else {
+    BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
+    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new');
+    botSendMessage(REQ_RESULT, CHAT_ID);
+    console.log('O_RESPONSE:', REQ_RESULT);
   }
+  console.log(`--------------------------------\n\n`);
 });
 
 if (TEST_MODE) {
