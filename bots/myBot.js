@@ -13,7 +13,25 @@ const {Configuration, OpenAIApi} = require('openai');
  */
 const API_URI = 'http://data.fixer.io/api/latest?access_key=e0822236ff493bffebc732cbfc84eb8d&format=1';
 const TEST_MODE = false;
-const LOG = false;
+const ANIMATED_STICKERS = [
+  'CAACAgIAAxkBAAIQkGQoXi5wEInigN9oa3w-PmobC01rAAI7AwACbbBCAwOCj__lcU91LwQ',
+  'CAACAgIAAxkBAAIQnWQoYj3iWb4tvJxqpQMknItjkSUMAAIrAAMkcWIal6q7lIE88KUvBA',
+  'CAACAgIAAxkBAAIQoWQoYrmkwEMrOb_3K3tipis1ve4IAALgAAOWn4wOUr49XZjLh8cvBA',
+  'CAACAgEAAxkBAAIQo2QoYxMcOVT9rQIF56oxYFFY1jRpAAIeAQACOA6CEUZYaNdphl79LwQ',
+  'CAACAgIAAxkBAAIQpWQoY0RzOCotDl5WaZKUdxbLa3CLAAIfCQACGELuCBeYBo77PzxmLwQ',
+  'CAACAgIAAxkBAAIQp2QoY5AH8ZuuFOvnZveFCBh9-tSJAAJIAwACRxVoCSpzhrjTvmcdLwQ',
+  'CAACAgIAAxkBAAIQqWQoY7TQdFdu3kgc9hdM_guOjrzxAAK6CAACCLcZAg4TYhWPCwe3LwQ',
+  'CAACAgIAAxkBAAIQq2QoY_QC62QTTClJCS3fijVk6L2OAAKeAAPvaTEAASJ1KOYdKTkaLwQ',
+  'CAACAgIAAxkBAAIQrWQoZAt8y7oq5AOarzNbTostrHe8AAIYAQACHwFMFe5Y4EwOFR4kLwQ',
+  'CAACAgEAAxkBAAIQr2QoZCM58RAG-WYcW55o27-yYhbwAAKyCAACv4yQBPukvERwiE7xLwQ',
+  'CAACAgIAAxkBAAIQs2QoZH5F0S8AAeNGsI2khBn6uI-ZNgACsgADmFw8HKwRjIWk-mobLwQ',
+  'CAACAgIAAxkBAAIQt2QoZODnOT8LmGeUE0R2pAR3EwNzAALjAANWnb0KD_gizK2mCzcvBA',
+  'CAACAgIAAxkBAAIQuWQoZSNHqT08-JmD21v_iqm90vimAAJ-AAPBnGAMCxR_3b0i_fMvBA',
+  'CAACAgIAAxkBAAIQu2QoZUl7ck3X62OZN0M2we6V9EzRAAICAQACVp29Ck7ibIHLQOT_LwQ',
+  'CAACAgIAAxkBAAIQvWQoZYx6AAFZRtfkBiB6JL42wfjE7AACQgcAAkb7rAR9WohAd-ZTzC8E',
+  'CAACAgIAAxkBAAIQv2QoZZh2wVXusog4W4vh_v5B5zmYAAI1AAOvxlEae1tmbETOHzYvBA',
+];
+
 
 /**
  * Telegram bot
@@ -58,8 +76,10 @@ const sendOpenAIAPI = async (prompt, model = 'new', userData) => {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data);
+      return `Возникла непредвиденная ошибка. Повторите попытку позже`;
     } else {
       console.error(`Error with OpenAI API request: ${error.message}`);
+      return `Возникла непредвиденная ошибка. Повторите попытку позже`;
     }
   }
 };
@@ -95,11 +115,13 @@ const formatNumber = (number, currency) => {
  * @param {number|string} sendTo ID адресата
  */
 const botSendMessage = (botMessage, sendTo = SEND_TO) => {
-  BOT.sendMessage(sendTo, botMessage).then((r) => {
-    if (LOG) {
-      console.log(r);
-    }
-  });
+  BOT.sendMessage(sendTo, botMessage, {
+    parse_mode: 'Markdown',
+  })
+      .then(() => false)
+      .catch(() => {
+        BOT.sendMessage(sendTo, `Возникла непредвиденная ошибка. Повторите попытку позже`).then(() => false);
+      });
 };
 
 /**
@@ -240,14 +262,7 @@ const sendAlyaMessage = async () => {
  */
 BOT.on('message', async (msg) => {
   const CHAT_ID = msg.chat.id;
-  const CURRENT_DATE = new Date();
   const USER_NAME = `${msg.from.first_name ? msg.from.first_name : ' '} ${msg.from.last_name ? msg.from.last_name : ' '}`;
-  console.log('--------------------------------');
-  console.log(CURRENT_DATE.toLocaleString());
-  console.log('----------------');
-  console.log(msg.from.username, USER_NAME, msg.from.id);
-  console.log('----------------');
-  console.log('I_REQUEST: ', msg.text);
 
   if (msg.text === '/start') { // Если отправлена команда /start
     botSendMessage(`Привет! Этот бот перенаправляет сообщения чат-боту с искусственным интеллектом ChatGPT (GPT-3.5-TURBO)
@@ -256,7 +271,9 @@ BOT.on('message', async (msg) => {
 - обрабатывать голосовые сообщения/видеосообщения/вложения
 - напоминать
 - запоминать прошлые сообщения/узнавать пользователей
-`, CHAT_ID);
+
+Источник ИИ (полный функционал):
+https://chat.openai.com/`, CHAT_ID);
   } else if (msg.text === '/ai_di') { // Если отправлена команда /ai_di
     botSendMessage(
         `Напиши своё сообщение ниже:`,
@@ -264,8 +281,9 @@ BOT.on('message', async (msg) => {
     );
     BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
     const REQ_RESULT = await sendOpenAIAPI(msg.text, 'old');
-    botSendMessage(REQ_RESULT, CHAT_ID);
-    console.log('O_D_RESPONSE: ', REQ_RESULT);
+    setTimeout(() => {
+      botSendMessage(REQ_RESULT, CHAT_ID);
+    }, 4000);
   } else if (msg.text === '/author') { // Если отправлена команда /author
     BOT.sendMessage(
         CHAT_ID,
@@ -280,13 +298,28 @@ BOT.on('message', async (msg) => {
           'Qjalti',
       ).then(() => false);
     });
+  } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
+    botSendMessage(`\`${msg.from.id}\``, CHAT_ID);
   } else { // Обращение к ChatGPT
-    BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
+    BOT.sendChatAction(CHAT_ID, 'choose_sticker').then(() => false);
+    let stickerMessageId = null;
+    setTimeout(() => {
+      BOT.sendAnimation(CHAT_ID, ANIMATED_STICKERS[Math.floor(Math.random() * ANIMATED_STICKERS.length)], {
+        disable_notification: true,
+      }).then((res) => {
+        stickerMessageId = res.message_id;
+      });
+    }, 1000);
     const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new', USER_NAME);
-    botSendMessage(REQ_RESULT, CHAT_ID);
-    console.log('O_RESPONSE:', REQ_RESULT);
+    BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
+    setTimeout(async () => {
+      await BOT.deleteMessage(CHAT_ID, stickerMessageId);
+      await botSendMessage(REQ_RESULT ?
+            REQ_RESULT :
+            `Возникла непредвиденная ошибка. Повторите попытку позже`,
+      CHAT_ID);
+    }, 4000);
   }
-  console.log(`--------------------------------\n\n`);
 });
 
 if (TEST_MODE) {
