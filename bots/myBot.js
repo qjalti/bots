@@ -257,6 +257,70 @@ const sendAlyaMessage = async () => {
   botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', ALYA_TELEGRAM_ID);
 };
 
+const morningMessage = async () => {
+  const KEYBOARD = [
+    [
+      {
+        text: 'Новое пожелание',
+        callback_data: 'morning_again',
+      },
+    ],
+  ];
+
+  const AI_PROMPT = `
+Напиши моей маме Елене пожелание доброго утра и хорошего дня
+А также напомни ей, что нужно беречь здоровье и делать перерывчики`;
+
+  const AI_RESPONSE = await sendOpenAIAPI(AI_PROMPT, 'new', 'qjalti');
+  await BOT.sendMessage(SEND_TO, AI_RESPONSE + `\nПозже созвонимся`, {
+    reply_markup: {
+      inline_keyboard: KEYBOARD,
+    },
+  },
+  );
+};
+
+const eveningMessage = async () => {
+  const KEYBOARD = [
+    [
+      {
+        text: 'Новое пожелание',
+        callback_data: 'evening_again',
+      },
+    ],
+  ];
+
+  const AI_PROMPT = `
+Напиши моей маме Елене пожелание спокойной ночи и хороших снов`;
+
+  const AI_RESPONSE = await sendOpenAIAPI(AI_PROMPT, 'new', 'qjalti');
+  await BOT.sendMessage(SEND_TO, AI_RESPONSE + `\nДозавтриго`, {
+    reply_markup: {
+      inline_keyboard: KEYBOARD,
+    },
+  },
+  );
+};
+
+const msgToMom = async () => {
+  const CURRENT_DATE = new Date;
+  const CURRENT_HOUR = CURRENT_DATE.getHours();
+  if (CURRENT_HOUR === 8) {
+    await morningMessage();
+  } else if (CURRENT_HOUR === 20) {
+    await eveningMessage();
+  }
+};
+
+/**
+ * CallBackQuery event
+ */
+BOT.on('callback_query', (ctx) => {
+  if (ctx.data === 'morning_again') {
+    morningMessage().then(() => false);
+  }
+});
+
 /**
  * New message event
  */
@@ -304,9 +368,13 @@ https://chat.openai.com/`, CHAT_ID);
     BOT.sendChatAction(CHAT_ID, 'choose_sticker').then(() => false);
     let stickerMessageId = null;
     setTimeout(() => {
-      BOT.sendAnimation(CHAT_ID, ANIMATED_STICKERS[Math.floor(Math.random() * ANIMATED_STICKERS.length)], {
-        disable_notification: true,
-      }).then((res) => {
+      BOT.sendAnimation(
+          CHAT_ID,
+          ANIMATED_STICKERS[Math.floor(
+              Math.random() * ANIMATED_STICKERS.length,
+          )], {
+            disable_notification: true,
+          }).then((res) => {
         stickerMessageId = res.message_id;
       });
     }, 1000);
@@ -315,13 +383,13 @@ https://chat.openai.com/`, CHAT_ID);
     setTimeout(async () => {
       await BOT.deleteMessage(CHAT_ID, stickerMessageId);
       await botSendMessage(REQ_RESULT ?
-            REQ_RESULT :
-            `Возникла непредвиденная ошибка. Повторите попытку позже`,
+          REQ_RESULT :
+          `Возникла непредвиденная ошибка. Повторите попытку позже`,
       CHAT_ID);
     }, 4000);
   }
 });
-
+msgToMom();
 if (TEST_MODE) {
   collectAndSendData().then(() => false);
 } else {
@@ -331,4 +399,6 @@ if (TEST_MODE) {
   CRON.schedule('0 5 * * *', collectAndSendData, {});
   CRON.schedule('0 15 * * *', collectAndSendData, {});
   CRON.schedule('0 5 * * *', sendAlyaMessage, {});
+  CRON.schedule('45 8 * * *', msgToMom, {});
+  CRON.schedule('45 20 * * *', msgToMom, {});
 }
