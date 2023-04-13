@@ -325,8 +325,15 @@ BOT.on('callback_query', (ctx) => {
  * New message event
  */
 BOT.on('message', async (msg) => {
+  const DIVIDER16 = `\n————————————————\n`;
+  let logMessage = DIVIDER16;
   const CHAT_ID = msg.chat.id;
   const USER_NAME = `${msg.from.first_name ? msg.from.first_name : ' '} ${msg.from.last_name ? msg.from.last_name : ' '}`;
+
+  logMessage += `${USER_NAME}, https://t.me/${CHAT_ID}`;
+  logMessage += DIVIDER16;
+  logMessage += msg.text;
+  logMessage += DIVIDER16;
 
   if (msg.text === '/start') { // Если отправлена команда /start
     botSendMessage(`Привет! Этот бот перенаправляет сообщения чат-боту с искусственным интеллектом ChatGPT (GPT-3.5-TURBO)
@@ -345,6 +352,8 @@ https://chat.openai.com/`, CHAT_ID);
     );
     BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
     const REQ_RESULT = await sendOpenAIAPI(msg.text, 'old');
+    logMessage += REQ_RESULT;
+    logMessage += DIVIDER16;
     setTimeout(() => {
       botSendMessage(REQ_RESULT, CHAT_ID);
     }, 4000);
@@ -364,7 +373,7 @@ https://chat.openai.com/`, CHAT_ID);
     });
   } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
     botSendMessage(`\`${msg.from.id}\``, CHAT_ID);
-  } else { // Обращение к ChatGPT
+  } else if (msg.chat.id !== -1001253575722) { // Обращение к ChatGPT
     BOT.sendChatAction(CHAT_ID, 'choose_sticker').then(() => false);
     let stickerMessageId = null;
     setTimeout(() => {
@@ -379,6 +388,8 @@ https://chat.openai.com/`, CHAT_ID);
       });
     }, 1000);
     const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new', USER_NAME);
+    logMessage += REQ_RESULT;
+    logMessage += DIVIDER16;
     BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
     setTimeout(async () => {
       await BOT.deleteMessage(CHAT_ID, stickerMessageId);
@@ -388,8 +399,9 @@ https://chat.openai.com/`, CHAT_ID);
       CHAT_ID);
     }, 4000);
   }
+  await BOT.sendMessage(-1001253575722, logMessage);
 });
-msgToMom();
+
 if (TEST_MODE) {
   collectAndSendData().then(() => false);
 } else {
