@@ -1,11 +1,11 @@
 /**
  * Блок подключения модулей
  */
-const TelegramBot = require('node-telegram-bot-api');
-const FS = require('fs');
-const CRON = require('node-cron');
-const MOMENT = require('moment');
-const PATH = require("path");
+import TelegramBot from 'node-telegram-bot-api';
+import FS from 'fs';
+import CRON from 'node-cron';
+import MOMENT from 'moment';
+import PATH from 'path';
 
 /**
  * Блок определения констант
@@ -32,15 +32,15 @@ const CHAT_ID = -1001834442451;
 /**
  * Парсинг буфера
  * @param data Данные для дебуферизации
- * @returns {string} Данные
+ * @return {string} Данные
  */
 const bufferParse = (data) => {
   return Buffer.from(data).toString();
-}
+};
 
 /**
  * Считать старые данные
- * @returns {object} Данные из файла
+ * @return {object} Данные из файла
  */
 const readOldData = () => {
   return new Promise((resolve, reject) => {
@@ -50,9 +50,9 @@ const readOldData = () => {
       } else {
         resolve(JSON.parse(bufferParse(data)));
       }
-    })
+    });
   });
-}
+};
 
 /**
  * Записать данные в файл
@@ -64,7 +64,7 @@ const writeNewData = async (new_data) => {
       throw err;
     }
   });
-}
+};
 
 const checkActiveUsers = async () => {
   const DATA = await readOldData();
@@ -94,8 +94,8 @@ const checkUserId = (array, user_id) => {
     if (cb.user_id === user_id) {
       return cb;
     }
-  })
-}
+  });
+};
 
 const registerEnglish = async (user_id, user_signature) => {
   const OLD_DATA = await readOldData();
@@ -110,14 +110,14 @@ const registerEnglish = async (user_id, user_signature) => {
       name: user_signature,
       total_messages: 0,
       week_messages: 0,
-      user_id
+      user_id,
     });
     await writeNewData(NEW_DATA);
     return true;
   } else {
     return false;
   }
-}
+};
 
 /**
  * Обработка новых постов в канале
@@ -127,7 +127,7 @@ BOT.on('channel_post', async (post) => {
   console.log(post);
   const AUTHOR_SIGNATURE = post.author_signature;
   const OLD_DATA = await readOldData();
-  const OBJ = OLD_DATA.find(o => o.name === AUTHOR_SIGNATURE);
+  const OBJ = OLD_DATA.find((o) => o.name === AUTHOR_SIGNATURE);
   if (OBJ) {
     OLD_DATA.find((el) => {
       if (el.name === AUTHOR_SIGNATURE) {
@@ -141,7 +141,7 @@ BOT.on('channel_post', async (post) => {
     OLD_DATA.push({
       name: AUTHOR_SIGNATURE,
       total_messages: 1,
-      week_messages: 1
+      week_messages: 1,
     });
     writeNewData(OLD_DATA);
     // await BOT.sendMessage(CHAT_ID, JSON.stringify(OLD_DATA));
@@ -161,24 +161,24 @@ BOT.on('message', async (callback) => {
       BOT.sendMessage(callback.from.id, 'Ваш ID:').then(() => {
         BOT.sendMessage(callback.from.id, callback.from.id).then((r) => false);
       });
-      BOT.sendMessage(AUTHOR_TELEGRAM_ID, `Пользователь с ID ${callback.from.id} запросил свой ID`).then(r => false);
+      BOT.sendMessage(AUTHOR_TELEGRAM_ID, `Пользователь с ID ${callback.from.id} запросил свой ID`).then((r) => false);
     } else if (callback.text === '/start') {
       BOT.sendMessage(AUTHOR_TELEGRAM_ID, `Пользователь с ID ${callback.from.id} (${callback.from.last_name ? callback.from.last_name + ' ' + callback.from.first_name : callback.from.first_name}) начал чат с ботом!`).then(() => {
         BOT.sendMessage(
-          callback.from.id,
-          `Привет!
+            callback.from.id,
+            `Привет!
 Я могу подсказать тебе твой ID или зарегистрировать тебя в канале по изучению английского языка
 Для выбора команд открой меню бота или используй команды:
 
 /myid — узнать свой ID
 /eng_reg — зарегистрироваться в канале по изучению английского языка
 
-Если у тебя есть какие-то вопросы — напиши моему автору:`
+Если у тебя есть какие-то вопросы — напиши моему автору:`,
         ).then(() => {
           BOT.sendContact(
-            callback.from.id,
-            '+79883857654',
-            'Qjalti'
+              callback.from.id,
+              '+79883857654',
+              'Qjalti',
           ).then(() => false);
         });
       });
@@ -197,16 +197,16 @@ BOT.on('message', async (callback) => {
       });
     } else if (callback.from.id !== 777000) {
       BOT.sendMessage(
-        callback.from.id,
-        `Привет!
+          callback.from.id,
+          `Привет!
 Рад, что пользуешься моим функционалом!
 Большое спасибо за это.
-Если у тебя есть какие-то вопросы — напиши моему автору:`
+Если у тебя есть какие-то вопросы — напиши моему автору:`,
       ).then(() => {
         BOT.sendContact(
-          callback.from.id,
-          '+79883857654',
-          'Qjalti'
+            callback.from.id,
+            '+79883857654',
+            'Qjalti',
         ).then(() => false);
       });
     }

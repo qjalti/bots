@@ -1,15 +1,17 @@
 /**
  * Блок подключения модулей
  */
-const express = require('express');
-const BODY_PARSER = require('body-parser');
+import express from 'express';
+import bodyParser from 'body-parser';
 
 /**
  * Боты
  */
-require('./bots/myBot');
-require('./bots/alya_english');
-require('./bots/vk_mutabor');
+// import './bots/myBot.js';
+// import './bots/alya_english.js';
+// import './bots/vk_mutabor.js';
+import './bots/chatgpt.js';
+import './bots/tonessiBot.js';
 
 /**
  * Блок определения констант
@@ -23,9 +25,9 @@ const PORT = 3001;
 /**
  * Запуск сервера
  */
-APP.listen(PORT)
+APP.listen(PORT);
 
 /**
  * Настройки Express
  */
-APP.use(BODY_PARSER.json());
+APP.use(bodyParser.json());

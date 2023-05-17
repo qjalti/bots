@@ -1,12 +1,13 @@
 /**
  * Блок подключения модулей
  */
-const TelegramBot = require('node-telegram-bot-api');
-const CRON = require('node-cron');
-const FS = require('fs');
-const PATH = require('path');
-const AXIOS = require('axios');
-const {Configuration, OpenAIApi} = require('openai');
+import TelegramBot from 'node-telegram-bot-api';
+import CRON from 'node-cron';
+import FS from 'fs';
+import PATH from 'path';
+import AXIOS from 'axios';
+import {Configuration, OpenAIApi} from 'openai';
+import moment from 'moment';
 
 /**
  * Блок определения констант
@@ -30,8 +31,10 @@ const ANIMATED_STICKERS = [
   'CAACAgIAAxkBAAIQu2QoZUl7ck3X62OZN0M2we6V9EzRAAICAQACVp29Ck7ibIHLQOT_LwQ',
   'CAACAgIAAxkBAAIQvWQoZYx6AAFZRtfkBiB6JL42wfjE7AACQgcAAkb7rAR9WohAd-ZTzC8E',
   'CAACAgIAAxkBAAIQv2QoZZh2wVXusog4W4vh_v5B5zmYAAI1AAOvxlEae1tmbETOHzYvBA',
+  'CAACAgIAAxkBAAIcTGRGhFAldQi-y2Yz_DuZhcQv30JfAAKvFAACBZOgSNo4y3ReLs91LwQ',
 ];
 
+moment.locale('ru');
 
 /**
  * Telegram bot
@@ -59,6 +62,12 @@ const sendOpenAIAPI = async (prompt, model = 'new', userData) => {
         model: 'gpt-3.5-turbo',
         messages: [
           {'role': 'system', 'content': `The user's name is ${userData}`},
+          {
+            'role': 'system',
+            'content': `Current date is ${moment().format('LLLL')}`,
+          },
+          {'role': 'system', 'content': `User is from Russia`},
+          {'role': 'system', 'content': `User speaks Russian`},
           {'role': 'user', 'content': prompt},
         ],
       });
@@ -76,6 +85,9 @@ const sendOpenAIAPI = async (prompt, model = 'new', userData) => {
     // Consider adjusting the error handling logic for your use case
     if (error.response) {
       console.error(error.response.status, error.response.data);
+      if (error.response.status === 429) {
+        return `Бесплатный пробный период завершился 1 мая. ChatGPT отключен`;
+      }
       return `Возникла непредвиденная ошибка. Повторите попытку позже`;
     } else {
       console.error(`Error with OpenAI API request: ${error.message}`);
@@ -120,7 +132,11 @@ const botSendMessage = (botMessage, sendTo = SEND_TO) => {
   })
       .then(() => false)
       .catch(() => {
-        BOT.sendMessage(sendTo, `Возникла непредвиденная ошибка. Повторите попытку позже`).then(() => false);
+        BOT.sendMessage(
+            sendTo,
+            `Возникла непредвиденная ошибка. Повторите попытку позже`,
+        )
+            .then(() => false);
       });
 };
 
@@ -328,9 +344,13 @@ BOT.on('message', async (msg) => {
   const DIVIDER16 = `\n————————————————\n`;
   let logMessage = DIVIDER16;
   const CHAT_ID = msg.chat.id;
-  const USER_NAME = `${msg.from.first_name ? msg.from.first_name : ' '} ${msg.from.last_name ? msg.from.last_name : ' '}`;
+  const USER_NAME = `${msg.from.first_name ?
+    msg.from.first_name :
+    ' '} ${msg.from.last_name ?
+    msg.from.last_name :
+    ' '}`;
 
-  logMessage += `${USER_NAME}, https://t.me/${CHAT_ID}`;
+  logMessage += `${USER_NAME}, ${CHAT_ID}, ${msg.from.username}`;
   logMessage += DIVIDER16;
   logMessage += msg.text;
   logMessage += DIVIDER16;
@@ -351,7 +371,7 @@ https://chat.openai.com/`, CHAT_ID);
         CHAT_ID,
     );
     BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
-    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'old');
+    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'old', 'Unknown');
     logMessage += REQ_RESULT;
     logMessage += DIVIDER16;
     setTimeout(() => {
@@ -373,7 +393,9 @@ https://chat.openai.com/`, CHAT_ID);
     });
   } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
     botSendMessage(`\`${msg.from.id}\``, CHAT_ID);
-  } else if (msg.chat.id !== -1001253575722) { // Обращение к ChatGPT
+  } else if (msg.sticker && msg.from.id === SEND_TO) {
+    await BOT.sendMessage(SEND_TO, msg.sticker.file_id);
+  } else if (msg.chat.id !== -1001253575722 && msg.text) {
     BOT.sendChatAction(CHAT_ID, 'choose_sticker').then(() => false);
     let stickerMessageId = null;
     setTimeout(() => {
@@ -399,7 +421,9 @@ https://chat.openai.com/`, CHAT_ID);
       CHAT_ID);
     }, 4000);
   }
-  await BOT.sendMessage(-1001253575722, logMessage);
+  if (CHAT_ID !== SEND_TO) {
+    await BOT.sendMessage(-1001253575722, logMessage);
+  }
 });
 
 if (TEST_MODE) {
@@ -411,6 +435,6 @@ if (TEST_MODE) {
   CRON.schedule('0 5 * * *', collectAndSendData, {});
   CRON.schedule('0 15 * * *', collectAndSendData, {});
   CRON.schedule('0 5 * * *', sendAlyaMessage, {});
-  CRON.schedule('45 8 * * *', msgToMom, {});
-  CRON.schedule('45 20 * * *', msgToMom, {});
+  // CRON.schedule('45 8 * * *', msgToMom, {});
+  // CRON.schedule('45 20 * * *', msgToMom, {});
 }

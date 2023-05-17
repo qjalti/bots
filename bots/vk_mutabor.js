@@ -1,10 +1,10 @@
 /**
  * Блок подключения модулей
  */
-const VK_BOT = require('node-vk-bot-api');
-const CRON = require('node-cron');
-const MOMENT = require('moment');
-const {Configuration, OpenAIApi} = require('openai');
+import VK_BOT from 'node-vk-bot-api';
+import CRON from 'node-cron';
+import MOMENT from 'moment';
+import {Configuration, OpenAIApi} from 'openai';
 
 /**
  * Блок настройки Moment
