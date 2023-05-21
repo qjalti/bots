@@ -7,10 +7,10 @@ import bodyParser from 'body-parser';
 /**
  * Боты
  */
-// import './bots/myBot.js';
-// import './bots/alya_english.js';
-// import './bots/vk_mutabor.js';
-import './bots/chatgpt.js';
+import './bots/myBot.js';
+import './bots/alya_english.js';
+import './bots/vk_mutabor.js';
+// import './bots/chatgpt.js';
 import './bots/tonessiBot.js';
 
 /**
