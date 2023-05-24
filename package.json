@@ -17,6 +17,7 @@
     "cheerio": "^1.0.0-rc.12",
     "config": "^3.3.9",
     "crypto": "^1.0.1",
+    "dotenv": "^16.0.3",
     "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
     "moment": "^2.29.4",

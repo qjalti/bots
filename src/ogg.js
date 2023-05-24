@@ -41,7 +41,7 @@ class OggConverter {
           __dirname,
           '../voices_temp',
           `${filename}.ogg`,
-      ); // TODO to OGG
+      );
       const RESPONSE = await axios({
         method: 'get',
         url,

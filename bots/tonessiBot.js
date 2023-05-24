@@ -1,20 +1,18 @@
 import {Telegraf} from 'telegraf';
-import {message} from 'telegraf/filters';
-import config from 'config';
 import cron from 'node-cron';
 import {tonnesiVacation} from '../src/tonessiVacation.js';
+import {TONESSI_FIRST_VACATION_DAY} from '../src/constants.js';
+import * as dotenv from 'dotenv';
 
-const BOT = new Telegraf(config.get('TONESSI_BOT_TOKEN'));
+dotenv.config();
 
-const AUTHOR_TELEGRAM_ID = config.get('AUTHOR_TELEGRAM_ID');
-const LOGS_CHAT_ID = config.get('LOGS_CHAT_ID');
+const BOT = new Telegraf(process.env.TONESSI_BOT_TOKEN);
+
+const AUTHOR_TELEGRAM_ID = process.env.AUTHOR_TELEGRAM_ID;
+const LOGS_CHAT_ID = process.env.LOGS_CHAT_ID;
 
 BOT.command('start', async (ctx) => {
   await ctx.reply('Бот успешно запущен!');
-});
-
-BOT.on(message('text'), (ctx) => {
-  console.log(ctx.message);
 });
 
 const getDayWord = (number) => {
@@ -43,7 +41,7 @@ const daysLeft = async () => {
     );
   } else if (!DAYS_LEFT) {
     await sendMessage(
-        config.get('TONESSI_FIRST_VACATION_DAY'),
+        TONESSI_FIRST_VACATION_DAY,
         AUTHOR_TELEGRAM_ID,
     );
     BOT.stop('Mission completed');

@@ -8,6 +8,9 @@ import PATH from 'path';
 import AXIOS from 'axios';
 import {Configuration, OpenAIApi} from 'openai';
 import moment from 'moment';
+import {fileURLToPath} from 'url';
+import {dirname} from 'path';
+
 
 /**
  * Блок определения констант
@@ -33,6 +36,8 @@ const ANIMATED_STICKERS = [
   'CAACAgIAAxkBAAIQv2QoZZh2wVXusog4W4vh_v5B5zmYAAI1AAOvxlEae1tmbETOHzYvBA',
   'CAACAgIAAxkBAAIcTGRGhFAldQi-y2Yz_DuZhcQv30JfAAKvFAACBZOgSNo4y3ReLs91LwQ',
 ];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 moment.locale('ru');
 
@@ -48,9 +53,15 @@ const SEND_TO = 738829247;
  * @param {string} prompt API request text
  * @param {string} model AI model
  * @param {string} userData User data
+ * @param {number} userId User id
  */
-const sendOpenAIAPI = async (prompt, model = 'new', userData) => {
-  const OPENAI_API_KEY = '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';
+const sendOpenAIAPI = async (prompt, model = 'new', userData, userId) => {
+  if (userId !== 738829247) {
+    return `Бесплатный пробный период завершился 1 мая. Для продолжения пользования ChatGPT — напишите автору бота (/author)`;
+  }
+
+  const OPENAI_API_KEY = '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';
+  // const OPENAI_API_KEY = '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';
   const CONFIGURATION = new Configuration({
     apiKey: OPENAI_API_KEY,
   });
@@ -86,7 +97,7 @@ const sendOpenAIAPI = async (prompt, model = 'new', userData) => {
     if (error.response) {
       console.error(error.response.status, error.response.data);
       if (error.response.status === 429) {
-        return `Бесплатный пробный период завершился 1 мая. ChatGPT отключен`;
+        return `Бесплатный пробный период завершился. ChatGPT отключен`;
       }
       return `Возникла непредвиденная ошибка. Повторите попытку позже`;
     } else {
@@ -328,6 +339,13 @@ const msgToMom = async () => {
   }
 };
 
+const upHHResume = async () => {
+  await BOT.sendMessage(
+      SEND_TO,
+      `Поднять резюме на hh.ru\nhttps://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455`,
+  );
+};
+
 /**
  * CallBackQuery event
  */
@@ -409,7 +427,7 @@ https://chat.openai.com/`, CHAT_ID);
         stickerMessageId = res.message_id;
       });
     }, 1000);
-    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new', USER_NAME);
+    const REQ_RESULT = await sendOpenAIAPI(msg.text, 'new', USER_NAME, msg.from.id);
     logMessage += REQ_RESULT;
     logMessage += DIVIDER16;
     BOT.sendChatAction(CHAT_ID, 'typing').then(() => false);
@@ -435,6 +453,7 @@ if (TEST_MODE) {
   CRON.schedule('0 5 * * *', collectAndSendData, {});
   CRON.schedule('0 15 * * *', collectAndSendData, {});
   CRON.schedule('0 5 * * *', sendAlyaMessage, {});
+  CRON.schedule('0 5-23/4 * * *', upHHResume, {});
   // CRON.schedule('45 8 * * *', msgToMom, {});
   // CRON.schedule('45 20 * * *', msgToMom, {});
 }

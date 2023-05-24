@@ -1,8 +1,17 @@
 import {Configuration, OpenAIApi} from 'openai';
-import config from 'config';
 import {createReadStream} from 'fs';
+import * as dotenv from 'dotenv';
+import moment from 'moment';
+
+dotenv.config();
 
 class OpenAI {
+  roles = {
+    ASSISTANT: 'assistant',
+    USER: 'user',
+    SYSTEM: 'system',
+  };
+
   constructor(apiKey) {
     const CONFIGURATION = new Configuration({
       apiKey,
@@ -10,8 +19,16 @@ class OpenAI {
     this.OPEN_AI = new OpenAIApi(CONFIGURATION);
   }
 
-  chat() {
-
+  async chat(messages) {
+    try {
+      const RESPONSE = await this.OPEN_AI.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        messages,
+      });
+      return RESPONSE.data.choices[0].message;
+    } catch (err) {
+      console.log('Error! While trying GPT-chat', err.message);
+    }
   }
 
   async transcription(filepath) {
@@ -25,7 +42,7 @@ class OpenAI {
         data: REPONSE.data.text,
       };
     } catch (err) {
-      console.log('Error! ', err.message);
+      console.log('Error while trying transcription! ', err.message);
       return {
         ok: false,
         data: err.message,
@@ -34,4 +51,4 @@ class OpenAI {
   }
 }
 
-export const OPEN_AI = new OpenAI(config.get('OPEN_AI_TOKEN'));
+export const OPEN_AI = new OpenAI(process.env.OPEN_AI_TOKEN);
