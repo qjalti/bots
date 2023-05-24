@@ -2,3 +2,6 @@ node_modules
 .idea
 bots/config/default.json
 .env
+**/*.mp3
+**/*.ogg
+**/*.oga

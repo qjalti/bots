@@ -14,6 +14,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "axios": "^1.2.1",
     "body-parser": "^1.19.0",
+    "chalk": "^5.2.0",
     "cheerio": "^1.0.0-rc.12",
     "config": "^3.3.9",
     "crypto": "^1.0.1",
