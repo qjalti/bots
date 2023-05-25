@@ -6,3 +6,4 @@ bots/config/default.json
 **/*.ogg
 **/*.oga
 /data/myBot.json
+voices_temp
