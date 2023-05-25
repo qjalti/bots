@@ -5,3 +5,4 @@ bots/config/default.json
 **/*.mp3
 **/*.ogg
 **/*.oga
+/data/myBot.json
