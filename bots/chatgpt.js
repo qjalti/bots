@@ -6,7 +6,6 @@ import {
   CHAT_GPT_EXAMPLES,
   ERROR_MESSAGE,
   ANIMATED_STICKERS,
-  USERS_WHITELIST,
   AUTHOR_COMMAND,
 } from '../src/constants.js';
 import * as dotenv from 'dotenv';
@@ -64,6 +63,7 @@ BOT.command('author', async (ctx) => {
 BOT.on(message('voice'), async (ctx) => {
   let log = SIXTEEN_DASHES;
   const USER_DATA = ctx.chat.id + ', ' + ctx.chat.username;
+  const USER_ID = ctx.chat.id;
   log += USER_DATA + `\n`;
   log += SIXTEEN_DASHES;
   const LINK = await ctx.telegram.getFileLink(ctx.message.voice.file_id);
@@ -81,9 +81,9 @@ BOT.on(message('voice'), async (ctx) => {
     });
   }, 1000);
   try {
-    const USER_ID = String(ctx.message.from.id);
-    const OGG_PATH = await OGG.create(LINK.href, USER_ID);
-    const MP3_PATH = await OGG.toMP3(OGG_PATH, USER_ID);
+    const USER_ID_OGG = String(ctx.message.from.id);
+    const OGG_PATH = await OGG.create(LINK.href, USER_ID_OGG);
+    const MP3_PATH = await OGG.toMP3(OGG_PATH, USER_ID_OGG);
     const TEXT = await OPEN_AI.transcription(MP3_PATH);
     log += LINK + `\n` + SIXTEEN_DASHES;
     log += TEXT.data + `\n` + SIXTEEN_DASHES;
@@ -114,7 +114,9 @@ BOT.on(message('voice'), async (ctx) => {
     } else {
       await ctx.replyWithMarkdown(RESPONSE.content);
     }
-    await logMessage(log);
+    if (USER_ID !== AUTHOR_TELEGRAM_ID) {
+      await logMessage(log);
+    }
     await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
   } catch (err) {
     console.log('Error while voice message sent. ', err.message);
@@ -124,6 +126,7 @@ BOT.on(message('voice'), async (ctx) => {
 BOT.on(message('text'), async (ctx) => {
   let log = SIXTEEN_DASHES;
   const USER_DATA = ctx.chat.id + ', ' + ctx.chat.username;
+  const USER_ID = ctx.chat.id;
   log += USER_DATA + `\n`;
   log += SIXTEEN_DASHES;
   ctx.session ??= INITIAL_SESSION;
@@ -155,7 +158,9 @@ BOT.on(message('text'), async (ctx) => {
     log += RESPONSE.content + `\n` + SIXTEEN_DASHES;
 
     await ctx.replyWithMarkdown(RESPONSE.content);
-    await logMessage(log);
+    if (USER_ID !== AUTHOR_TELEGRAM_ID) {
+      await logMessage(log);
+    }
     await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
   } catch (err) {
     console.log('Error while voice message sent. ', err.message);
