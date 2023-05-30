@@ -32,6 +32,10 @@ class OggConverter {
       });
     } catch (err) {
       console.log('Error while trying to MP3. ', err.message);
+      return {
+        success: false,
+        data: err.message,
+      };
     }
   }
 
@@ -56,6 +60,10 @@ class OggConverter {
       });
     } catch (err) {
       console.log('Error while creating OGG file. ', err.message);
+      return {
+        success: false,
+        data: err.message,
+      };
     }
   }
 };

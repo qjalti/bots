@@ -5,5 +5,9 @@ export const removeFile = async (path) => {
     await unlink(path);
   } catch (err) {
     console.log('Error while trying to delete file. ', err.message);
+    return {
+      success: false,
+      data: err.message,
+    };
   }
 };

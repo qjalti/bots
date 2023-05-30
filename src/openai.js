@@ -1,7 +1,6 @@
 import {Configuration, OpenAIApi} from 'openai';
 import {createReadStream} from 'fs';
 import * as dotenv from 'dotenv';
-import moment from 'moment';
 
 dotenv.config();
 
@@ -28,6 +27,10 @@ class OpenAI {
       return RESPONSE.data.choices[0].message;
     } catch (err) {
       console.log('Error! While trying GPT-chat', err.message);
+      return {
+        success: false,
+        data: err.message,
+      };
     }
   }
 
@@ -44,7 +47,7 @@ class OpenAI {
     } catch (err) {
       console.log('Error while trying transcription! ', err.message);
       return {
-        ok: false,
+        success: false,
         data: err.message,
       };
     }
