@@ -7,6 +7,8 @@ import {
   ERROR_MESSAGE,
   ANIMATED_STICKERS,
   AUTHOR_COMMAND,
+  AUTHOR_TELEGRAM_ID,
+  LOGS_CHAT_ID,
 } from '../src/constants.js';
 import * as dotenv from 'dotenv';
 
@@ -19,8 +21,6 @@ const INITIAL_SESSION = {
 const BOT = new Telegraf(process.env.TELEGRAM_TOKEN);
 BOT.use(session());
 
-const AUTHOR_TELEGRAM_ID = process.env.AUTHOR_TELEGRAM_ID;
-const LOGS_CHAT_ID = process.env.LOGS_CHAT_ID;
 const SIXTEEN_DASHES = `----------------\n`;
 
 const logMessage = async (message) => {
@@ -101,7 +101,7 @@ BOT.on(message('voice'), async (ctx) => {
     );
     log += RESPONSE.content + `\n` + SIXTEEN_DASHES;
 
-    if (!TEXT.success) {
+    if (!TEXT.success && !RESPONSE.content) {
       await ctx.reply(ERROR_MESSAGE);
       await ctx.telegram.sendMessage(
           AUTHOR_TELEGRAM_ID,
@@ -114,6 +114,8 @@ BOT.on(message('voice'), async (ctx) => {
     } else {
       await ctx.replyWithMarkdown(RESPONSE.content);
     }
+    console.log(USER_ID, typeof USER_ID);
+    console.log(AUTHOR_TELEGRAM_ID, typeof AUTHOR_TELEGRAM_ID);
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
       await logMessage(log);
     }
@@ -158,6 +160,8 @@ BOT.on(message('text'), async (ctx) => {
     log += RESPONSE.content + `\n` + SIXTEEN_DASHES;
 
     await ctx.replyWithMarkdown(RESPONSE.content);
+    console.log(USER_ID, typeof USER_ID);
+    console.log(AUTHOR_TELEGRAM_ID, typeof AUTHOR_TELEGRAM_ID);
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
       await logMessage(log);
     }
