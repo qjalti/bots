@@ -10,7 +10,7 @@ class TonessiPills {
     this.vitaminC = 32;
 
     // this.currentDate = moment();
-    this.currentDate = moment([2023, 5, 4, 21, 0, 0]);
+    this.currentDate = moment();
     this.startDate = moment([2023, 4, 24, 8, 0, 0]);
     this.currentHours = this.currentDate.hour();
     this.currentMinutes = this.currentDate.minute();

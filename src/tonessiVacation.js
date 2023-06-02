@@ -2,9 +2,12 @@ import moment from 'moment';
 
 class TonessiVacation {
   check() {
-    this.currentDate = moment([2023, 6, 4, 12, 0, 0]);
+    this.currentDate = moment();
     this.vacationDate = moment([2023, 6, 18, 13, 0, 0]);
-    return this.vacationDate.diff(this.currentDate, 'days');
+    return {
+      hoursLeft: this.vacationDate.diff(this.currentDate, 'hours'),
+      daysLeft: this.vacationDate.diff(this.currentDate, 'days'),
+    };
   }
 }
 

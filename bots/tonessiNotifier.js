@@ -39,7 +39,13 @@ const sendMessage = async (message, id = AUTHOR_TELEGRAM_ID) => {
         LOGS_CHAT_ID,
         JSON.stringify(RESPONSE, null, 2),
     );
+    await BOT.telegram.sendMessage(
+        AUTHOR_TELEGRAM_ID, REFORMATTED_MESSAGE, SM_OPTIONS,
+    );
   } catch (err) {
+    await BOT.telegram.sendMessage(
+        id, err.message, SM_OPTIONS,
+    );
     console.log('Error! ', err.message);
   }
 };

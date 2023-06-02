@@ -6,6 +6,7 @@ import {
   LOGS_CHAT_ID,
   TONESSI_FIRST_VACATION_DAY,
   VACATION_MESSAGES,
+  TONESSI_ID,
 } from '../src/constants.js';
 import * as dotenv from 'dotenv';
 
@@ -38,30 +39,46 @@ const charsReplace = (innerString) => {
 const sendMessage = async (message, id = AUTHOR_TELEGRAM_ID) => {
   try {
     const REFORMATTED_MESSAGE = charsReplace(message);
-    await BOT.telegram.sendMessage(LOGS_CHAT_ID, message, SM_OPTIONS);
-    await BOT.telegram.sendMessage(id, REFORMATTED_MESSAGE, SM_OPTIONS);
+    const RESPONSE = await BOT.telegram.sendMessage(
+        id, REFORMATTED_MESSAGE, SM_OPTIONS,
+    );
+    await BOT.telegram.sendMessage(
+        LOGS_CHAT_ID, REFORMATTED_MESSAGE, SM_OPTIONS,
+    );
+    await BOT.telegram.sendMessage(
+        LOGS_CHAT_ID,
+        JSON.stringify(RESPONSE, null, 2),
+    );
+    await BOT.telegram.sendMessage(
+        AUTHOR_TELEGRAM_ID, REFORMATTED_MESSAGE, SM_OPTIONS,
+    );
   } catch (err) {
+    await BOT.telegram.sendMessage(
+        id, err.message, SM_OPTIONS,
+    );
     console.log('Error! ', err.message);
   }
 };
 
 const daysLeft = async () => {
-  const DAYS_LEFT = tonessiVacation.check();
-
+  const {daysLeft, hoursLeft} = tonessiVacation.check();
 
   if (
-    DAYS_LEFT % 2 === 0 &&
-    DAYS_LEFT <= 14 &&
-    DAYS_LEFT > 1
+    daysLeft % 2 === 0 &&
+    daysLeft <= 14 &&
+    daysLeft > 1
   ) {
     await sendMessage(
-        `${DAYS_LEFT} ${getDayWord(DAYS_LEFT)} до отпуска! ${VACATION_MESSAGES[DAYS_LEFT]}`,
-        AUTHOR_TELEGRAM_ID,
+        `${daysLeft} ${getDayWord(daysLeft)} до отпуска! ${VACATION_MESSAGES[daysLeft]}`,
+        TONESSI_ID,
     );
-  } else if (DAYS_LEFT === 0) {
+  } else if (
+    daysLeft === 0 &&
+    hoursLeft > 0
+  ) {
     await sendMessage(
         TONESSI_FIRST_VACATION_DAY,
-        AUTHOR_TELEGRAM_ID,
+        TONESSI_ID,
     );
   }
 };
