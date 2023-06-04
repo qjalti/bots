@@ -3,8 +3,14 @@ import {createReadStream} from 'fs';
 import {ERROR_MESSAGE} from './constants.js';
 import * as dotenv from 'dotenv';
 
+/**
+ * Modules settings
+ */
 dotenv.config();
 
+/**
+ * Send requests to OpenAI API
+ */
 class OpenAI {
   roles = {
     ASSISTANT: 'assistant',
@@ -12,6 +18,10 @@ class OpenAI {
     SYSTEM: 'system',
   };
 
+  /**
+   * Class init
+   * @param {string} apiKey Open AI API token
+   */
   constructor(apiKey) {
     const CONFIGURATION = new Configuration({
       apiKey,
@@ -19,22 +29,38 @@ class OpenAI {
     this.OPEN_AI = new OpenAIApi(CONFIGURATION);
   }
 
+  /**
+   * Requst to Open AI chat model
+   * @param {Object} messages Object with messages history between user and chat
+   * @return {Promise<{success: boolean, content: string}|*>}
+   */
   async chat(messages) {
     try {
       const RESPONSE = await this.OPEN_AI.createChatCompletion({
         model: 'gpt-3.5-turbo',
         messages,
       });
-      return RESPONSE.data.choices[0].message;
+      return {
+        success: true,
+        code: 0,
+        data: RESPONSE.data.choices[0].message,
+      };
     } catch (err) {
-      console.log('Error! While trying GPT-chat', err.message, err);
+      console.log('Error in chat() method', err.message);
+      console.log(err, 'err');
       return {
         success: false,
-        content: ERROR_MESSAGE,
+        code: 0,
+        data: ERROR_MESSAGE,
       };
     }
   }
 
+  /**
+   * Voice-to-text (transcription)
+   * @param {string} filepath Path to voice .mp3 file
+   * @return {Promise<{success: boolean, content: string}|{data, success: boolean}>}
+   */
   async transcription(filepath) {
     try {
       const REPONSE = await this.OPEN_AI.createTranscription(
@@ -46,7 +72,7 @@ class OpenAI {
         data: REPONSE.data.text,
       };
     } catch (err) {
-      console.log('Error while trying transcription! ', err.message, err);
+      console.log('Error in transcription() method', err.message, err);
       return {
         success: false,
         content: ERROR_MESSAGE,
