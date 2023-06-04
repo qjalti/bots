@@ -173,75 +173,56 @@ _1 таблетка через 12 часов от предыдущей_`;
     if (
       this.currentHours === 9 &&
       this.currentMinutes === 0 &&
-      (
-        this.currentDate.diff(this.startDate, 'days') <= 10 ||
-        (
-          this.currentDate.diff(this.startDate, 'days') > 30 &&
-          this.currentDate.diff(this.startDate, 'days') <= 40
-        ) ||
-        (
-          this.currentDate.diff(this.startDate, 'days') > 60 &&
-          this.currentDate.diff(this.startDate, 'days') <= 70
-        )
-      )
+      this.MORNING
     ) {
       return this.MORNING;
     } else if (
       this.currentHours === 12 &&
       this.currentMinutes === 0 &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.linebact)
+      this.DAY_12_00
     ) {
       return this.DAY_12_00;
     } else if (
       this.currentHours === 12 &&
       this.currentMinutes === 30 &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront)
+      this.DAY_12_30
     ) {
       return this.DAY_12_30;
     } else if (
       this.currentHours === 14 &&
       this.currentMinutes === 30 &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.ecoclav) &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.ketoprofen)
+      this.DAY_14_30
     ) {
       return this.DAY_14_30;
     } else if (
       this.currentHours === 15 &&
       this.currentMinutes === 30 &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront)
+      this.DAY_15_30
     ) {
       return this.DAY_15_30;
     } else if (
       this.currentHours === 18 && this.currentMinutes === 0 &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.vitaminC) &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront)
+      this.EVENING_18
     ) {
       return this.EVENING_18;
     } else if (
       this.currentHours === 19 &&
       this.currentMinutes === 0 &&
-      (this.currentDate.diff(this.startDate, 'days') <= this.ketoprofen)
+      this.EVENING_19
     ) {
       return this.EVENING_19;
     } else if (
       this.currentHours === 21 &&
       this.currentMinutes === 0 &&
-      (
-        (this.currentDate.diff(
-            this.startDate,
-            'days',
-        ) <= this.malavitLevopront) ||
-        (this.currentDate.diff(
-            this.startDate,
-            'days',
-        ) <= this.ecoclav)
-      )
+      this.EVENING_20
     ) {
       return this.EVENING_20;
-    } else if (this.currentDate.diff(this.startDate, 'days') === 71) {
+    } else if (
+      this.currentDate.diff(this.startDate, 'days') === 71
+    ) {
       return TONESSI_PILLS_END;
     } else {
-      return 'Никакие лекарства не нужно принимать на это время! 🤗';
+      return false;
     }
   }
 }

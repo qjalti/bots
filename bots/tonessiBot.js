@@ -56,7 +56,7 @@ const sendMessage = async (message, id = AUTHOR_TELEGRAM_ID) => {
     await BOT.telegram.sendMessage(
         id, err.message, SM_OPTIONS,
     );
-    console.log('Error! ', err.message);
+    console.log('Error! ', err.message, err);
   }
 };
 

@@ -8,6 +8,7 @@ import {fileURLToPath} from 'url';
 import ffmpeg from 'fluent-ffmpeg';
 import installer from '@ffmpeg-installer/ffmpeg';
 import {removeFile} from './utils.js';
+import {ERROR_MESSAGE} from './constants.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -31,10 +32,10 @@ class OggConverter {
             .run();
       });
     } catch (err) {
-      console.log('Error while trying to MP3. ', err.message);
+      console.log('Error while trying to MP3. ', err.message, err);
       return {
         success: false,
-        data: err.message,
+        data: ERROR_MESSAGE,
       };
     }
   }
@@ -59,10 +60,10 @@ class OggConverter {
         });
       });
     } catch (err) {
-      console.log('Error while creating OGG file. ', err.message);
+      console.log('Error while creating OGG file. ', err.message, err);
       return {
         success: false,
-        data: err.message,
+        data: ERROR_MESSAGE,
       };
     }
   }

@@ -46,13 +46,15 @@ const sendMessage = async (message, id = AUTHOR_TELEGRAM_ID) => {
     await BOT.telegram.sendMessage(
         id, err.message, SM_OPTIONS,
     );
-    console.log('Error! ', err.message);
+    console.log('Error! ', err.message, err);
   }
 };
 
 const takePills = async () => {
   const MESSAGE = await tonessiPills.parsePillsList();
-  await sendMessage(MESSAGE, TONESSI_ID);
+  if (MESSAGE !== false) {
+    await sendMessage(MESSAGE, TONESSI_ID); // TODO DEV & PROD
+  }
 };
 
 BOT.launch().then(() => false);

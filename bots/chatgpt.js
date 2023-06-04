@@ -76,7 +76,7 @@ BOT.on(message('voice'), async (ctx) => {
             Math.random() * ANIMATED_STICKERS.length,
         )], {
           disable_notification: true,
-        }).then((res) => {
+        }).then(async (res) => {
       stickerMessageId = res.message_id;
     });
   }, 1000);
@@ -114,14 +114,18 @@ BOT.on(message('voice'), async (ctx) => {
     } else {
       await ctx.replyWithMarkdown(RESPONSE.content);
     }
-    console.log(USER_ID, typeof USER_ID);
-    console.log(AUTHOR_TELEGRAM_ID, typeof AUTHOR_TELEGRAM_ID);
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
       await logMessage(log);
     }
-    await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
+    if (stickerMessageId) {
+      await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
+    }
   } catch (err) {
-    console.log('Error while voice message sent. ', err.message);
+    if (stickerMessageId) {
+      await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
+    }
+    ctx.reply(ERROR_MESSAGE);
+    console.log('Error while voice message sent. ', err.message, err);
   }
 });
 
@@ -152,6 +156,7 @@ BOT.on(message('text'), async (ctx) => {
         },
     );
     const RESPONSE = await OPEN_AI.chat(ctx.session.messages);
+
     ctx.session.messages.push(
         {
           role: OPEN_AI.roles.ASSISTANT, content: RESPONSE.content,
@@ -160,14 +165,18 @@ BOT.on(message('text'), async (ctx) => {
     log += RESPONSE.content + `\n` + SIXTEEN_DASHES;
 
     await ctx.replyWithMarkdown(RESPONSE.content);
-    console.log(USER_ID, typeof USER_ID);
-    console.log(AUTHOR_TELEGRAM_ID, typeof AUTHOR_TELEGRAM_ID);
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
       await logMessage(log);
     }
-    await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
+    if (stickerMessageId) {
+      await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
+    }
   } catch (err) {
-    console.log('Error while voice message sent. ', err.message);
+    if (stickerMessageId) {
+      await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
+    }
+    ctx.reply(ERROR_MESSAGE);
+    console.log('Error while text message sent. ', err.message, err);
   }
 });
 
