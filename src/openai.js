@@ -48,9 +48,11 @@ class OpenAI {
     } catch (err) {
       console.log('Error in chat() method', err.message);
       console.log(err, 'err');
+      console.log(err.response.status, 'err.response.status');
+      console.log(typeof err.response.status, 'typeof err.response.status');
       return {
         success: false,
-        code: 0,
+        code: err.response.status === 400 ? 4 : 0,
         data: ERROR_MESSAGE,
       };
     }

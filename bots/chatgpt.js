@@ -9,6 +9,7 @@ import {
   AUTHOR_COMMAND,
   AUTHOR_TELEGRAM_ID,
   LOGS_CHAT_ID,
+  HISTORY_CLEARED_MESSAGE,
 } from '../src/constants.js';
 import * as dotenv from 'dotenv';
 
@@ -103,7 +104,7 @@ BOT.on(message('voice'), async (ctx) => {
             Math.random() * ANIMATED_STICKERS.length,
         )], {
           disable_notification: true,
-        }).then(async (res) => {
+        }).then((res) => {
       stickerMessageId = res.message_id;
     });
   }, 1000);
@@ -141,7 +142,8 @@ BOT.on(message('voice'), async (ctx) => {
     if (RESPONSE.success) {
       await ctx.replyWithMarkdown(RESPONSE.data.content);
     } else if (RESPONSE.code === 4) {
-      sessionClear(ctx);
+      await sessionClear(ctx);
+      await ctx.reply(HISTORY_CLEARED_MESSAGE);
     }
 
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
@@ -209,7 +211,8 @@ BOT.on(message('text'), async (ctx) => {
     if (RESPONSE.success) {
       await ctx.replyWithMarkdown(RESPONSE.data.content);
     } else if (RESPONSE.code === 4) {
-      sessionClear(ctx);
+      await sessionClear(ctx);
+      await ctx.reply(HISTORY_CLEARED_MESSAGE);
     }
 
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
@@ -227,6 +230,9 @@ BOT.on(message('text'), async (ctx) => {
   }
 });
 
+/**
+ * Unsupported message types handlers
+ */
 BOT.on(message('video_note'), async (ctx) => {
   await ctx.reply('Обработка видеосообщений недоступна');
 });
