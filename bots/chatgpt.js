@@ -43,14 +43,6 @@ const logMessage = async (message) => {
 };
 
 /**
- * Clear session data
- * @param {Object} ctx Context
- */
-const sessionClear = (ctx) => {
-  ctx.session = INITIAL_SESSION;
-};
-
-/**
  * Errors handler
  */
 BOT.catch(async (error, ctx) => {
@@ -142,7 +134,7 @@ BOT.on(message('voice'), async (ctx) => {
     if (RESPONSE.success) {
       await ctx.replyWithMarkdown(RESPONSE.data.content);
     } else if (RESPONSE.code === 4) {
-      await sessionClear(ctx);
+      ctx.session.messages = [];
       await ctx.reply(HISTORY_CLEARED_MESSAGE);
     }
 
@@ -211,13 +203,15 @@ BOT.on(message('text'), async (ctx) => {
     if (RESPONSE.success) {
       await ctx.replyWithMarkdown(RESPONSE.data.content);
     } else if (RESPONSE.code === 4) {
-      await sessionClear(ctx);
+      ctx.session.messages = [];
       await ctx.reply(HISTORY_CLEARED_MESSAGE);
     }
 
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {
       await logMessage(log);
     }
+    console.log(stickerMessageId, 'stickerMessageId');
+    console.log(typeof stickerMessageId, 'typeof stickerMessageId');
     if (stickerMessageId) {
       await ctx.telegram.deleteMessage(ctx.chat.id, stickerMessageId);
     }
