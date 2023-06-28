@@ -57,7 +57,7 @@ BOT.command('start', async (ctx) => {
   ctx.session = INITIAL_SESSION;
 });
 BOT.command('new', async (ctx) => {
-  ctx.session = INITIAL_SESSION;
+  ctx.session.messages = [];
   await ctx.reply('История переписки сброшена');
 });
 BOT.command('examples', async (ctx) => {
@@ -202,9 +202,12 @@ BOT.on(message('text'), async (ctx) => {
 
     if (RESPONSE.success) {
       await ctx.replyWithMarkdown(RESPONSE.data.content);
-    } else if (RESPONSE.code === 4) {
+    } else if (RESPONSE.code === 400) {
       ctx.session.messages = [];
       await ctx.reply(HISTORY_CLEARED_MESSAGE);
+    } else if (RESPONSE.code === 429) {
+      ctx.session.messages = [];
+      await ctx.reply(ERROR_429_MESSAGE);
     }
 
     if (USER_ID !== AUTHOR_TELEGRAM_ID) {

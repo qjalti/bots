@@ -7,6 +7,7 @@ export const TONESSI_ID = 232169074;
 export const LOGS_CHAT_ID = -1001253575722;
 export const AUTHOR_COMMAND = `Привет!\nРад, что пользуешься моим функционалом!\nБольшое спасибо тебе!\nЕсли у тебя есть какие-то вопросы — напиши моему автору:`;
 export const HISTORY_CLEARED_MESSAGE = `История переписка была очищена, так как была слишком длинная. Пожалуйста, повторите запрос`;
+export const ERROR_429_MESSAGE = `Количество запросов к API OpenAI достигло лимита. Поторите попытку позже`;
 export const ANIMATED_STICKERS = [
   'CAACAgIAAxkBAAIQkGQoXi5wEInigN9oa3w-PmobC01rAAI7AwACbbBCAwOCj__lcU91LwQ',
   'CAACAgIAAxkBAAIQnWQoYj3iWb4tvJxqpQMknItjkSUMAAIrAAMkcWIal6q7lIE88KUvBA',

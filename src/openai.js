@@ -52,7 +52,7 @@ class OpenAI {
       console.log(typeof err.response.status, 'typeof err.response.status');
       return {
         success: false,
-        code: err.response.status === 400 ? 4 : 0,
+        code: err.response.status,
         data: ERROR_MESSAGE,
       };
     }
