@@ -124,7 +124,6 @@ const registerEnglish = async (user_id, user_signature) => {
  * @param post Объект с данными о посте
  */
 BOT.on('channel_post', async (post) => {
-  console.log(post);
   const AUTHOR_SIGNATURE = post.author_signature;
   const OLD_DATA = await readOldData();
   const OBJ = OLD_DATA.find((o) => o.name === AUTHOR_SIGNATURE);

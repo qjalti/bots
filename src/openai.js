@@ -46,10 +46,7 @@ class OpenAI {
         data: RESPONSE.data.choices[0].message,
       };
     } catch (err) {
-      console.log('Error in chat() method', err.message);
       console.log(err, 'err');
-      console.log(err.response.status, 'err.response.status');
-      console.log(typeof err.response.status, 'typeof err.response.status');
       return {
         success: false,
         code: err.response.status,

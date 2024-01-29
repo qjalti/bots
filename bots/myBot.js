@@ -62,14 +62,14 @@ const botSendMessage = (botMessage, sendTo = SEND_TO) => {
   BOT.sendMessage(sendTo, botMessage, {
     parse_mode: 'Markdown',
   })
-      .then(() => false)
-      .catch(() => {
-        BOT.sendMessage(
-            sendTo,
-            `Возникла непредвиденная ошибка. Повторите попытку позже`,
-        )
-            .then(() => false);
-      });
+    .then(() => false)
+    .catch(() => {
+      BOT.sendMessage(
+        sendTo,
+        `Возникла непредвиденная ошибка. Повторите попытку позже`,
+      )
+        .then(() => false);
+    });
 };
 
 /**
@@ -79,15 +79,15 @@ const botSendMessage = (botMessage, sendTo = SEND_TO) => {
 const readOldData = () => {
   return new Promise((resolve, reject) => {
     FS.readFile(
-        PATH.join(__dirname, '..', 'data', 'myBot.json'),
-        'utf-8',
-        (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(JSON.parse(bufferParse(data)));
-          }
-        });
+      PATH.join(__dirname, '..', 'data', 'myBot.json'),
+      'utf-8',
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(JSON.parse(bufferParse(data)));
+        }
+      });
   });
 };
 
@@ -98,74 +98,74 @@ const readOldData = () => {
 const parseExchangeRates = () => {
   return new Promise((resolve) => {
     AXIOS.get(API_URI)
-        .then(async (res) => {
-          const DATA = res.data;
+      .then(async (res) => {
+        const DATA = res.data;
 
-          let EUR_RUB;
-          let USD_RUB;
-          let EUR_SIGN;
-          let USD_SIGN;
+        let EUR_RUB;
+        let USD_RUB;
+        let EUR_SIGN;
+        let USD_SIGN;
 
-          /**
+        /**
          * Получение старых данных и расчет разницы
          */
-          const OLD_DATA = await readOldData();
+        const OLD_DATA = await readOldData();
 
-          if (DATA.success) {
-            EUR_RUB = DATA.rates.RUB;
-            USD_RUB = DATA.rates.RUB / DATA.rates.USD;
-          } else {
-            EUR_RUB = OLD_DATA.EUR;
-            USD_RUB = OLD_DATA.USD;
-          }
+        if (DATA.success) {
+          EUR_RUB = DATA.rates.RUB;
+          USD_RUB = DATA.rates.RUB / DATA.rates.USD;
+        } else {
+          EUR_RUB = OLD_DATA.EUR;
+          USD_RUB = OLD_DATA.USD;
+        }
 
-          const EUR_DIFF = (EUR_RUB - OLD_DATA.EUR).toFixed(2);
-          const USD_DIFF = (USD_RUB - OLD_DATA.USD).toFixed(2);
+        const EUR_DIFF = (EUR_RUB - OLD_DATA.EUR).toFixed(2);
+        const USD_DIFF = (USD_RUB - OLD_DATA.USD).toFixed(2);
 
-          if (Math.sign(EUR_DIFF)) {
-            EUR_SIGN = `↑ ${EUR_DIFF}`;
-          }
-          if (Math.sign(EUR_DIFF) === -1) {
-            EUR_SIGN = `↓ ${EUR_DIFF}`;
-          }
-          if (!Math.sign(EUR_DIFF)) {
-            EUR_SIGN = `= ${EUR_DIFF}`;
-          }
+        if (Math.sign(EUR_DIFF)) {
+          EUR_SIGN = `↑ ${EUR_DIFF}`;
+        }
+        if (Math.sign(EUR_DIFF) === -1) {
+          EUR_SIGN = `↓ ${EUR_DIFF}`;
+        }
+        if (!Math.sign(EUR_DIFF)) {
+          EUR_SIGN = `= ${EUR_DIFF}`;
+        }
 
-          if (Math.sign(USD_DIFF)) {
-            USD_SIGN = `↑ ${USD_DIFF}`;
-          }
-          if (Math.sign(USD_DIFF) === -1) {
-            USD_SIGN = `↓ ${USD_DIFF}`;
-          }
-          if (!Math.sign(USD_DIFF)) {
-            USD_SIGN = `= ${USD_DIFF}`;
-          }
+        if (Math.sign(USD_DIFF)) {
+          USD_SIGN = `↑ ${USD_DIFF}`;
+        }
+        if (Math.sign(USD_DIFF) === -1) {
+          USD_SIGN = `↓ ${USD_DIFF}`;
+        }
+        if (!Math.sign(USD_DIFF)) {
+          USD_SIGN = `= ${USD_DIFF}`;
+        }
 
-          /**
+        /**
          * Запись новой информации в файл
          */
-          const NEW_DATA = {
-            EUR: EUR_RUB,
-            USD: USD_RUB,
-            EUR_DIFF,
-            USD_DIFF,
-            SWING_PRICE: OLD_DATA.SWING_PRICE,
-            QUERIES_LIMIT: DATA.success,
-            USD_SIGN: USD_SIGN,
-            EUR_SIGN: EUR_SIGN,
-          };
+        const NEW_DATA = {
+          EUR: EUR_RUB,
+          USD: USD_RUB,
+          EUR_DIFF,
+          USD_DIFF,
+          SWING_PRICE: OLD_DATA.SWING_PRICE,
+          QUERIES_LIMIT: DATA.success,
+          USD_SIGN: USD_SIGN,
+          EUR_SIGN: EUR_SIGN,
+        };
 
-          FS.writeFile(
-              PATH.join(__dirname, '..', 'data', 'myBot.json'),
-              JSON.stringify(NEW_DATA),
-              (err) => {
-                if (err) {
-                  throw err;
-                }
-              });
-          resolve(NEW_DATA);
-        });
+        FS.writeFile(
+          PATH.join(__dirname, '..', 'data', 'myBot.json'),
+          JSON.stringify(NEW_DATA),
+          (err) => {
+            if (err) {
+              throw err;
+            }
+          });
+        resolve(NEW_DATA);
+      });
   });
 };
 
@@ -211,9 +211,58 @@ const sendAlyaMessage = async () => {
 
 const upHHResume = async () => {
   await BOT.sendMessage(
-      SEND_TO,
-      `Поднять резюме на hh.ru\nhttps://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455`,
+    SEND_TO,
+    `Поднять резюме на hh.ru\nhttps://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455`,
   );
+};
+
+const tattooReady = async () => {
+  const TATTOO_DATE = moment([2023, 9, 17, 22, 0]);
+
+  const TD_YEARS = moment().diff(TATTOO_DATE, 'years');
+  TATTOO_DATE.add(TD_YEARS, 'years');
+
+  const TD_MONTHS = moment().diff(TATTOO_DATE, 'months');
+  TATTOO_DATE.add(TD_MONTHS, 'months');
+
+  const TD_DAYS = moment().diff(TATTOO_DATE, 'days');
+  TATTOO_DATE.add(TD_DAYS, 'days');
+
+  await BOT.sendMessage(
+    SEND_TO,
+    'Тату было сделано ' +
+    ' (' +
+    TD_YEARS +
+    'Y, ' +
+    TD_MONTHS +
+    'M, ' +
+    TD_DAYS +
+    'D)');
+};
+
+const moscowArrived = async () => {
+  const ARRIVED_DATE = moment([2023, 9, 5, 13, 0]);
+
+  const AD_YEARS = moment().diff(ARRIVED_DATE, 'years');
+  ARRIVED_DATE.add(AD_YEARS, 'years');
+
+  const AD_MONTHS = moment().diff(ARRIVED_DATE, 'months');
+  ARRIVED_DATE.add(AD_MONTHS, 'months');
+
+  const AD_DAYS = moment().diff(ARRIVED_DATE, 'days');
+  ARRIVED_DATE.add(AD_DAYS, 'days');
+
+  await BOT.sendMessage(
+    SEND_TO,
+    'Переехал в Москву ' +
+    '\n' +
+    ' (' +
+    AD_YEARS +
+    'Y, ' +
+    AD_MONTHS +
+    'M, ' +
+    AD_DAYS +
+    'D)');
 };
 
 /**
@@ -238,16 +287,16 @@ BOT.on('message', async (msg) => {
     botSendMessage('Бот успешно запущен', CHAT_ID);
   } else if (msg.text === '/author') { // Если отправлена команда /author
     BOT.sendMessage(
-        CHAT_ID,
-        `Привет!
+      CHAT_ID,
+      `Привет!
 Рад, что пользуешься моим функционалом!
 Большое спасибо тебе!
 Если у тебя есть какие-то вопросы — напиши моему автору:`,
     ).then(() => {
       BOT.sendContact(
-          CHAT_ID,
-          '+79883857654',
-          'Никита',
+        CHAT_ID,
+        '+79883857654',
+        'Никита',
       ).then(() => false);
     });
   } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
@@ -268,8 +317,10 @@ if (TEST_MODE) {
    */
   CRON.schedule('0 5 * * *', collectAndSendData, {});
   CRON.schedule('0 15 * * *', collectAndSendData, {});
-  CRON.schedule('0 5 * * *', sendAlyaMessage, {});
-  CRON.schedule('0 5-23/4 * * *', upHHResume, {});
+  CRON.schedule('0 9 * * *', sendAlyaMessage, {});
+  CRON.schedule('0 22 * * *', tattooReady, {});
+  CRON.schedule('0 13 * * *', moscowArrived, {});
+  // CRON.schedule('0 5-23/4 * * *', upHHResume, {});
   // CRON.schedule('45 8 * * *', msgToMom, {});
   // CRON.schedule('45 20 * * *', msgToMom, {});
 }

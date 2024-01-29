@@ -5,6 +5,7 @@ import {
   AUTHOR_TELEGRAM_ID,
   LOGS_CHAT_ID,
   TONESSI_FIRST_VACATION_DAY,
+  TONESSI_FIRST_VACATION_DAY_SORRY,
   VACATION_MESSAGES,
   TONESSI_ID,
 } from '../src/constants.js';
@@ -63,6 +64,13 @@ const sendMessage = async (message, id = AUTHOR_TELEGRAM_ID) => {
 const daysLeft = async () => {
   const {daysLeft, hoursLeft} = tonessiVacation.check();
 
+  console.log('---');
+  console.log(daysLeft, 'daysLeft');
+  console.log(typeof daysLeft, 'typeof daysLeft');
+  console.log(hoursLeft, 'hoursLeft');
+  console.log(typeof hoursLeft, 'typeof hoursLeft');
+  console.log(`---\n\n`);
+
   if (
     daysLeft % 2 === 0 &&
     daysLeft <= 14 &&
@@ -78,6 +86,13 @@ const daysLeft = async () => {
   ) {
     await sendMessage(
         TONESSI_FIRST_VACATION_DAY,
+        TONESSI_ID,
+    );
+  } else if (
+    hoursLeft === -23
+  ) {
+    await sendMessage(
+        TONESSI_FIRST_VACATION_DAY_SORRY,
         TONESSI_ID,
     );
   }

@@ -23,11 +23,6 @@ class TonessiPills {
      */
     this.morningNumeration = 1;
 
-    console.log(this.currentDate.diff(this.startDate, 'days'));
-    console.log(typeof this.currentDate.diff(this.startDate, 'days'), 'typeof');
-    console.log(this.linebact);
-    console.log(typeof this.linebact, 'typeof');
-
     if (
       this.currentDate.diff(this.startDate, 'days') <= 10 ||
       (
@@ -80,11 +75,9 @@ _20 капель/1 стакан воды_`;
     if (
       this.currentDate.diff(this.startDate, 'days') <= this.linebact
     ) {
-      console.log('if');
       this.DAY_12_00 = `1. *Линебакт* (Прибиотик) 
 _1 таблетка перед/во время еды_`;
     }
-    console.log(this.DAY_12_00);
 
     /**
      * 12:30 pm
@@ -188,8 +181,6 @@ _1 таблетка через 12 часов от предыдущей_`;
       this.currentMinutes === 0 &&
       this.DAY_12_00
     ) {
-      console.log(this.DAY_12_00);
-      console.log('if2');
       return this.DAY_12_00;
     } else if (
       this.currentHours === 12 &&
