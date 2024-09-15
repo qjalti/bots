@@ -191,8 +191,8 @@ const collectAndSendData = async () => {
   const CURRENT_DAY_PART = getDayPart();
   const MESSAGE = `
 ${CURRENT_DAY_PART}, Никита!
-${EXCHANGE_RATES.USD_SIGN}
-${EXCHANGE_RATES.EUR_SIGN}
+${formatNumber(EXCHANGE_RATES.USD_SIGN, 'USD')}
+${formatNumber(EXCHANGE_RATES.EUR_SIGN, 'EUR')}
 
 Курс${EXCHANGE_RATES.QUERIES_LIMIT ? '' : ' (лимит запросов исчерпан)'}:
 ${formatNumber(EXCHANGE_RATES.USD, 'USD')}
@@ -212,7 +212,28 @@ const sendAlyaMessage = async () => {
 const upHHResume = async () => {
   await BOT.sendMessage(
     SEND_TO,
-    `Поднять резюме на hh.ru\nhttps://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455`,
+    `Поднять резюме на hh\nhttps://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455`,
+  );
+};
+
+const msgToMom = async () => {
+  await BOT.sendMessage(
+    SEND_TO,
+    `Написать <a href='http://t.me/+79892142176'>маме</a>`,
+    {
+      parse_mode: 'HTML'
+    }
+  );
+};
+
+const freeParkingSunday = async () => {
+  await BOT.sendMessage(
+    SEND_TO,
+    `🚙 Напоминание: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
+
+<em>(но на всякий случай лучше перепроверять информацию в приложениях или на столбе)</em>`, {
+      parse_mode: 'HTML'
+    }
   );
 };
 
@@ -231,13 +252,12 @@ const tattooReady = async () => {
   await BOT.sendMessage(
     SEND_TO,
     'Тату было сделано ' +
-    ' (' +
     TD_YEARS +
-    'Y, ' +
+    'y, ' +
     TD_MONTHS +
-    'M, ' +
+    'mo, ' +
     TD_DAYS +
-    'D)');
+    'd');
 };
 
 const moscowArrived = async () => {
@@ -255,14 +275,12 @@ const moscowArrived = async () => {
   await BOT.sendMessage(
     SEND_TO,
     'Переехал в Москву ' +
-    '\n' +
-    ' (' +
     AD_YEARS +
-    'Y, ' +
+    'y, ' +
     AD_MONTHS +
-    'M, ' +
+    'mo, ' +
     AD_DAYS +
-    'D)');
+    'd');
 };
 
 /**
@@ -320,7 +338,8 @@ if (TEST_MODE) {
   CRON.schedule('0 9 * * *', sendAlyaMessage, {});
   CRON.schedule('0 22 * * *', tattooReady, {});
   CRON.schedule('0 13 * * *', moscowArrived, {});
-  // CRON.schedule('0 5-23/4 * * *', upHHResume, {});
-  // CRON.schedule('45 8 * * *', msgToMom, {});
-  // CRON.schedule('45 20 * * *', msgToMom, {});
+  CRON.schedule('0 5-23/4 * * *', upHHResume, {});
+  CRON.schedule('45 9 * * *', msgToMom, {});
+  CRON.schedule('45 21 * * *', msgToMom, {});
+  CRON.schedule('0 11 * * 0', freeParkingSunday, {});
 }

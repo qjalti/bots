@@ -11,7 +11,8 @@ import * as dotenv from 'dotenv';
 import './bots/myBot.js';
 import './bots/alya_english.js';
 import './bots/vk_mutabor.js';
-import './bots/chatgpt.js';
+// import './bots/ultimaBot.js';
+// import './bots/chatgpt.js';
 // import './bots/tonessiBot.js';
 // import './bots/tonessiNotifier.js';
 

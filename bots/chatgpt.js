@@ -96,11 +96,11 @@ BOT.on(message('voice'), async (ctx) => {
 
   setTimeout(async () => {
     await ctx.replyWithAnimation(
-      ANIMATED_STICKERS[Math.floor(
-        Math.random() * ANIMATED_STICKERS.length,
-      )], {
-        disable_notification: true,
-      }).then((res) => {
+        ANIMATED_STICKERS[Math.floor(
+            Math.random() * ANIMATED_STICKERS.length,
+        )], {
+          disable_notification: true,
+        }).then((res) => {
       stickerMessageId = res.message_id;
     });
   }, 1000);
@@ -116,9 +116,9 @@ BOT.on(message('voice'), async (ctx) => {
     await ctx.reply(`Я так понял Вы сказали:\n"${TEXT.data}"`);
 
     ctx.session.messages.push(
-      {
-        role: OPEN_AI.roles.USER, content: TEXT.data,
-      },
+        {
+          role: OPEN_AI.roles.USER, content: TEXT.data,
+        },
     );
 
     const RESPONSE = await OPEN_AI.chat(ctx.session.messages);
@@ -128,9 +128,9 @@ BOT.on(message('voice'), async (ctx) => {
     }
 
     ctx.session.messages.push(
-      {
-        role: OPEN_AI.roles.ASSISTANT, content: RESPONSE.data.content,
-      },
+        {
+          role: OPEN_AI.roles.ASSISTANT, content: RESPONSE.data.content,
+        },
     );
 
     log += RESPONSE.data.content + `\n` + SIXTEEN_DASHES;
@@ -177,11 +177,11 @@ BOT.on(message('text'), async (ctx) => {
 
   setTimeout(async () => {
     await ctx.replyWithAnimation(
-      ANIMATED_STICKERS[Math.floor(
-        Math.random() * ANIMATED_STICKERS.length,
-      )], {
-        disable_notification: true,
-      }).then((res) => {
+        ANIMATED_STICKERS[Math.floor(
+            Math.random() * ANIMATED_STICKERS.length,
+        )], {
+          disable_notification: true,
+        }).then((res) => {
       stickerMessageId = res.message_id;
     });
   }, 1000);
@@ -190,16 +190,16 @@ BOT.on(message('text'), async (ctx) => {
     log += ctx.message.text + `\n` + SIXTEEN_DASHES;
 
     ctx.session.messages.push(
-      {
-        role: OPEN_AI.roles.USER, content: ctx.message.text,
-      },
+        {
+          role: OPEN_AI.roles.USER, content: ctx.message.text,
+        },
     );
     const RESPONSE = await OPEN_AI.chat(ctx.session.messages);
 
     ctx.session.messages.push(
-      {
-        role: OPEN_AI.roles.ASSISTANT, content: RESPONSE.data.content,
-      },
+        {
+          role: OPEN_AI.roles.ASSISTANT, content: RESPONSE.data.content,
+        },
     );
 
     log += RESPONSE.data.content + `\n` + SIXTEEN_DASHES;
