@@ -191,8 +191,8 @@ const collectAndSendData = async () => {
   const CURRENT_DAY_PART = getDayPart();
   const MESSAGE = `
 ${CURRENT_DAY_PART}, Никита!
-${formatNumber(EXCHANGE_RATES.USD_SIGN, 'USD')}
-${formatNumber(EXCHANGE_RATES.EUR_SIGN, 'EUR')}
+${EXCHANGE_RATES.USD_SIGN, 'USD'}
+${EXCHANGE_RATES.EUR_SIGN, 'EUR'}
 
 Курс${EXCHANGE_RATES.QUERIES_LIMIT ? '' : ' (лимит запросов исчерпан)'}:
 ${formatNumber(EXCHANGE_RATES.USD, 'USD')}
@@ -209,10 +209,17 @@ const sendAlyaMessage = async () => {
   botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', ALYA_TELEGRAM_ID);
 };
 
+const seventeenthDay = async () => {
+  botSendMessage('Передать показания счетчиков', SEND_TO);
+};
+
 const upHHResume = async () => {
   await BOT.sendMessage(
     SEND_TO,
-    `Поднять резюме на hh\nhttps://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455`,
+    `Поднять резюме на <a href='https://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455' target='_blank'>hh</a>`,
+    {
+      parse_mode: 'HTML'
+    }
   );
 };
 
@@ -342,4 +349,5 @@ if (TEST_MODE) {
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
+  CRON.schedule('0 8 17 * *', seventeenthDay, {});
 }
