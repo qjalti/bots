@@ -191,8 +191,8 @@ const collectAndSendData = async () => {
   const CURRENT_DAY_PART = getDayPart();
   const MESSAGE = `
 ${CURRENT_DAY_PART}, Никита!
-${EXCHANGE_RATES.USD_SIGN, 'USD'}
-${EXCHANGE_RATES.EUR_SIGN, 'EUR'}
+${EXCHANGE_RATES.USD_SIGN} $
+${EXCHANGE_RATES.EUR_SIGN} €
 
 Курс${EXCHANGE_RATES.QUERIES_LIMIT ? '' : ' (лимит запросов исчерпан)'}:
 ${formatNumber(EXCHANGE_RATES.USD, 'USD')}
@@ -290,6 +290,29 @@ const moscowArrived = async () => {
     'd');
 };
 
+const appartmentRent = async () => {
+  const RENT_DATE = moment([2023, 11, 2, 13, 0]);
+
+  const RD_YEARS = moment().diff(RENT_DATE, 'years');
+  RENT_DATE.add(RD_YEARS, 'years');
+
+  const RD_MONTHS = moment().diff(RENT_DATE, 'months');
+  RENT_DATE.add(RD_MONTHS, 'months');
+
+  const RD_DAYS = moment().diff(RENT_DATE, 'days');
+  RENT_DATE.add(RD_DAYS, 'days');
+
+  await BOT.sendMessage(
+    SEND_TO,
+    'Арендовал квартиру ' +
+    RD_YEARS +
+    'y, ' +
+    RD_MONTHS +
+    'mo, ' +
+    RD_DAYS +
+    'd');
+};
+
 /**
  * New message event
  */
@@ -345,6 +368,7 @@ if (TEST_MODE) {
   CRON.schedule('0 9 * * *', sendAlyaMessage, {});
   CRON.schedule('0 22 * * *', tattooReady, {});
   CRON.schedule('0 13 * * *', moscowArrived, {});
+  CRON.schedule('0 12 * * *', appartmentRent, {});
   CRON.schedule('0 5-23/4 * * *', upHHResume, {});
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
