@@ -369,7 +369,7 @@ if (TEST_MODE) {
   CRON.schedule('0 22 * * *', tattooReady, {});
   CRON.schedule('0 13 * * *', moscowArrived, {});
   CRON.schedule('0 12 * * *', appartmentRent, {});
-  CRON.schedule('0 5-23/4 * * *', upHHResume, {});
+  // CRON.schedule('0 5-23/4 * * *', upHHResume, {});
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
