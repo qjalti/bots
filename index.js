@@ -15,6 +15,7 @@ import './bots/vk_mutabor.js';
 // import './bots/chatgpt.js';
 // import './bots/tonessiBot.js';
 // import './bots/tonessiNotifier.js';
+// import './bots/personalBot.js';
 
 /**
  * Блок определения констант
