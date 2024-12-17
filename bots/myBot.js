@@ -373,5 +373,5 @@ if (TEST_MODE) {
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
-  CRON.schedule('0 8 17 * *', seventeenthDay, {});
+  CRON.schedule('0 7 30 * *', seventeenthDay, {});
 }
