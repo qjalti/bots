@@ -305,7 +305,7 @@ const checkOil = async () => {
 
   await BOT.sendMessage(
       SEND_TO,
-      'Менял масло в машине (57K km) ' +
+      'Менял масло в машине (56K km) ' +
     OCD_YEARS +
     'y, ' +
     OCD_MONTHS +
