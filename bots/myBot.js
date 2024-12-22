@@ -62,14 +62,14 @@ const botSendMessage = (botMessage, sendTo = SEND_TO) => {
   BOT.sendMessage(sendTo, botMessage, {
     parse_mode: 'Markdown',
   })
-    .then(() => false)
-    .catch(() => {
-      BOT.sendMessage(
-        sendTo,
-        `Возникла непредвиденная ошибка. Повторите попытку позже`,
-      )
-        .then(() => false);
-    });
+      .then(() => false)
+      .catch(() => {
+        BOT.sendMessage(
+            sendTo,
+            `Возникла непредвиденная ошибка. Повторите попытку позже`,
+        )
+            .then(() => false);
+      });
 };
 
 /**
@@ -79,15 +79,15 @@ const botSendMessage = (botMessage, sendTo = SEND_TO) => {
 const readOldData = () => {
   return new Promise((resolve, reject) => {
     FS.readFile(
-      PATH.join(__dirname, '..', 'data', 'myBot.json'),
-      'utf-8',
-      (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(JSON.parse(bufferParse(data)));
-        }
-      });
+        PATH.join(__dirname, '..', 'data', 'myBot.json'),
+        'utf-8',
+        (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(JSON.parse(bufferParse(data)));
+          }
+        });
   });
 };
 
@@ -98,74 +98,74 @@ const readOldData = () => {
 const parseExchangeRates = () => {
   return new Promise((resolve) => {
     AXIOS.get(API_URI)
-      .then(async (res) => {
-        const DATA = res.data;
+        .then(async (res) => {
+          const DATA = res.data;
 
-        let EUR_RUB;
-        let USD_RUB;
-        let EUR_SIGN;
-        let USD_SIGN;
+          let EUR_RUB;
+          let USD_RUB;
+          let EUR_SIGN;
+          let USD_SIGN;
 
-        /**
+          /**
          * Получение старых данных и расчет разницы
          */
-        const OLD_DATA = await readOldData();
+          const OLD_DATA = await readOldData();
 
-        if (DATA.success) {
-          EUR_RUB = DATA.rates.RUB;
-          USD_RUB = DATA.rates.RUB / DATA.rates.USD;
-        } else {
-          EUR_RUB = OLD_DATA.EUR;
-          USD_RUB = OLD_DATA.USD;
-        }
+          if (DATA.success) {
+            EUR_RUB = DATA.rates.RUB;
+            USD_RUB = DATA.rates.RUB / DATA.rates.USD;
+          } else {
+            EUR_RUB = OLD_DATA.EUR;
+            USD_RUB = OLD_DATA.USD;
+          }
 
-        const EUR_DIFF = (EUR_RUB - OLD_DATA.EUR).toFixed(2);
-        const USD_DIFF = (USD_RUB - OLD_DATA.USD).toFixed(2);
+          const EUR_DIFF = (EUR_RUB - OLD_DATA.EUR).toFixed(2);
+          const USD_DIFF = (USD_RUB - OLD_DATA.USD).toFixed(2);
 
-        if (Math.sign(EUR_DIFF)) {
-          EUR_SIGN = `↑ ${EUR_DIFF}`;
-        }
-        if (Math.sign(EUR_DIFF) === -1) {
-          EUR_SIGN = `↓ ${EUR_DIFF}`;
-        }
-        if (!Math.sign(EUR_DIFF)) {
-          EUR_SIGN = `= ${EUR_DIFF}`;
-        }
+          if (Math.sign(EUR_DIFF)) {
+            EUR_SIGN = `↑ ${EUR_DIFF}`;
+          }
+          if (Math.sign(EUR_DIFF) === -1) {
+            EUR_SIGN = `↓ ${EUR_DIFF}`;
+          }
+          if (!Math.sign(EUR_DIFF)) {
+            EUR_SIGN = `= ${EUR_DIFF}`;
+          }
 
-        if (Math.sign(USD_DIFF)) {
-          USD_SIGN = `↑ ${USD_DIFF}`;
-        }
-        if (Math.sign(USD_DIFF) === -1) {
-          USD_SIGN = `↓ ${USD_DIFF}`;
-        }
-        if (!Math.sign(USD_DIFF)) {
-          USD_SIGN = `= ${USD_DIFF}`;
-        }
+          if (Math.sign(USD_DIFF)) {
+            USD_SIGN = `↑ ${USD_DIFF}`;
+          }
+          if (Math.sign(USD_DIFF) === -1) {
+            USD_SIGN = `↓ ${USD_DIFF}`;
+          }
+          if (!Math.sign(USD_DIFF)) {
+            USD_SIGN = `= ${USD_DIFF}`;
+          }
 
-        /**
+          /**
          * Запись новой информации в файл
          */
-        const NEW_DATA = {
-          EUR: EUR_RUB,
-          USD: USD_RUB,
-          EUR_DIFF,
-          USD_DIFF,
-          SWING_PRICE: OLD_DATA.SWING_PRICE,
-          QUERIES_LIMIT: DATA.success,
-          USD_SIGN: USD_SIGN,
-          EUR_SIGN: EUR_SIGN,
-        };
+          const NEW_DATA = {
+            EUR: EUR_RUB,
+            USD: USD_RUB,
+            EUR_DIFF,
+            USD_DIFF,
+            SWING_PRICE: OLD_DATA.SWING_PRICE,
+            QUERIES_LIMIT: DATA.success,
+            USD_SIGN: USD_SIGN,
+            EUR_SIGN: EUR_SIGN,
+          };
 
-        FS.writeFile(
-          PATH.join(__dirname, '..', 'data', 'myBot.json'),
-          JSON.stringify(NEW_DATA),
-          (err) => {
-            if (err) {
-              throw err;
-            }
-          });
-        resolve(NEW_DATA);
-      });
+          FS.writeFile(
+              PATH.join(__dirname, '..', 'data', 'myBot.json'),
+              JSON.stringify(NEW_DATA),
+              (err) => {
+                if (err) {
+                  throw err;
+                }
+              });
+          resolve(NEW_DATA);
+        });
   });
 };
 
@@ -207,6 +207,7 @@ ${formatNumber(EXCHANGE_RATES.EUR, 'EUR')}
 const sendAlyaMessage = async () => {
   const ALYA_TELEGRAM_ID = 272337232;
   botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', ALYA_TELEGRAM_ID);
+  botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', SEND_TO);
 };
 
 const seventeenthDay = async () => {
@@ -215,32 +216,32 @@ const seventeenthDay = async () => {
 
 const upHHResume = async () => {
   await BOT.sendMessage(
-    SEND_TO,
-    `Поднять резюме на <a href='https://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455' target='_blank'>hh</a>`,
-    {
-      parse_mode: 'HTML'
-    }
+      SEND_TO,
+      `Поднять резюме на <a href='https://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455' target='_blank'>hh</a>`,
+      {
+        parse_mode: 'HTML',
+      },
   );
 };
 
 const msgToMom = async () => {
   await BOT.sendMessage(
-    SEND_TO,
-    `Написать <a href='http://t.me/+79892142176'>маме</a>`,
-    {
-      parse_mode: 'HTML'
-    }
+      SEND_TO,
+      `Написать <a href='http://t.me/+79892142176'>маме</a>`,
+      {
+        parse_mode: 'HTML',
+      },
   );
 };
 
 const freeParkingSunday = async () => {
   await BOT.sendMessage(
-    SEND_TO,
-    `🚙 Напоминание: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
+      SEND_TO,
+      `🚙 Напоминание: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
 
 <em>(но на всякий случай лучше перепроверять информацию в приложениях или на столбе)</em>`, {
-      parse_mode: 'HTML'
-    }
+        parse_mode: 'HTML',
+      },
   );
 };
 
@@ -257,8 +258,8 @@ const tattooReady = async () => {
   TATTOO_DATE.add(TD_DAYS, 'days');
 
   await BOT.sendMessage(
-    SEND_TO,
-    'Тату было сделано ' +
+      SEND_TO,
+      'Тату было сделано ' +
     TD_YEARS +
     'y, ' +
     TD_MONTHS +
@@ -280,13 +281,36 @@ const moscowArrived = async () => {
   ARRIVED_DATE.add(AD_DAYS, 'days');
 
   await BOT.sendMessage(
-    SEND_TO,
-    'Переехал в Москву ' +
+      SEND_TO,
+      'Переехал в Москву ' +
     AD_YEARS +
     'y, ' +
     AD_MONTHS +
     'mo, ' +
     AD_DAYS +
+    'd');
+};
+
+const checkOil = async () => {
+  const OIL_CHANGE_DATE = moment([2023, 11, 21, 0, 0]);
+
+  const OCD_YEARS = moment().diff(OIL_CHANGE_DATE, 'years');
+  OIL_CHANGE_DATE.add(OCD_YEARS, 'years');
+
+  const OCD_MONTHS = moment().diff(OIL_CHANGE_DATE, 'months');
+  OIL_CHANGE_DATE.add(OCD_MONTHS, 'months');
+
+  const OCD_DAYS = moment().diff(OIL_CHANGE_DATE, 'days');
+  OIL_CHANGE_DATE.add(OCD_DAYS, 'days');
+
+  await BOT.sendMessage(
+      SEND_TO,
+      'Менял масло в машине (57K km) ' +
+    OCD_YEARS +
+    'y, ' +
+    OCD_MONTHS +
+    'mo, ' +
+    OCD_DAYS +
     'd');
 };
 
@@ -303,8 +327,8 @@ const appartmentRent = async () => {
   RENT_DATE.add(RD_DAYS, 'days');
 
   await BOT.sendMessage(
-    SEND_TO,
-    'Арендовал квартиру ' +
+      SEND_TO,
+      'Арендовал квартиру ' +
     RD_YEARS +
     'y, ' +
     RD_MONTHS +
@@ -335,16 +359,16 @@ BOT.on('message', async (msg) => {
     botSendMessage('Бот успешно запущен', CHAT_ID);
   } else if (msg.text === '/author') { // Если отправлена команда /author
     BOT.sendMessage(
-      CHAT_ID,
-      `Привет!
+        CHAT_ID,
+        `Привет!
 Рад, что пользуешься моим функционалом!
 Большое спасибо тебе!
 Если у тебя есть какие-то вопросы — напиши моему автору:`,
     ).then(() => {
       BOT.sendContact(
-        CHAT_ID,
-        '+79883857654',
-        'Никита',
+          CHAT_ID,
+          '+79883857654',
+          'Никита',
       ).then(() => false);
     });
   } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
@@ -373,5 +397,6 @@ if (TEST_MODE) {
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
-  CRON.schedule('0 7 30 * *', seventeenthDay, {});
+  CRON.schedule('15 7 17 * *', seventeenthDay, {});
+  CRON.schedule('30 7 */3 * *', checkOil, {});
 }
