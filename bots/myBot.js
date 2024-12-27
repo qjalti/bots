@@ -292,7 +292,7 @@ const moscowArrived = async () => {
 };
 
 const checkOil = async () => {
-  const OIL_CHANGE_DATE = moment([2023, 11, 21, 0, 0]);
+  const OIL_CHANGE_DATE = moment([2024, 11, 21, 0, 0]);
 
   const OCD_YEARS = moment().diff(OIL_CHANGE_DATE, 'years');
   OIL_CHANGE_DATE.add(OCD_YEARS, 'years');
