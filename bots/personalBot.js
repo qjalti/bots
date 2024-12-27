@@ -23,9 +23,7 @@ bot.on('business_message', async (context) => {
   }
 });
 
-bot.launch(() => {
-  console.log('personalBot successfull start');
-});
+bot.launch(() => false);
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
