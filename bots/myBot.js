@@ -315,7 +315,7 @@ const checkOil = async () => {
 };
 
 const appartmentRent = async () => {
-  const RENT_DATE = moment([2023, 11, 2, 13, 0]);
+  const RENT_DATE = moment([2025, 11, 29, 0, 0]);
 
   const RD_YEARS = moment().diff(RENT_DATE, 'years');
   RENT_DATE.add(RD_YEARS, 'years');
