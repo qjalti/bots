@@ -234,6 +234,13 @@ const msgToMom = async () => {
   );
 };
 
+const freeGiftCounter = async () => {
+  await BOT.sendMessage(
+      MY_ID,
+      'Сброс бесплатного подарка',
+  );
+};
+
 const freeParkingSunday = async () => {
   await BOT.sendMessage(
       MY_ID,
@@ -418,4 +425,5 @@ if (TEST_MODE) {
   CRON.schedule('15 7 17 * *', seventeenthDay, {});
   CRON.schedule('30 7 */3 * *', checkOil, {});
   CRON.schedule('30 9 * * *', vacationLeft, {});
+  CRON.schedule('30 14 * * 5', freeGiftCounter, {});
 }
