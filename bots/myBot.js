@@ -337,6 +337,25 @@ const appartmentRent = async () => {
     'd');
 };
 
+const vacationLeft = async () => {
+	const VACATION_DATE = moment([2025, 3, 9, 18, 0]);
+	
+	const VD_MONTHS = moment().diff(VACATION_DATE, 'months');
+	VACATION_DATE.add(VD_YEARS, 'months');
+
+	const VD_DAYS = moment().diff(VACATION_DATE, 'days');
+	VACATION_DATE.add(VD_DAYS, 'days');
+
+	await BOT.sendMessage(
+		SEND_TO,
+		'До отпуска ' +
+		VD_MONTHS +
+		'mo, ' +
+		VD_DAYS +
+		'd'
+	);
+}
+
 /**
  * New message event
  */
@@ -399,4 +418,5 @@ if (TEST_MODE) {
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
   CRON.schedule('15 7 17 * *', seventeenthDay, {});
   CRON.schedule('30 7 */3 * *', checkOil, {});
+	CRON.schedule('30 9 * * *', vacationLeft, {});
 }
