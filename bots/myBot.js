@@ -26,7 +26,7 @@ moment.locale('ru');
  */
 const TOKEN = '2095103352:AAGsqtjMG-R9bTuDdgzKsEetMxWslt4xjXw';
 const BOT = new TelegramBot(TOKEN, {polling: true});
-const SEND_TO = 738829247;
+const MY_ID = 738829247;
 
 /**
  * Блок определения функций
@@ -58,7 +58,7 @@ const formatNumber = (number, currency) => {
  * @param {string} botMessage Текст сообщения
  * @param {number|string} sendTo ID адресата
  */
-const botSendMessage = (botMessage, sendTo = SEND_TO) => {
+const botSendMessage = (botMessage, sendTo = MY_ID) => {
   BOT.sendMessage(sendTo, botMessage, {
     parse_mode: 'Markdown',
   })
@@ -207,16 +207,16 @@ ${formatNumber(EXCHANGE_RATES.EUR, 'EUR')}
 const sendAlyaMessage = async () => {
   const ALYA_TELEGRAM_ID = 272337232;
   botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', ALYA_TELEGRAM_ID);
-  botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', SEND_TO);
+  botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', MY_ID);
 };
 
 const seventeenthDay = async () => {
-  botSendMessage('Передать показания счетчиков', SEND_TO);
+  botSendMessage('Передать показания счетчиков', MY_ID);
 };
 
 const upHHResume = async () => {
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       `Поднять резюме на <a href='https://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455' target='_blank'>hh</a>`,
       {
         parse_mode: 'HTML',
@@ -226,7 +226,7 @@ const upHHResume = async () => {
 
 const msgToMom = async () => {
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       `Написать <a href='http://t.me/+79892142176'>маме</a>`,
       {
         parse_mode: 'HTML',
@@ -236,7 +236,7 @@ const msgToMom = async () => {
 
 const freeParkingSunday = async () => {
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       `🚙 Напоминание: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
 
 <em>(но на всякий случай лучше перепроверять информацию в приложениях или на столбе)</em>`, {
@@ -258,7 +258,7 @@ const tattooReady = async () => {
   TATTOO_DATE.add(TD_DAYS, 'days');
 
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       'Тату было сделано ' +
     TD_YEARS +
     'y, ' +
@@ -281,7 +281,7 @@ const moscowArrived = async () => {
   ARRIVED_DATE.add(AD_DAYS, 'days');
 
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       'Переехал в Москву ' +
     AD_YEARS +
     'y, ' +
@@ -304,7 +304,7 @@ const checkOil = async () => {
   OIL_CHANGE_DATE.add(OCD_DAYS, 'days');
 
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       'Менял масло в машине (56K km) ' +
     OCD_YEARS +
     'y, ' +
@@ -327,7 +327,7 @@ const appartmentRent = async () => {
   RENT_DATE.add(RD_DAYS, 'days');
 
   await BOT.sendMessage(
-      SEND_TO,
+      MY_ID,
       'Арендовал квартиру ' +
     RD_YEARS +
     'y, ' +
@@ -338,23 +338,22 @@ const appartmentRent = async () => {
 };
 
 const vacationLeft = async () => {
-	const VACATION_DATE = moment([2025, 3, 9, 18, 0]);
-	
-	const VD_MONTHS = moment().diff(VACATION_DATE, 'months');
-	VACATION_DATE.add(VD_YEARS, 'months');
+  const VACATION_DATE = moment([2025, 3, 9, 18, 0]);
 
-	const VD_DAYS = moment().diff(VACATION_DATE, 'days');
-	VACATION_DATE.add(VD_DAYS, 'days');
+  const VD_MONTHS = VACATION_DATE.diff(moment(), 'months');
+  VACATION_DATE.add(VD_MONTHS, 'months');
 
-	await BOT.sendMessage(
-		SEND_TO,
-		'До отпуска ' +
-		VD_MONTHS +
-		'mo, ' +
-		VD_DAYS +
-		'd'
-	);
-}
+  const VD_DAYS = VACATION_DATE.diff(moment(), 'days');
+
+  await BOT.sendMessage(
+      MY_ID,
+      'До отпуска ' +
+    VD_MONTHS +
+    'mo, ' +
+    VD_DAYS +
+    'd',
+  );
+};
 
 /**
  * New message event
@@ -392,10 +391,10 @@ BOT.on('message', async (msg) => {
     });
   } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
     botSendMessage(`\`${msg.from.id}\``, CHAT_ID);
-  } else if (msg.sticker && msg.from.id === SEND_TO) { // Получение ID стикера
-    await BOT.sendMessage(SEND_TO, msg.sticker.file_id);
+  } else if (msg.sticker && msg.from.id === MY_ID) { // Получение ID стикера
+    await BOT.sendMessage(MY_ID, msg.sticker.file_id);
   }
-  if (CHAT_ID !== SEND_TO) { // Логгирование сообщения
+  if (CHAT_ID !== MY_ID) { // Логгирование сообщения
     await BOT.sendMessage(-1001253575722, logMessage);
   }
 });
@@ -412,11 +411,11 @@ if (TEST_MODE) {
   CRON.schedule('0 22 * * *', tattooReady, {});
   CRON.schedule('0 13 * * *', moscowArrived, {});
   CRON.schedule('0 12 * * *', appartmentRent, {});
-  // CRON.schedule('0 5-23/4 * * *', upHHResume, {});
+  CRON.schedule('0 5-23/4 * * *', upHHResume, {scheduled: false});
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
   CRON.schedule('15 7 17 * *', seventeenthDay, {});
   CRON.schedule('30 7 */3 * *', checkOil, {});
-	CRON.schedule('30 9 * * *', vacationLeft, {});
+  CRON.schedule('30 9 * * *', vacationLeft, {});
 }

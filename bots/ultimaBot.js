@@ -50,7 +50,7 @@ BOT.on('message', async (msg) => {
   logMessage += msg;
   logMessage += DIVIDER16;
 
-  /*BOT.sendMessage(
+  /* BOT.sendMessage(
     CHAT_ID,
     `Привет!
 Рад, что пользуешься моим функционалом!
@@ -73,14 +73,14 @@ BOT.on('message', async (msg) => {
 
 const freeParkingNotify = async () => {
   await BOT.sendMessage(
-    GROUP_ID,
-    `🚙 Напоминание автокурьерам: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
+      GROUP_ID,
+      `🚙 Напоминание автокурьерам: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
 
 <em>(но на всякий случай лучше перепроверять информацию в приложениях или на столбе)</em>`,
-    {
-      disable_notification: true,
-      parse_mode: 'HTML'
-    }
+      {
+        disable_notification: true,
+        parse_mode: 'HTML',
+      },
   );
 };
 

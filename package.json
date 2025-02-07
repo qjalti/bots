@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "lint": "eslint . --fix"
   },
   "author": "NikitaGuriev <stig.guriev@gmail.com>",
   "license": "ISC",
