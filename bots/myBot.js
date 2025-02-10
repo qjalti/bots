@@ -348,7 +348,7 @@ const vacationLeft = async () => {
   const VACATION_DATE = moment([2025, 3, 9, 18, 0]);
 
   const VD_MONTHS = VACATION_DATE.diff(moment(), 'months');
-  VACATION_DATE.add(VD_MONTHS, 'months');
+  VACATION_DATE.subtract(VD_MONTHS, 'months');
 
   const VD_DAYS = VACATION_DATE.diff(moment(), 'days');
 
