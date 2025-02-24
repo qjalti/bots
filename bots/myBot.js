@@ -322,7 +322,7 @@ const checkOil = async () => {
 };
 
 const appartmentRent = async () => {
-  const RENT_DATE = moment([2024, 11, 29, 0, 0]);
+  const RENT_DATE = moment([2025, 1, 22, 10, 0]);
 
   const RD_YEARS = moment().diff(RENT_DATE, 'years');
   RENT_DATE.add(RD_YEARS, 'years');
@@ -422,7 +422,7 @@ if (TEST_MODE) {
   CRON.schedule('45 9 * * *', msgToMom, {});
   CRON.schedule('45 21 * * *', msgToMom, {});
   CRON.schedule('0 11 * * 0', freeParkingSunday, {});
-  CRON.schedule('15 7 17 * *', seventeenthDay, {});
+  CRON.schedule('15 6 17 * *', seventeenthDay, {});
   CRON.schedule('30 7 */3 * *', checkOil, {});
   CRON.schedule('30 9 * * *', vacationLeft, {});
   CRON.schedule('30 14 * * 5', freeGiftCounter, {});
