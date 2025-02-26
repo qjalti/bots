@@ -298,6 +298,29 @@ const moscowArrived = async () => {
     'd');
 };
 
+const workFor = async () => {
+  const WORK_FOR_DATE = moment([2024, 10, 1, 9, 0]);
+
+  const WFD_YEARS = moment().diff(WORK_FOR_DATE, 'years');
+  WORK_FOR_DATE.add(WFD_YEARS, 'years');
+
+  const WFD_MONTHS = moment().diff(WORK_FOR_DATE, 'months');
+  WORK_FOR_DATE.add(WFD_MONTHS, 'months');
+
+  const WFD_DAYS = moment().diff(WORK_FOR_DATE, 'days');
+  WORK_FOR_DATE.add(WFD_DAYS, 'days');
+
+  await BOT.sendMessage(
+      MY_ID,
+      'Работаю в Rodiyar ' +
+    WFD_YEARS +
+    'y, ' +
+    WFD_MONTHS +
+    'mo, ' +
+    WFD_DAYS +
+    'd');
+};
+
 const checkOil = async () => {
   const OIL_CHANGE_DATE = moment([2024, 11, 21, 0, 0]);
 
@@ -426,4 +449,5 @@ if (TEST_MODE) {
   CRON.schedule('30 7 */3 * *', checkOil, {});
   CRON.schedule('30 9 * * *', vacationLeft, {});
   CRON.schedule('30 14 * * 5', freeGiftCounter, {});
+  CRON.schedule('15 9 * * *', workFor, {});
 }
