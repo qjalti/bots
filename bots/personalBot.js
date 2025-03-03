@@ -53,7 +53,6 @@ bot.on('business_message', async (ctx) => {
     const DATA = RESPONSE.data;
 
     if (DATA.success) {
-      console.log(DATA);
       await ctx.telegram.sendMessage(
           chatId,
           `$ ${(DATA.rates.RUB / DATA.rates.USD).toFixed(2)}
