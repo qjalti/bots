@@ -7,3 +7,4 @@ bots/config/default.json
 /data/myBot.json
 voices_temp/
 .env
+package-lock.json
