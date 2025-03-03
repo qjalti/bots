@@ -2,6 +2,9 @@
  * Блок подключения модулей
  */
 import TelegramBot from 'node-telegram-bot-api';
+import {Telegraf} from 'telegraf';
+import {message} from 'telegraf/filters';
+import dotenv from 'dotenv';
 import CRON from 'node-cron';
 import FS from 'fs';
 import PATH from 'path';
@@ -10,23 +13,26 @@ import moment from 'moment';
 import {fileURLToPath} from 'url';
 import {dirname} from 'path';
 
+/**
+ * Settings
+ */
+dotenv.config();
+moment.locale('ru');
 
 /**
- * Блок определения констант
+ * Constants
  */
 const API_URI = 'http://data.fixer.io/api/latest?access_key=e0822236ff493bffebc732cbfc84eb8d&format=1';
 const TEST_MODE = false;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-moment.locale('ru');
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 /**
- * Telegram bot
+ * Telegraf
  */
-const TOKEN = '2095103352:AAGsqtjMG-R9bTuDdgzKsEetMxWslt4xjXw';
-const BOT = new TelegramBot(TOKEN, {polling: true});
 const MY_ID = 738829247;
+let lastMessageData = null;
 
 /**
  * Блок определения функций
@@ -51,25 +57,6 @@ const formatNumber = (number, currency) => {
     style: 'currency',
     currency,
   }).format(number);
-};
-
-/**
- * Отправить сообщение ботом
- * @param {string} botMessage Текст сообщения
- * @param {number|string} sendTo ID адресата
- */
-const botSendMessage = (botMessage, sendTo = MY_ID) => {
-  BOT.sendMessage(sendTo, botMessage, {
-    parse_mode: 'Markdown',
-  })
-      .then(() => false)
-      .catch(() => {
-        BOT.sendMessage(
-            sendTo,
-            `Возникла непредвиденная ошибка. Повторите попытку позже`,
-        )
-            .then(() => false);
-      });
 };
 
 /**
@@ -198,7 +185,9 @@ ${EXCHANGE_RATES.EUR_SIGN} €
 ${formatNumber(EXCHANGE_RATES.USD, 'USD')}
 ${formatNumber(EXCHANGE_RATES.EUR, 'EUR')}
 `;
-  botSendMessage(MESSAGE);
+  bot.telegram.sendMessage(MY_ID, MESSAGE).then((r) => {
+    lastMessageData = r;
+  });
 };
 
 /**
@@ -206,50 +195,69 @@ ${formatNumber(EXCHANGE_RATES.EUR, 'EUR')}
  */
 const sendAlyaMessage = async () => {
   const ALYA_TELEGRAM_ID = 272337232;
-  botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', ALYA_TELEGRAM_ID);
-  botSendMessage('ДЕД, ВЫПЕЙ ТАБЛЕТКИ!', MY_ID);
+  bot.telegram.sendMessage(
+      ALYA_TELEGRAM_ID,
+      'ДЕД, ВЫПЕЙ ТАБЛЕТКИ!',
+  )
+      .then(() => false);
+  bot.telegram.sendMessage(
+      MY_ID,
+      'ДЕД, ВЫПЕЙ ТАБЛЕТКИ!',
+  )
+      .then((r) => {
+        lastMessageData = r;
+      });
 };
 
-const seventeenthDay = async () => {
-  botSendMessage('Передать показания счетчиков', MY_ID);
+const seventeenthDay = () => {
+  bot.telegram.sendMessage(
+      MY_ID,
+      'Передать показания счетчиков',
+  )
+      .then(() => false);
 };
 
-const upHHResume = async () => {
-  await BOT.sendMessage(
+const upHHResume = () => {
+  bot.telegram.sendMessage(
       MY_ID,
       `Поднять резюме на <a href='https://hh.ru/resume/a2f705e1ff09c57c830039ed1f423464753455' target='_blank'>hh</a>`,
       {
         parse_mode: 'HTML',
       },
-  );
+  )
+      .then(() => false);
 };
 
 const msgToMom = async () => {
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
-      `Написать <a href='http://t.me/+79892142176'>маме</a>`,
+      `Написать <a href='https://wa.me/79892142176'>маме</a>`,
       {
         parse_mode: 'HTML',
       },
-  );
+  )
+      .then(() => false);
 };
 
 const freeGiftCounter = async () => {
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'Сброс бесплатного подарка',
-  );
+  )
+      .then(() => false);
 };
 
 const freeParkingSunday = async () => {
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       `🚙 Напоминание: сегодня воскресенье, а значит <a href="https://parking.mos.ru/parking/street/rules/">платная городская парковка (200 руб/час и дешевле)</a> — <strong>БЕСПЛАТНАЯ</strong>
 
-<em>(но на всякий случай лучше перепроверять информацию в приложениях или на столбе)</em>`, {
+<em>(но на всякий случай лучше перепроверять информацию в приложениях или на столбе)</em>`,
+      {
         parse_mode: 'HTML',
       },
-  );
+  )
+      .then(() => false);
 };
 
 const tattooReady = async () => {
@@ -264,15 +272,17 @@ const tattooReady = async () => {
   const TD_DAYS = moment().diff(TATTOO_DATE, 'days');
   TATTOO_DATE.add(TD_DAYS, 'days');
 
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'Тату было сделано ' +
-    TD_YEARS +
-    'y, ' +
-    TD_MONTHS +
-    'mo, ' +
-    TD_DAYS +
-    'd');
+      TD_YEARS +
+      'y, ' +
+      TD_MONTHS +
+      'mo, ' +
+      TD_DAYS +
+      'd',
+  )
+      .then(() => false);
 };
 
 const moscowArrived = async () => {
@@ -287,15 +297,17 @@ const moscowArrived = async () => {
   const AD_DAYS = moment().diff(ARRIVED_DATE, 'days');
   ARRIVED_DATE.add(AD_DAYS, 'days');
 
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'Переехал в Москву ' +
-    AD_YEARS +
-    'y, ' +
-    AD_MONTHS +
-    'mo, ' +
-    AD_DAYS +
-    'd');
+      AD_YEARS +
+      'y, ' +
+      AD_MONTHS +
+      'mo, ' +
+      AD_DAYS +
+      'd',
+  )
+      .then(() => false);
 };
 
 const workFor = async () => {
@@ -310,15 +322,17 @@ const workFor = async () => {
   const WFD_DAYS = moment().diff(WORK_FOR_DATE, 'days');
   WORK_FOR_DATE.add(WFD_DAYS, 'days');
 
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'Работаю в Rodiyar ' +
-    WFD_YEARS +
-    'y, ' +
-    WFD_MONTHS +
-    'mo, ' +
-    WFD_DAYS +
-    'd');
+      WFD_YEARS +
+      'y, ' +
+      WFD_MONTHS +
+      'mo, ' +
+      WFD_DAYS +
+      'd',
+  )
+      .then(() => false);
 };
 
 const checkOil = async () => {
@@ -333,15 +347,17 @@ const checkOil = async () => {
   const OCD_DAYS = moment().diff(OIL_CHANGE_DATE, 'days');
   OIL_CHANGE_DATE.add(OCD_DAYS, 'days');
 
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'Менял масло в машине (56K km) ' +
-    OCD_YEARS +
-    'y, ' +
-    OCD_MONTHS +
-    'mo, ' +
-    OCD_DAYS +
-    'd');
+      OCD_YEARS +
+      'y, ' +
+      OCD_MONTHS +
+      'mo, ' +
+      OCD_DAYS +
+      'd',
+  )
+      .then(() => false);
 };
 
 const appartmentRent = async () => {
@@ -356,15 +372,17 @@ const appartmentRent = async () => {
   const RD_DAYS = moment().diff(RENT_DATE, 'days');
   RENT_DATE.add(RD_DAYS, 'days');
 
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'Арендовал квартиру ' +
-    RD_YEARS +
-    'y, ' +
-    RD_MONTHS +
-    'mo, ' +
-    RD_DAYS +
-    'd');
+      RD_YEARS +
+      'y, ' +
+      RD_MONTHS +
+      'mo, ' +
+      RD_DAYS +
+      'd',
+  )
+      .then(() => false);
 };
 
 const vacationLeft = async () => {
@@ -375,57 +393,53 @@ const vacationLeft = async () => {
 
   const VD_DAYS = VACATION_DATE.diff(moment(), 'days');
 
-  await BOT.sendMessage(
+  bot.telegram.sendMessage(
       MY_ID,
       'До отпуска ' +
-    VD_MONTHS +
-    'mo, ' +
-    VD_DAYS +
-    'd',
-  );
+      VD_MONTHS +
+      'mo, ' +
+      VD_DAYS +
+      'd',
+  )
+      .then(() => false);
 };
+
 
 /**
  * New message event
  */
-BOT.on('message', async (msg) => {
+
+bot.on('message', async (ctx) => {
   const DIVIDER16 = `\n————————————————\n`;
   let logMessage = DIVIDER16;
-  const CHAT_ID = msg.chat.id;
-  const USER_NAME = `${msg.from.first_name ?
-    msg.from.first_name :
-    ' '} ${msg.from.last_name ?
-    msg.from.last_name :
+
+  const MESSAGE_DATA = ctx.update.message;
+  const CHAT_DATA = ctx.update.message.chat;
+  const CHAT_ID = CHAT_DATA.id;
+  const USER_NAME = `${CHAT_DATA.first_name ?
+    CHAT_DATA.first_name :
+    ' '} ${CHAT_DATA.last_name ?
+    CHAT_DATA.last_name :
     ' '}`;
 
-  logMessage += `${USER_NAME}, ${CHAT_ID}, ${msg.from.username}`;
+  logMessage += `${USER_NAME}, ${CHAT_ID}, ${CHAT_DATA.username}`;
   logMessage += DIVIDER16;
-  logMessage += msg.text;
+  logMessage += MESSAGE_DATA.text;
   logMessage += DIVIDER16;
 
-  if (msg.text === '/start') { // Если отправлена команда /start
-    botSendMessage('Бот успешно запущен', CHAT_ID);
-  } else if (msg.text === '/author') { // Если отправлена команда /author
-    BOT.sendMessage(
-        CHAT_ID,
-        `Привет!
+  if (MESSAGE_DATA.text === '/start') {
+    ctx.reply('Бот успешно запущен');
+  } else if (MESSAGE_DATA.text === '/author') {
+    await ctx.reply(`Привет!
 Рад, что пользуешься моим функционалом!
 Большое спасибо тебе!
-Если у тебя есть какие-то вопросы — напиши моему автору:`,
-    ).then(() => {
-      BOT.sendContact(
-          CHAT_ID,
-          '+79883857654',
-          'Никита',
-      ).then(() => false);
-    });
-  } else if (msg.text === '/my_id') { // Если отправлена команда /my_id
-    botSendMessage(`\`${msg.from.id}\``, CHAT_ID);
-  } else if (msg.sticker && msg.from.id === MY_ID) { // Получение ID стикера
-    await BOT.sendMessage(MY_ID, msg.sticker.file_id);
+Если у тебя есть какие-то вопросы — напиши моему автору:`);
+    ctx.sendContact('+79883857654', 'Никита');
+  } else if (MESSAGE_DATA.text === '/my_id') {
+    ctx.reply(`\`${CHAT_ID}\``);
   }
-  if (CHAT_ID !== MY_ID) { // Логгирование сообщения
-    await BOT.sendMessage(-1001253575722, logMessage);
+  if (CHAT_ID !== MY_ID) {
+    await bot.telegram.sendMessage(-1001253575722, logMessage);
   }
 });
 
@@ -435,19 +449,96 @@ if (TEST_MODE) {
   /**
    * Настройка CRON
    */
+
+  /**
+   * ┌────────────── second (optional)
+   * │ ┌──────────── minute
+   * │ │ ┌────────── hour
+   * │ │ │ ┌──────── day of month
+   * │ │ │ │ ┌────── month
+   * │ │ │ │ │ ┌──── day of week (0-6 (SUN-MON))
+   * │ │ │ │ │ │
+   * │ │ │ │ │ │
+   * 0 0 0 0 0 0
+   */
+
+  /**
+   * Every day at 5 AM
+   */
   CRON.schedule('0 5 * * *', collectAndSendData, {});
-  CRON.schedule('0 15 * * *', collectAndSendData, {});
-  CRON.schedule('0 9 * * *', sendAlyaMessage, {});
-  CRON.schedule('0 22 * * *', tattooReady, {});
-  CRON.schedule('0 13 * * *', moscowArrived, {});
-  CRON.schedule('0 12 * * *', appartmentRent, {});
+
+  /**
+   * Every day from 5 AM to 11 PM every 4 hours
+   */
   CRON.schedule('0 5-23/4 * * *', upHHResume, {scheduled: false});
-  CRON.schedule('45 9 * * *', msgToMom, {});
-  CRON.schedule('45 21 * * *', msgToMom, {});
-  CRON.schedule('0 11 * * 0', freeParkingSunday, {});
+
+  /**
+   * On the 20th day of every month at 6:15 AM
+   */
   CRON.schedule('15 6 20 * *', seventeenthDay, {});
+
+  /**
+   * Every 3rd day of the month at 7:30 AM
+   */
   CRON.schedule('30 7 */3 * *', checkOil, {});
-  CRON.schedule('30 9 * * *', vacationLeft, {});
-  CRON.schedule('30 14 * * 5', freeGiftCounter, {});
+
+  /**
+   * Every day at 9 AM
+   */
+  CRON.schedule('0 9 * * *', sendAlyaMessage, {});
+
+  /**
+   * Every day at 9:15 AM
+   */
   CRON.schedule('15 9 * * *', workFor, {});
+
+  /**
+   * Every day at 9:45 AM
+   */
+  CRON.schedule('45 9 * * *', msgToMom, {});
+
+  /**
+   * Every day at 9:30 AM
+   */
+  CRON.schedule('30 9 * * *', vacationLeft, {});
+
+  /**
+   * Every sunday at 11 AM
+   */
+  CRON.schedule('0 11 * * 0', freeParkingSunday, {});
+
+  /**
+   * Every day at 12 PM
+   */
+  CRON.schedule('0 12 * * *', appartmentRent, {});
+
+  /**
+   * Every day at 1 PM
+   */
+  CRON.schedule('0 13 * * *', moscowArrived, {});
+
+  /**
+   * Every friday at 2:30 PM
+   */
+  CRON.schedule('30 14 * * 5', freeGiftCounter, {});
+
+  /**
+   * Every day at 3 PM
+   */
+  CRON.schedule('0 15 * * *', collectAndSendData, {});
+
+  /**
+   * Every day at 9:45 PM
+   */
+  CRON.schedule('45 21 * * *', msgToMom, {});
+
+  /**
+   * Every day at 10 PM
+   */
+  CRON.schedule('0 22 * * *', tattooReady, {});
 }
+
+bot.launch().then(() => false);
+
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
