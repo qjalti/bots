@@ -1,29 +1,75 @@
 import {Telegraf} from 'telegraf';
+import dotenv from 'dotenv';
+import AXIOS from 'axios';
+import moment from 'moment';
 // import {message} from 'telegraf/filters';
 
-const bot = new Telegraf('7848218846:AAENqhrKuVqPC1RRR8B0RO-W2NGb3AUrlFE');
+const API_URI = process.env.CURRENCIES_API;
 
-/* bot.start((ctx) => ctx.reply('Welcome'));
-bot.help((ctx) => ctx.reply('Send me a sticker'));
-bot.on(message('sticker'), (ctx) => ctx.reply('👍'));
-bot.hears('hi', (ctx) => ctx.reply('Hey there'));*/
+moment.locale('ru');
+dotenv.config();
 
-bot.on('business_message', async (context) => {
-  const TEXT = context.update.business_message.text;
-  const USER_ID = context.update.business_message.from.id;
-  if (TEXT === '/my_id') {
-    await context.telegram.sendMessage(
-        context.update.business_message.chat.id,
-        `Ваш ID: <code>${USER_ID}</code>`,
+const bot = new Telegraf(process.env.PERSONAL_BOT_TOKEN);
+
+/**
+ * Обработчик события 'business_message'
+ *
+ * @param {Context} ctx - Контекст сообщения от Telegraf
+ * @param {Object} ctx.update - Объект обновления от Telegram
+ * @param {Object} ctx.update.business_message - Объект бизнес-сообщения
+ * @param {string} ctx.update.business_message.text - Текст сообщения
+ * @param {Object} ctx.update.business_message.from - Информация о отправителе
+ * @param {number} ctx.update.business_message.from.id - ID отправителя
+ * @param {Object} ctx.update.business_message.chat - Информация о чате
+ * @param {number} ctx.update.business_message.chat.id - ID чата
+ * @param {string} ctx.update.business_message.business_connection_id - ID бизнес-соединения
+ * Содержит информацию о сообщении, чате и других данных
+ */
+bot.on('business_message', async (ctx) => {
+  /**
+   * Получаем данные из контекста.
+   */
+  const {text} = ctx.update.business_message;
+  const userId = ctx.update.business_message.from.id;
+  const chatId = ctx.update.business_message.chat.id;
+  const businessConnectionId = ctx.update.business_message.business_connection_id;
+
+  /**
+   * Если текст сообщения равен '/my_id', отправляем ID пользователя.
+   */
+  if (text === '/my_id') {
+    await ctx.telegram.sendMessage(
+        chatId,
+        `Ваш ID: <code>${userId}</code>`,
         {
-          business_connection_id: context.update.business_message.business_connection_id,
+          business_connection_id: businessConnectionId,
           parse_mode: 'HTML',
         },
     );
   }
+  if (text === '/currencies') {
+    const RESPONSE = await AXIOS.get(API_URI);
+
+    const DATA = RESPONSE.data;
+
+    if (DATA.success) {
+      console.log(DATA);
+      await ctx.telegram.sendMessage(
+          chatId,
+          `$ ${(DATA.rates.RUB / DATA.rates.USD).toFixed(2)}
+€ ${(DATA.rates.RUB).toFixed(2)}
+(${moment(DATA.timestamp * 1000).fromNow()})
+          `,
+          {
+            business_connection_id: businessConnectionId,
+            parse_mode: 'HTML',
+          },
+      );
+    }
+  }
 });
 
-bot.launch(() => false);
+bot.launch().then(() => false);
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));

@@ -1,7 +1,6 @@
 /**
  * Блок подключения модулей
  */
-import TelegramBot from 'node-telegram-bot-api';
 import {Telegraf} from 'telegraf';
 import {message} from 'telegraf/filters';
 import dotenv from 'dotenv';
@@ -22,7 +21,7 @@ moment.locale('ru');
 /**
  * Constants
  */
-const API_URI = 'http://data.fixer.io/api/latest?access_key=e0822236ff493bffebc732cbfc84eb8d&format=1';
+const API_URI = process.env.CURRENCIES_API;
 const TEST_MODE = false;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -172,7 +171,7 @@ const getDayPart = () => {
 /**
  * Парсинг значений и отправка сообщения ботом
  */
-const collectAndSendData = async () => {
+const collectAndSendData = async (chatId = MY_ID) => {
   const EXCHANGE_RATES = await parseExchangeRates();
 
   const CURRENT_DAY_PART = getDayPart();
@@ -275,12 +274,12 @@ const tattooReady = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'Тату было сделано ' +
-      TD_YEARS +
-      'y, ' +
-      TD_MONTHS +
-      'mo, ' +
-      TD_DAYS +
-      'd',
+    TD_YEARS +
+    'y, ' +
+    TD_MONTHS +
+    'mo, ' +
+    TD_DAYS +
+    'd',
   )
       .then(() => false);
 };
@@ -300,12 +299,12 @@ const moscowArrived = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'Переехал в Москву ' +
-      AD_YEARS +
-      'y, ' +
-      AD_MONTHS +
-      'mo, ' +
-      AD_DAYS +
-      'd',
+    AD_YEARS +
+    'y, ' +
+    AD_MONTHS +
+    'mo, ' +
+    AD_DAYS +
+    'd',
   )
       .then(() => false);
 };
@@ -325,12 +324,12 @@ const workFor = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'Работаю в Rodiyar ' +
-      WFD_YEARS +
-      'y, ' +
-      WFD_MONTHS +
-      'mo, ' +
-      WFD_DAYS +
-      'd',
+    WFD_YEARS +
+    'y, ' +
+    WFD_MONTHS +
+    'mo, ' +
+    WFD_DAYS +
+    'd',
   )
       .then(() => false);
 };
@@ -350,12 +349,12 @@ const checkOil = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'Менял масло в машине (56K km) ' +
-      OCD_YEARS +
-      'y, ' +
-      OCD_MONTHS +
-      'mo, ' +
-      OCD_DAYS +
-      'd',
+    OCD_YEARS +
+    'y, ' +
+    OCD_MONTHS +
+    'mo, ' +
+    OCD_DAYS +
+    'd',
   )
       .then(() => false);
 };
@@ -375,12 +374,12 @@ const appartmentRent = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'Арендовал квартиру ' +
-      RD_YEARS +
-      'y, ' +
-      RD_MONTHS +
-      'mo, ' +
-      RD_DAYS +
-      'd',
+    RD_YEARS +
+    'y, ' +
+    RD_MONTHS +
+    'mo, ' +
+    RD_DAYS +
+    'd',
   )
       .then(() => false);
 };
@@ -396,10 +395,10 @@ const vacationLeft = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'До отпуска ' +
-      VD_MONTHS +
-      'mo, ' +
-      VD_DAYS +
-      'd',
+    VD_MONTHS +
+    'mo, ' +
+    VD_DAYS +
+    'd',
   )
       .then(() => false);
 };
@@ -408,6 +407,12 @@ const vacationLeft = async () => {
 /**
  * New message event
  */
+
+bot.on(message('sticker'), (ctx) => {
+  ctx.reply('`' + ctx.update.message.sticker.file_id + '`', {
+    parse_mode: 'MarkdownV2',
+  });
+});
 
 bot.on('message', async (ctx) => {
   const DIVIDER16 = `\n————————————————\n`;
@@ -436,7 +441,9 @@ bot.on('message', async (ctx) => {
 Если у тебя есть какие-то вопросы — напиши моему автору:`);
     ctx.sendContact('+79883857654', 'Никита');
   } else if (MESSAGE_DATA.text === '/my_id') {
-    ctx.reply(`\`${CHAT_ID}\``);
+    ctx.reply('`' + CHAT_ID + '`', {
+      parse_mode: 'MarkdownV2',
+    });
   }
   if (CHAT_ID !== MY_ID) {
     await bot.telegram.sendMessage(-1001253575722, logMessage);
