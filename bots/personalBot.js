@@ -58,7 +58,9 @@ bot.on('business_message', async (ctx) => {
           chatId,
           `$ ${(DATA.rates.RUB / DATA.rates.USD).toFixed(2)}
 € ${(DATA.rates.RUB).toFixed(2)}
+
 (${moment(DATA.timestamp * 1000).fromNow()})
+
 (бот @qjalti_personal_bot)`,
           {
             business_connection_id: businessConnectionId,
@@ -71,8 +73,11 @@ bot.on('business_message', async (ctx) => {
     await ctx.telegram.sendMessage(
         chatId,
         `Помощь по командам бота:
-/currencies — получить курс доллара и евро по отношению к рублю
-/my_id — узнать Ваш ID в Telegram
+
+<code>/currencies</code> — получить курс доллара и евро по отношению к рублю
+
+<code>/my_id</code> — узнать Ваш ID в Telegram
+
 (бот @qjalti_personal_bot)`,
         {
           business_connection_id: businessConnectionId,
