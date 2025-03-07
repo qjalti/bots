@@ -233,6 +233,9 @@ const msgToMom = async () => {
       `Написать <a href='https://wa.me/79892142176'>маме</a>`,
       {
         parse_mode: 'HTML',
+        link_preview_options: {
+          is_disabled: true,
+        },
       },
   )
       .then(() => false);

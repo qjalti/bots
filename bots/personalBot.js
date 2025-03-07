@@ -66,6 +66,18 @@ bot.on('business_message', async (ctx) => {
       );
     }
   }
+  if (text === '/help') {
+    await ctx.telegram.sendMessage(
+        chatId,
+        `Помощь по командам бота:
+/currencies — получить курс доллара и евро по отношению к рублю
+/my_id — узнать Ваш ID в Telegram`,
+        {
+          business_connection_id: businessConnectionId,
+          parse_mode: 'HTML',
+        },
+    );
+  }
 });
 
 bot.launch().then(() => false);
