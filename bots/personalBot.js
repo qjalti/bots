@@ -41,7 +41,7 @@ bot.on('business_message', async (ctx) => {
     await ctx.telegram.sendMessage(
         chatId,
         `Ваш ID: <code>${userId}</code>
-(бот @qjalti_personal_bot)`,
+(отправлено ботом)`,
         {
           business_connection_id: businessConnectionId,
           parse_mode: 'HTML',
@@ -61,7 +61,7 @@ bot.on('business_message', async (ctx) => {
 
 (${moment(DATA.timestamp * 1000).fromNow()})
 
-(бот @qjalti_personal_bot)`,
+(отправлено ботом)`,
           {
             business_connection_id: businessConnectionId,
             parse_mode: 'HTML',
@@ -78,7 +78,7 @@ bot.on('business_message', async (ctx) => {
 
 <code>/my_id</code> — узнать Ваш ID в Telegram
 
-(бот @qjalti_personal_bot)`,
+(отправлено ботом)`,
         {
           business_connection_id: businessConnectionId,
           parse_mode: 'HTML',
