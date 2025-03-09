@@ -9,8 +9,8 @@ import * as dotenv from 'dotenv';
  * Боты
  */
 import './bots/myBot.js';
-import './bots/alya_english.js';
-import './bots/vk_mutabor.js';
+// import './bots/alya_english.js';
+// import './bots/vk_mutabor.js';
 import './bots/personalBot.js';
 // import './bots/ultimaBot.js';
 // import './bots/chatgpt.js';
