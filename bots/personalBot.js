@@ -14,15 +14,16 @@ const bot = new Telegraf(process.env.PERSONAL_BOT_TOKEN);
 /**
  * Обработчик события 'business_message'
  *
- * @param {Context} ctx - Контекст сообщения от Telegraf
- * @param {Object} ctx.update - Объект обновления от Telegram
- * @param {Object} ctx.update.business_message - Объект бизнес-сообщения
- * @param {string} ctx.update.business_message.text - Текст сообщения
- * @param {Object} ctx.update.business_message.from - Информация о отправителе
- * @param {number} ctx.update.business_message.from.id - ID отправителя
- * @param {Object} ctx.update.business_message.chat - Информация о чате
- * @param {number} ctx.update.business_message.chat.id - ID чата
- * @param {string} ctx.update.business_message.business_connection_id - ID бизнес-соединения
+ * @param {Context} ctx Контекст сообщения от Telegraf
+ * @param {Object} ctx.update Объект обновления от Telegram
+ * @param {Object} ctx.update.business_message Объект бизнес-сообщения
+ * @param {string} ctx.update.business_message.text Текст сообщения
+ * @param {Object} ctx.update.business_message.from Информация о отправителе
+ * @param {number} ctx.update.business_message.from.id ID отправителя
+ * @param {Object} ctx.update.business_message.chat Информация о чате
+ * @param {number} ctx.update.business_message.chat.id ID чата
+ * @param {string} ctx.update.business_message.business_connection_id ID
+ * бизнес-соединения
  * Содержит информацию о сообщении, чате и других данных
  */
 bot.on('business_message', async (ctx) => {
@@ -32,7 +33,8 @@ bot.on('business_message', async (ctx) => {
   const {text} = ctx.update.business_message;
   const userId = ctx.update.business_message.from.id;
   const chatId = ctx.update.business_message.chat.id;
-  const businessConnectionId = ctx.update.business_message.business_connection_id;
+  const businessConnectionId =
+    ctx.update.business_message.business_connection_id;
 
   /**
    * Если текст сообщения равен '/my_id', отправляем ID пользователя.

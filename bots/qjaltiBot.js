@@ -17,21 +17,42 @@ try {
   console.error('Ошибка при чтении JSON файла:', error);
 }
 
-// Функция поиска по чату
+/**
+ * Выполняет поиск по сообщениям в чате на основе переданного запроса
+ * @param {string} query Строка запроса для поиска в сообщениях
+ * @return {Array<Object>} Массив объектов, представляющих найденные сообщения,
+ * которые содержат совпадающие слова с запросом
+ * @example
+ * searchChat('привет'); // Возвращает массив сообщений,
+ * содержащих слово "привет"
+ */
 function searchChat(query) {
   const tokenizer = new natural.WordTokenizer();
   const queryTokens = tokenizer.tokenize(query.toLowerCase());
 
   // Ищем совпадения в сообщениях
-  const results = messages.filter((msg) => {
+  return messages.filter((msg) => {
     if (!msg.text) return false; // Пропускаем сообщения без текста
     const messageTokens = tokenizer.tokenize(msg.text.toLowerCase());
     // Проверяем, есть ли пересечение токенов
     return queryTokens.some((token) => messageTokens.includes(token));
   });
-
-  return results;
 }
+
+// function searchChat(query) {
+//   const tokenizer = new natural.WordTokenizer();
+//   const queryTokens = tokenizer.tokenize(query.toLowerCase());
+//
+//   // Ищем совпадения в сообщениях
+//   const results = messages.filter((msg) => {
+//     if (!msg.text) return false; // Пропускаем сообщения без текста
+//     const messageTokens = tokenizer.tokenize(msg.text.toLowerCase());
+//     // Проверяем, есть ли пересечение токенов
+//     return queryTokens.some((token) => messageTokens.includes(token));
+//   });
+//
+//   return results;
+// }
 
 // Обработка запросов пользователя
 bot.on('text', async (ctx) => {

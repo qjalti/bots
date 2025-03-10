@@ -1,7 +1,17 @@
 import moment from 'moment';
 import {TONESSI_PILLS_END} from './constants.js';
 
+/**
+ * Класс для управления расписанием приема таблеток по методу Тонесси
+ */
 class TonessiPills {
+  /**
+   * Парсит список таблеток и формирует расписание их приема в зависимости
+   * от текущей даты и времени
+   * @return {string|boolean} - Возвращает строку с описанием таблеток,
+   * которые нужно принять в данный момент, или `false`,
+   * если на текущий момент нет назначений
+   */
   parsePillsList() {
     this.ecoclav = 10;
     this.ketoprofen = 5;

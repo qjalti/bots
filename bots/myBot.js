@@ -31,7 +31,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
  * Telegraf
  */
 const MY_ID = 738829247;
-let lastMessageData = null;
+// let lastMessageData = null;
 
 /**
  * Блок определения функций
@@ -169,7 +169,14 @@ const getDayPart = () => {
 };
 
 /**
- * Парсинг значений и отправка сообщения ботом
+ * Парсит значения курсов валют и отправляет сообщение ботом.
+ * @param {number} [chatId=MY_ID] Идентификатор чата,
+ * куда будет отправлено сообщение.
+ * По умолчанию используется значение MY_ID.
+ * @return {Promise<void>} Функция не возвращает значений напрямую,
+ * но выполняет асинхронные операции.
+ * @throws {Error} Если произойдет ошибка при парсинге курсов валют
+ * или отправке сообщения.
  */
 const collectAndSendData = async (chatId = MY_ID) => {
   const EXCHANGE_RATES = await parseExchangeRates();
@@ -184,9 +191,7 @@ ${EXCHANGE_RATES.EUR_SIGN} €
 ${formatNumber(EXCHANGE_RATES.USD, 'USD')}
 ${formatNumber(EXCHANGE_RATES.EUR, 'EUR')}
 `;
-  bot.telegram.sendMessage(MY_ID, MESSAGE).then((r) => {
-    lastMessageData = r;
-  });
+  bot.telegram.sendMessage(MY_ID, MESSAGE).then(() => false);
 };
 
 /**
@@ -203,9 +208,7 @@ const sendAlyaMessage = async () => {
       MY_ID,
       'ДЕД, ВЫПЕЙ ТАБЛЕТКИ!',
   )
-      .then((r) => {
-        lastMessageData = r;
-      });
+      .then(() => false);
 };
 
 const seventeenthDay = () => {

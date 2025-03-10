@@ -12,11 +12,24 @@ import {ERROR_MESSAGE} from './constants.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Класс для конвертации аудио файлов из формата OGG в MP3
+ */
 class OggConverter {
+  /**
+   * Инициализирует конвертер и устанавливает путь к FFMPEG
+   */
   constructor() {
     ffmpeg.setFfmpegPath(installer.path);
   }
 
+  /**
+   * Конвертирует OGG файл в MP3
+   * @param {string} input - Путь к входному файлу в формате OGG
+   * @param {string} output - Имя выходного файла без расширения
+   * @return {Promise<string>} - Возвращает путь к созданному MP3 файлу
+   * @throws {Error} - Если произошла ошибка во время конвертации
+   */
   toMP3(input, output) {
     try {
       const OUTPUT_PATH = resolve(dirname(input), `${output}.mp3`);
@@ -40,6 +53,13 @@ class OggConverter {
     }
   }
 
+  /**
+   * Создает временный OGG файл из указанного URL
+   * @param {string} url - URL-адрес для скачивания аудио файла
+   * @param {string} filename - Имя файла без расширения
+   * @return {Promise<string>} - Возвращает путь к созданному OGG файлу
+   * @throws {Error} - Если произошла ошибка при создании файла
+   */
   async create(url, filename) {
     try {
       const OGGPath = resolve(

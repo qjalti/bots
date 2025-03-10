@@ -20,6 +20,15 @@ try {
   console.error('Ошибка при чтении JSON файла:', error);
 }
 
+/**
+ * Разбивает текст на массив сообщений с максимальной длиной каждого сообщения
+ *
+ * @param {string} text Исходный текст, который нужно разбить
+ * @return {string[]} Массив строк, где каждая строка имеет длину не более
+ * MAX_MESSAGE_LENGTH
+ * @example
+ * splitMessage('abcdefghij', 5); // ['abcde', 'fghij']
+ */
 function splitMessage(text) {
   const messages = [];
   while (text.length > 0) {
@@ -29,12 +38,21 @@ function splitMessage(text) {
   return messages;
 }
 
-// Функция для замены 'ё' на 'е'
+/**
+ * Заменяет все символы 'ё' на 'е' в тексте
+ * @param {string} text - Исходный текст для обработки
+ * @return {string} - Текст, в котором все 'ё' заменены на 'е'
+ */
 function sanitizeText(text) {
   return text.replace(/ё/g, 'е'); // Заменяет 'ё' на 'е'
 }
 
-// Функция для очистки HTML-тегов
+/**
+ * Очищает HTML-теги из текста, оставляя только разрешенные теги
+ * (<strong>, <em>, <b>, <i>)
+ * @param {string} text - Исходный текст с HTML-тегами
+ * @return {string} - Текст без неразрешенных HTML-тегов
+ */
 function sanitizeHtml(text) {
   // Преобразуем все <strong> в правильный формат
   return text.replace(/<[^>]*>/g, (match) => {
@@ -47,6 +65,15 @@ function sanitizeHtml(text) {
   });
 }
 
+/**
+ * Отправляет сообщение через бота, разбивая его на части при необходимости
+ * @param {Object} bot - Экземпляр бота с методом telegram.sendMessage
+ * @param {number|string} chatId - Идентификатор чата,
+ * куда отправляется сообщение
+ * @param {string} text - Текст сообщения для отправки
+ * @return {Promise<void>} - Функция не возвращает значений напрямую,
+ * но выполняет асинхронные операции
+ */
 async function sendMessage(bot, chatId, text) {
   const sanitizedText = sanitizeText(text); // Очистка текста перед отправкой
   const cleanText = sanitizeHtml(sanitizedText); // Очистка HTML перед отправкой
@@ -66,23 +93,31 @@ async function sendMessage(bot, chatId, text) {
   }
 }
 
-// Функция поиска по чату
+/**
+ * Выполняет поиск по сообщениям в чате на основе переданного запроса
+ * @param {string} query Строка запроса для поиска в сообщениях
+ * @return {Array<Object>} Массив объектов, представляющих найденные сообщения,
+ * которые содержат совпадающие слова с запросом
+ */
 function searchChat(query) {
   const tokenizer = new natural.WordTokenizer();
   const queryTokens = tokenizer.tokenize(query.toLowerCase());
 
   // Ищем совпадения в сообщениях
-  const results = messages.filter((msg) => {
-    if (!msg.text || typeof msg.text !== 'string') return false; // Пропускаем сообщения без текста
+  return messages.filter((msg) => {
+    if (!msg.text || typeof msg.text !== 'string') return false;
     const messageTokens = tokenizer.tokenize(msg.text.toLowerCase());
     // Проверяем, есть ли пересечение токенов
     return queryTokens.some((token) => messageTokens.includes(token));
   });
-
-  return results;
 }
 
-// Обработка запросов пользователя
+/**
+ * Обрабатывает текстовые сообщения от пользователя,
+ * выполняя поиск и отправку результатов
+ * @param {Object} ctx Контекст сообщения,
+ * содержащий информацию о чате и пользователе
+ */
 bot.on('text', async (ctx) => {
   const query = ctx.message.text;
 
@@ -111,7 +146,8 @@ bot.on('text', async (ctx) => {
           'ru-RU', options,
       ).format(date);
 
-      response += `————————————————\n<strong>${formattedDateTime}</strong>\n<strong>${msg.from}</strong>:\n${msg.text}\n`;
+      response +=
+        `————————————————\n<strong>${formattedDateTime}</strong>\n<strong>${msg.from}</strong>:\n${msg.text}\n`;
     });
     response += `————————————————`;
     // Отправляем найденные сообщения

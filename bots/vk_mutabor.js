@@ -14,9 +14,9 @@ MOMENT.locale('ru');
 /**
  * Блок определения констант
  */
-const PROD_CHAT_ID = 2000000004;
+// const PROD_CHAT_ID = 2000000004;
 const DEV_CHAT_ID = 2000000003;
-const TOKEN = 'vk1.a.W_e_xqnrJwDg-DYFxA9Gbmgbn-diyaYyEuL8I0dITwPGnKaTYrSFdW46e0CgQA_LPeuFAsoASp5RRaKkAGtWLwve3X3Pvdd3dWqGTDsdP0AEIs4u4L7sx6te-WCg2Len0ywK-zRBNWHPTGsSojFTPhs52BB1ghOMG11tcRqKeNchXugQuHu_mnVJrjFW2z-eqkiTgfja-KftVwmQsQDSfw';
+// const TOKEN = 'vk1.a.W_e_xqnrJwDg-DYFxA9Gbmgbn-diyaYyEuL8I0dITwPGnKaTYrSFdW46e0CgQA_LPeuFAsoASp5RRaKkAGtWLwve3X3Pvdd3dWqGTDsdP0AEIs4u4L7sx6te-WCg2Len0ywK-zRBNWHPTGsSojFTPhs52BB1ghOMG11tcRqKeNchXugQuHu_mnVJrjFW2z-eqkiTgfja-KftVwmQsQDSfw';
 const CHAT_ID = DEV_CHAT_ID;
 const TRIGGER_TEXT = '[club210382674|@mutabor_action]';
 const DEV_MODE = true;
@@ -94,7 +94,12 @@ const parseYearText = (years) => {
 };
 
 /**
- * Отправвить информационное сообщение (о доступных функциях бота)
+ * Отправляет информационное сообщение с доступными функциями бота
+ * @param {Object} ctx - Контекст сообщения, содержащий информацию о
+ * пользователе и чате
+ * Включает данные о peer_id для отправки ответного сообщения
+ * @return {Promise<void>} - Функция не возвращает значений напрямую,
+ * но выполняет асинхронные операции
  */
 const sendInfoMessage = async (ctx) => {
   const REPLY_TO_ID = ctx.message.peer_id;
@@ -135,9 +140,9 @@ const sendInfoMessage = async (ctx) => {
  * Отправить "сколько времени знакомы"
  */
 const sendMeetTime = async () => {
-  const CURRENT_DATE = MOMENT();
+  const CURRENT_DATE = moment();
   const MUTABOR_FRIENDS = [2021, 1, 14, 15, 0];
-  const MUTABOR_FRIENDS_DATE = MOMENT(MUTABOR_FRIENDS);
+  const MUTABOR_FRIENDS_DATE = moment(MUTABOR_FRIENDS);
   const YEARS_MF = CURRENT_DATE.diff(MUTABOR_FRIENDS_DATE, 'years');
   MUTABOR_FRIENDS_DATE.add(YEARS_MF, 'years');
   const MONTHS_MF = CURRENT_DATE.diff(MUTABOR_FRIENDS_DATE, 'months');
@@ -149,7 +154,7 @@ const sendMeetTime = async () => {
   const MINUTES_MF = CURRENT_DATE.diff(MUTABOR_FRIENDS_DATE, 'minutes');
   MUTABOR_FRIENDS_DATE.add(MINUTES_MF, 'minutes');
 
-  return `Знакомы ${parseYearText(YEARS_MF)}, ${MONTHS_MF} мес, ${DAYS_MF} д, ${HOURS_MF} ч, ${MINUTES_MF} мин, (с ${MOMENT(MUTABOR_FRIENDS).format('Do MMMM YYYY, kk:mm:ss')})`;
+  return `Знакомы ${parseYearText(YEARS_MF)}, ${MONTHS_MF} мес, ${DAYS_MF} д, ${HOURS_MF} ч, ${MINUTES_MF} мин, (с ${moment(MUTABOR_FRIENDS).format('Do MMMM YYYY, kk:mm:ss')})`;
 };
 
 /**

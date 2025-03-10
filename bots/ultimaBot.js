@@ -3,20 +3,20 @@
  */
 import TelegramBot from 'node-telegram-bot-api';
 import CRON from 'node-cron';
-import FS from 'fs';
-import PATH from 'path';
-import AXIOS from 'axios';
+// import FS from 'fs';
+// import PATH from 'path';
+// import AXIOS from 'axios';
 import moment from 'moment';
-import {fileURLToPath} from 'url';
-import {dirname} from 'path';
+// import {fileURLToPath} from 'url';
+// import {dirname} from 'path';
 
 
 /**
  * Блок определения констант
  */
-const TEST_MODE = false;
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// const TEST_MODE = false;
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = dirname(__filename);
 
 moment.locale('ru');
 
@@ -25,7 +25,7 @@ moment.locale('ru');
  */
 const TOKEN = '7230407089:AAEItWerSIi0tQh2NPEDXsChmMz8WLxP74s';
 const BOT = new TelegramBot(TOKEN, {polling: true});
-const SEND_TO = 738829247;
+// const SEND_TO = 738829247;
 const LOG_GROUP_ID = -1001253575722;
 const GROUP_ID = -1002147555826;
 

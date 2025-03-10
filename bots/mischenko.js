@@ -55,20 +55,25 @@
 //
 // if (!INLINE_FORMAT) {
 //   BOT.on('message', (msg) => {
-//     if (msg.text === 'Пятигорск' || msg.text === 'Ессентуки' || msg.text === 'Ростов-на-Дону') {
-//       const OPTIONS = {
-//         reply_markup: JSON.stringify({
-//             remove_keyboard: true,
-//           },
-//         )
-//       };
-//       BOT.sendMessage(
-//         msg.chat.id,
-//         `Вы выбрали город ${msg.text}. Пожалуйста, ожидайте, оператор скоро Вам ответит`,
-//         OPTIONS
-//       );
-//     }
-//   });
+// if (
+//   msg.text === 'Пятигорск' ||
+//       msg.text === 'Ессентуки' ||
+//       msg.text === 'Ростов-на-Дону'
+// ) {
+//   const OPTIONS = {
+//     reply_markup: JSON.stringify({
+//       remove_keyboard: true,
+//     },
+//     ),
+//   };
+//   BOT.sendMessage(
+//       msg.chat.id,
+//       `Вы выбрали город ${msg.text}.
+// Пожалуйста, ожидайте, оператор скоро Вам ответит`,
+//       OPTIONS,
+//   );
+// }
+// });
 // }
 //
 // BOT.on('callback_query', (callbackQuery) => {
