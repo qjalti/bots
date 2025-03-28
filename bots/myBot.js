@@ -483,7 +483,9 @@ if (TEST_MODE) {
   /**
    * Every day from 5 AM to 11 PM every 4 hours
    */
-  CRON.schedule('0 5-23/4 * * *', upHHResume, {scheduled: false});
+  CRON.schedule('0 5-23/4 * * *', upHHResume, {
+    scheduled: false,
+  });
 
   /**
    * On the 20th day of every month at 6:15 AM
@@ -498,7 +500,9 @@ if (TEST_MODE) {
   /**
    * Every day at 9 AM
    */
-  CRON.schedule('0 9 * * *', sendAlyaMessage, {});
+  CRON.schedule('0 9 * * *', sendAlyaMessage, {
+    scheduled: false,
+  });
 
   /**
    * Every day at 9:15 AM
