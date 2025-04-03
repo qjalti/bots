@@ -390,6 +390,32 @@ const appartmentRent = async () => {
       .then(() => false);
 };
 
+const sendTemperatureData = async () => {
+  const LA = '55.80852';
+  const LO = '37.70758';
+
+  const ROOM_TEMPERATURE_QUERY = await AXIOS.post(
+      'https://qjalti.ru/api/arduino/select',
+  );
+
+  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
+      `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
+  );
+
+  const ROOM_TEMPERATURE = ROOM_TEMPERATURE_QUERY.data.data[0].temperature;
+  const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY.data.
+      current.temperature_2m +
+    OUTDOOR_TEMPERATURE_QUERY.data.
+        current_units.temperature_2m;
+
+  await bot.telegram.sendMessage(
+      MY_ID,
+      `${ROOM_TEMPERATURE}°C (room)
+
+${OUTDOOR_TEMPERATURE} (outdoor)`,
+  );
+};
+
 const vacationLeft = async () => {
   const VACATION_DATE = moment([2025, 3, 9, 18, 0]);
 
@@ -479,6 +505,11 @@ if (TEST_MODE) {
    * Every day at 5 AM
    */
   CRON.schedule('0 5 * * *', collectAndSendData, {});
+
+  /**
+   * Every day from 5 AM to 11 PM every 4 hours
+   */
+  CRON.schedule('0 5/2 * * *', sendTemperatureData, {});
 
   /**
    * Every day from 5 AM to 11 PM every 4 hours
