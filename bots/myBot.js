@@ -509,7 +509,7 @@ if (TEST_MODE) {
   /**
    * Every day from 5 AM to 11 PM every 4 hours
    */
-  CRON.schedule('0 5/2 * * *', sendTemperatureData, {});
+  CRON.schedule('0 5-23/2 * * *', sendTemperatureData, {});
 
   /**
    * Every day from 5 AM to 11 PM every 4 hours
