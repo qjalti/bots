@@ -548,7 +548,9 @@ if (TEST_MODE) {
   /**
    * Every day at 9:30 AM
    */
-  CRON.schedule('30 9 * * *', vacationLeft, {});
+  CRON.schedule('30 9 * * *', vacationLeft, {
+    scheduled: false,
+  });
 
   /**
    * Every sunday at 11 AM
