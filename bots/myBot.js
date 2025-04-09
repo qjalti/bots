@@ -532,7 +532,7 @@ if (TEST_MODE) {
    * Every day at 9 AM
    */
   CRON.schedule('0 9 * * *', sendAlyaMessage, {
-    scheduled: false,
+    scheduled: true,
   });
 
   /**
