@@ -340,6 +340,31 @@ const workFor = async () => {
       .then(() => false);
 };
 
+const lilacAge = async () => {
+  const WORK_FOR_DATE = moment([2023, 2, 19, 15, 0]);
+
+  const WFD_YEARS = moment().diff(WORK_FOR_DATE, 'years');
+  WORK_FOR_DATE.add(WFD_YEARS, 'years');
+
+  const WFD_MONTHS = moment().diff(WORK_FOR_DATE, 'months');
+  WORK_FOR_DATE.add(WFD_MONTHS, 'months');
+
+  const WFD_DAYS = moment().diff(WORK_FOR_DATE, 'days');
+  WORK_FOR_DATE.add(WFD_DAYS, 'days');
+
+  bot.telegram.sendMessage(
+      MY_ID,
+      'Возраст сирени ' +
+      WFD_YEARS +
+      'y, ' +
+      WFD_MONTHS +
+      'mo, ' +
+      WFD_DAYS +
+      'd',
+  )
+      .then(() => false);
+};
+
 const checkOil = async () => {
   const OIL_CHANGE_DATE = moment([2024, 11, 21, 0, 0]);
 
@@ -576,6 +601,12 @@ if (TEST_MODE) {
    * Every day at 3 PM
    */
   CRON.schedule('0 15 * * *', collectAndSendData, {});
+
+
+  /**
+   * Every day at 9:15 PM
+   */
+  CRON.schedule('15 21 * * *', lilacAge, {});
 
   /**
    * Every day at 9:45 PM
