@@ -354,12 +354,12 @@ const lilacAge = async () => {
   bot.telegram.sendMessage(
       MY_ID,
       'Возраст сирени ' +
-      WFD_YEARS +
-      'y, ' +
-      WFD_MONTHS +
-      'mo, ' +
-      WFD_DAYS +
-      'd',
+    WFD_YEARS +
+    'y, ' +
+    WFD_MONTHS +
+    'mo, ' +
+    WFD_DAYS +
+    'd',
   )
       .then(() => false);
 };
