@@ -504,8 +504,6 @@ bot.on('message', async (ctx) => {
   }
 });
 
-collectAndSendData().then(() => false);
-
 /**
  * Настройка CRON
  */
