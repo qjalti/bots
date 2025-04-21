@@ -22,7 +22,6 @@ moment.locale('ru');
  * Constants
  */
 const API_URI = process.env.CURRENCIES_API;
-const TEST_MODE = false;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -428,10 +427,8 @@ const sendTemperatureData = async () => {
   );
 
   const ROOM_TEMPERATURE = ROOM_TEMPERATURE_QUERY.data.data[0].temperature;
-  const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY.data.
-      current.temperature_2m +
-    OUTDOOR_TEMPERATURE_QUERY.data.
-        current_units.temperature_2m;
+  const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY.data.current.temperature_2m +
+    OUTDOOR_TEMPERATURE_QUERY.data.current_units.temperature_2m;
 
   await bot.telegram.sendMessage(
       MY_ID,
@@ -507,117 +504,115 @@ bot.on('message', async (ctx) => {
   }
 });
 
-if (TEST_MODE) {
-  collectAndSendData().then(() => false);
-} else {
-  /**
-   * Настройка CRON
-   */
+collectAndSendData().then(() => false);
 
-  /**
-   * ┌────────────── second (optional)
-   * │ ┌──────────── minute
-   * │ │ ┌────────── hour
-   * │ │ │ ┌──────── day of month
-   * │ │ │ │ ┌────── month
-   * │ │ │ │ │ ┌──── day of week (0-6 (SUN-MON))
-   * │ │ │ │ │ │
-   * │ │ │ │ │ │
-   * 0 0 0 0 0 0
-   */
+/**
+ * Настройка CRON
+ */
 
-  /**
-   * Every day at 5 AM
-   */
-  CRON.schedule('0 5 * * *', collectAndSendData, {});
+/**
+ * ┌────────────── second (optional)
+ * │ ┌──────────── minute
+ * │ │ ┌────────── hour
+ * │ │ │ ┌──────── day of month
+ * │ │ │ │ ┌────── month
+ * │ │ │ │ │ ┌──── day of week (0-6 (SUN-MON))
+ * │ │ │ │ │ │
+ * │ │ │ │ │ │
+ * 0 0 0 0 0 0
+ */
 
-  /**
-   * Every day from 5 AM to 11 PM every 4 hours
-   */
-  CRON.schedule('0 5-23/2 * * *', sendTemperatureData, {});
+/**
+ * Every day at 5 AM
+ */
+CRON.schedule('0 5 * * *', collectAndSendData, {});
 
-  /**
-   * Every day from 5 AM to 11 PM every 4 hours
-   */
-  CRON.schedule('0 5-23/4 * * *', upHHResume, {
-    scheduled: false,
-  });
+/**
+ * Every day from 5 AM to 11 PM every 4 hours
+ */
+CRON.schedule('0 5-23/2 * * *', sendTemperatureData, {});
 
-  /**
-   * On the 20th day of every month at 6:15 AM
-   */
-  CRON.schedule('15 6 20 * *', seventeenthDay, {});
+/**
+ * Every day from 5 AM to 11 PM every 4 hours
+ */
+CRON.schedule('0 5-23/4 * * *', upHHResume, {
+  scheduled: false,
+});
 
-  /**
-   * Every 3rd day of the month at 7:30 AM
-   */
-  CRON.schedule('30 7 */3 * *', checkOil, {});
+/**
+ * On the 20th day of every month at 6:15 AM
+ */
+CRON.schedule('15 6 20 * *', seventeenthDay, {});
 
-  /**
-   * Every day at 9 AM
-   */
-  CRON.schedule('0 9 * * *', sendAlyaMessage, {
-    scheduled: true,
-  });
+/**
+ * Every 3rd day of the month at 7:30 AM
+ */
+CRON.schedule('30 7 */3 * *', checkOil, {});
 
-  /**
-   * Every day at 9:15 AM
-   */
-  CRON.schedule('15 9 * * *', workFor, {});
+/**
+ * Every day at 9 AM
+ */
+CRON.schedule('0 9 * * *', sendAlyaMessage, {
+  scheduled: true,
+});
 
-  /**
-   * Every day at 9:45 AM
-   */
-  CRON.schedule('45 9 * * *', msgToMom, {});
+/**
+ * Every day at 9:15 AM
+ */
+CRON.schedule('15 9 * * *', workFor, {});
 
-  /**
-   * Every day at 9:30 AM
-   */
-  CRON.schedule('30 9 * * *', vacationLeft, {
-    scheduled: false,
-  });
+/**
+ * Every day at 9:45 AM
+ */
+CRON.schedule('45 9 * * *', msgToMom, {});
 
-  /**
-   * Every sunday at 11 AM
-   */
-  CRON.schedule('0 11 * * 0', freeParkingSunday, {});
+/**
+ * Every day at 9:30 AM
+ */
+CRON.schedule('30 9 * * *', vacationLeft, {
+  scheduled: false,
+});
 
-  /**
-   * Every day at 12 PM
-   */
-  CRON.schedule('0 12 * * *', appartmentRent, {});
+/**
+ * Every sunday at 11 AM
+ */
+CRON.schedule('0 11 * * 0', freeParkingSunday, {});
 
-  /**
-   * Every day at 1 PM
-   */
-  CRON.schedule('0 13 * * *', moscowArrived, {});
+/**
+ * Every day at 12 PM
+ */
+CRON.schedule('0 12 * * *', appartmentRent, {});
 
-  /**
-   * Every friday at 2:30 PM
-   */
-  CRON.schedule('30 14 * * 5', freeGiftCounter, {});
+/**
+ * Every day at 1 PM
+ */
+CRON.schedule('0 13 * * *', moscowArrived, {});
 
-  /**
-   * Every day at 3 PM
-   */
-  CRON.schedule('0 15 * * *', collectAndSendData, {});
+/**
+ * Every friday at 2:30 PM
+ */
+CRON.schedule('30 14 * * 5', freeGiftCounter, {});
+
+/**
+ * Every day at 3 PM
+ */
+CRON.schedule('0 15 * * *', collectAndSendData, {});
 
 
-  /**
-   * Every day at 9:15 PM
-   */
-  CRON.schedule('15 21 * * *', lilacAge, {});
+/**
+ * Every day at 9:15 PM
+ */
+CRON.schedule('15 21 * * *', lilacAge, {});
 
-  /**
-   * Every day at 9:45 PM
-   */
-  CRON.schedule('45 21 * * *', msgToMom, {});
+/**
+ * Every day at 9:45 PM
+ */
+CRON.schedule('45 21 * * *', msgToMom, {});
 
-  /**
-   * Every day at 10 PM
-   */
-  CRON.schedule('0 22 * * *', tattooReady, {});
-}
+/**
+ * Every day at 10 PM
+ */
+CRON.schedule('0 22 * * *', tattooReady, {});
 
 bot.launch().then(() => false);
 
