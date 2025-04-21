@@ -96,9 +96,9 @@ const parseExchangeRates = () => {
          */
           const OLD_DATA = await readOldData();
 
-          if (DATA.success) {
-            EUR_RUB = DATA.rates.RUB;
-            USD_RUB = DATA.rates.RUB / DATA.rates.USD;
+          if (DATA.result === 'success') {
+            EUR_RUB = DATA.conversion_rates.RUB / DATA.conversion_rates.EUR;
+            USD_RUB = DATA.conversion_rates.RUB / DATA.conversion_rates.USD;
           } else {
             EUR_RUB = OLD_DATA.EUR;
             USD_RUB = OLD_DATA.USD;
@@ -136,7 +136,7 @@ const parseExchangeRates = () => {
             EUR_DIFF,
             USD_DIFF,
             SWING_PRICE: OLD_DATA.SWING_PRICE,
-            QUERIES_LIMIT: DATA.success,
+            QUERIES_LIMIT: DATA.result === 'success',
             USD_SIGN: USD_SIGN,
             EUR_SIGN: EUR_SIGN,
           };
