@@ -596,6 +596,10 @@ CRON.schedule('30 14 * * 5', freeGiftCounter, {});
  */
 CRON.schedule('0 15 * * *', collectAndSendData, {});
 
+/**
+ * Every day at 9 PM
+ */
+CRON.schedule('0 21 * * *', collectAndSendData, {});
 
 /**
  * Every day at 9:15 PM
