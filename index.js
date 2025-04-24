@@ -16,6 +16,7 @@ import './bots/personalBot.js';
 // import './bots/chatgpt.js';
 // import './bots/tonessiBot.js';
 // import './bots/tonessiNotifier.js';
+import './bots/vTv.js';
 
 /**
  * Блок определения констант
