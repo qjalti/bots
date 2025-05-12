@@ -46,8 +46,8 @@ bot.on('video', async (ctx) => {
       ffmpeg(videoFilePath)
           .noVideo() // Отключаем видео
           .audioCodec('libopus') // Устанавливаем кодек Opus
-          .audioBitrate('32k') // Устанавливаем битрейт
-          .audioFrequency(16000) // Устанавливаем частоту дискретизации
+          .audioBitrate('64k') // Устанавливаем битрейт
+          .audioFrequency(48000) // Устанавливаем частоту дискретизации
           .save(audioFilePath) // Сохраняем как OGG
           .on('end', resolve)
           .on('error', (err) => reject(err));
