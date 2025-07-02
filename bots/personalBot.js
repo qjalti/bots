@@ -74,8 +74,8 @@ bot.on('business_message', async (ctx) => {
     if (DATA.success) {
       await ctx.telegram.sendMessage(
           chatId,
-          `$ ${(DATA.rates.RUB / DATA.rates.USD).toFixed(2)}
-€ ${(DATA.rates.RUB).toFixed(2)}
+          `$ ${(DATA.conversion_rates.RUB / DATA.conversion_rates.EUR).toFixed(2)}
+€ ${(DATA.conversion_rates.RUB / DATA.conversion_rates.USD).toFixed(2)}
 
 (${moment(DATA.timestamp * 1000).fromNow()})
 
