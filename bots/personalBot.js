@@ -5,6 +5,8 @@ import moment from 'moment';
 // import {message} from 'telegraf/filters';
 
 const API_URI = process.env.CURRENCIES_API;
+const ALYA_ID = 272337232;
+const TESTER_ID = 2133256301;
 
 moment.locale('ru');
 dotenv.config();
@@ -35,6 +37,20 @@ bot.on('business_message', async (ctx) => {
   const chatId = ctx.update.business_message.chat.id;
   const businessConnectionId =
     ctx.update.business_message.business_connection_id;
+
+  if (
+    userId === ALYA_ID ||
+    userId === TESTER_ID
+  ) {
+    await ctx.telegram.sendMessage(
+        chatId,
+        `<code>qjalti's on sabbatical, honey</code>`,
+        {
+          business_connection_id: businessConnectionId,
+          parse_mode: 'HTML',
+        },
+    );
+  }
 
   /**
    * Если текст сообщения равен '/my_id', отправляем ID пользователя.
