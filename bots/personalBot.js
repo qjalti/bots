@@ -38,20 +38,6 @@ bot.on('business_message', async (ctx) => {
   const businessConnectionId =
     ctx.update.business_message.business_connection_id;
 
-  if (
-    userId === ALYA_ID ||
-    userId === TESTER_ID
-  ) {
-    await ctx.telegram.sendMessage(
-        chatId,
-        `<code>qjalti's on sabbatical, honey</code>`,
-        {
-          business_connection_id: businessConnectionId,
-          parse_mode: 'HTML',
-        },
-    );
-  }
-
   /**
    * Если текст сообщения равен '/my_id', отправляем ID пользователя.
    */
