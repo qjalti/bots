@@ -57,13 +57,13 @@ bot.on('business_message', async (ctx) => {
 
     const DATA = RESPONSE.data;
 
-    if (DATA.success) {
+    if (DATA.result === 'success') {
       await ctx.telegram.sendMessage(
           chatId,
           `$ ${(DATA.conversion_rates.RUB / DATA.conversion_rates.EUR).toFixed(2)}
 € ${(DATA.conversion_rates.RUB / DATA.conversion_rates.USD).toFixed(2)}
 
-(${moment(DATA.timestamp * 1000).fromNow()})
+(${moment(DATA.time_last_update_unix * 1000).fromNow()})
 
 (отправлено ботом)`,
           {
