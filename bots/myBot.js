@@ -429,15 +429,16 @@ const sendTemperatureAndSunRiseData = async () => {
   const SUNRISE_SUNSET_QUERY = await AXIOS.get(
       `https://api.sunrise-sunset.org/json?lat=${LA}&lng=${LO}&date=today&formatted=0&tzid=Europe/Moscow`,
   );
+
   const SUNRISE_TIME = new Date(
-      SUNRISE_SUNSET_QUERY.results.sunrise,
+      SUNRISE_SUNSET_QUERY.data.results.sunrise,
   )
       .toLocaleString('ru-RU', {
         hour: 'numeric',
         minute: 'numeric',
       });
   const SUNSET_TIME = new Date(
-      SUNRISE_SUNSET_QUERY.results.sunset,
+      SUNRISE_SUNSET_QUERY.data.results.sunset,
   )
       .toLocaleString('ru-RU', {
         hour: 'numeric',
@@ -549,7 +550,7 @@ CRON.schedule('0 5 * * *', collectAndSendData, {});
  * Every day from 5 AM to 11 PM every 4 hours
  */
 CRON.schedule('0 5-23/1 * * *', sendTemperatureAndSunRiseData, {});
-
+sendTemperatureAndSunRiseData();
 /**
  * Every day from 5 AM to 11 PM every 4 hours
  */
