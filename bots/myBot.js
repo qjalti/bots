@@ -414,7 +414,7 @@ const appartmentRent = async () => {
       .then(() => false);
 };
 
-const sendTemperatureData = async () => {
+const sendTemperatureAndSunRiseData = async () => {
   const LA = '55.80852';
   const LO = '37.70758';
 
@@ -426,20 +426,40 @@ const sendTemperatureData = async () => {
       `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
   );
 
+  const SUNRISE_SUNSET_QUERY = await AXIOS.get(
+      `https://api.sunrise-sunset.org/json?lat=${LA}&lng=${LO}&date=today&formatted=0&tzid=Europe/Moscow`,
+  );
+  const SUNRISE_TIME = new Date(
+      SUNRISE_SUNSET_QUERY.results.sunrise,
+  )
+      .toLocaleString('ru-RU', {
+        hour: 'numeric',
+        minute: 'numeric',
+      });
+  const SUNSET_TIME = new Date(
+      SUNRISE_SUNSET_QUERY.results.sunset,
+  )
+      .toLocaleString('ru-RU', {
+        hour: 'numeric',
+        minute: 'numeric',
+      });
+
   const ROOM_TEMPERATURE = ROOM_TEMPERATURE_QUERY.data.data[0].temperature;
-  const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY.data.current.temperature_2m +
+  const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY
+      .data.current.temperature_2m +
     OUTDOOR_TEMPERATURE_QUERY.data.current_units.temperature_2m;
 
   await bot.telegram.sendMessage(
       MY_ID,
-      `${ROOM_TEMPERATURE}°C (room)
-
-${OUTDOOR_TEMPERATURE} (outdoor)`,
+      `${OUTDOOR_TEMPERATURE} (outdoor)
+${ROOM_TEMPERATURE}°C (room)
+${SUNRISE_TIME} (sunrise)
+${SUNSET_TIME} (sunset)`,
   );
 };
 
 const vacationLeft = async () => {
-  const VACATION_DATE = moment([2025, 3, 9, 18, 0]);
+  const VACATION_DATE = moment([2025, 11, 9, 18, 0]);
 
   const VD_MONTHS = VACATION_DATE.diff(moment(), 'months');
   VACATION_DATE.subtract(VD_MONTHS, 'months');
@@ -528,7 +548,7 @@ CRON.schedule('0 5 * * *', collectAndSendData, {});
 /**
  * Every day from 5 AM to 11 PM every 4 hours
  */
-CRON.schedule('0 5-23/2 * * *', sendTemperatureData, {});
+CRON.schedule('0 5-23/1 * * *', sendTemperatureAndSunRiseData, {});
 
 /**
  * Every day from 5 AM to 11 PM every 4 hours
@@ -568,7 +588,7 @@ CRON.schedule('45 9 * * *', msgToMom, {});
  * Every day at 9:30 AM
  */
 CRON.schedule('30 9 * * *', vacationLeft, {
-  scheduled: false,
+  scheduled: true,
 });
 
 /**
