@@ -550,7 +550,7 @@ CRON.schedule('0 5 * * *', collectAndSendData, {});
  * Every day from 5 AM to 11 PM every 4 hours
  */
 CRON.schedule('0 5-23/1 * * *', sendTemperatureAndSunRiseData, {});
-sendTemperatureAndSunRiseData();
+
 /**
  * Every day from 5 AM to 11 PM every 4 hours
  */
