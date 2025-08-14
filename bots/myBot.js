@@ -30,6 +30,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
  * Telegraf
  */
 const MY_ID = 738829247;
+const ORLOV_ALEXANDER_ID = 391884971;
 // let lastMessageData = null;
 
 /**
@@ -459,6 +460,25 @@ ${SUNSET_TIME} (sunset)`,
   );
 };
 
+const sendOrlovAlexanderMessage = async () => {
+  const LA = '55.80852';
+  const LO = '37.70758';
+
+  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
+      `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
+  );
+
+  const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY
+      .data.current.temperature_2m +
+    OUTDOOR_TEMPERATURE_QUERY.data.current_units.temperature_2m;
+
+  await bot.telegram.sendMessage(
+      ORLOV_ALEXANDER_ID,
+      `Температура на улице:
+    ${OUTDOOR_TEMPERATURE}`,
+  );
+};
+
 const vacationLeft = async () => {
   const VACATION_DATE = moment([2025, 11, 9, 18, 0]);
 
@@ -562,6 +582,13 @@ CRON.schedule('0 5-23/4 * * *', upHHResume, {
  * On the 20th day of every month at 6:15 AM
  */
 CRON.schedule('15 6 20 * *', seventeenthDay, {});
+
+/**
+ * On the 20th day of every month at 7:05 AM
+ */
+CRON.schedule('5 7 * * *', sendOrlovAlexanderMessage, {
+  scheduled: true,
+});
 
 /**
  * Every 3rd day of the month at 7:30 AM
