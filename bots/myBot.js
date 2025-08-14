@@ -475,7 +475,7 @@ const sendOrlovAlexanderMessage = async () => {
   await bot.telegram.sendMessage(
       ORLOV_ALEXANDER_ID,
       `Температура на улице:
-    ${OUTDOOR_TEMPERATURE}`,
+${OUTDOOR_TEMPERATURE}`,
   );
 };
 
