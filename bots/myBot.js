@@ -473,6 +473,12 @@ const sendOrlovAlexanderMessage = async () => {
     OUTDOOR_TEMPERATURE_QUERY.data.current_units.temperature_2m;
 
   await bot.telegram.sendMessage(
+      MY_ID,
+      `Температура на улице:
+${OUTDOOR_TEMPERATURE}`,
+  );
+
+  await bot.telegram.sendMessage(
       ORLOV_ALEXANDER_ID,
       `Температура на улице:
 ${OUTDOOR_TEMPERATURE}`,
