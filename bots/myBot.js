@@ -415,17 +415,9 @@ const appartmentRent = async () => {
       .then(() => false);
 };
 
-const sendTemperatureAndSunRiseData = async () => {
+const setSunriseSunsetData = async () => {
   const LA = '55.80852';
   const LO = '37.70758';
-
-  const ROOM_TEMPERATURE_QUERY = await AXIOS.post(
-      'https://qjalti.ru/api/arduino/select',
-  );
-
-  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
-      `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
-  );
 
   const SUNRISE_SUNSET_QUERY = await AXIOS.get(
       `https://api.sunrise-sunset.org/json?lat=${LA}&lng=${LO}&date=today&formatted=0&tzid=Europe/Moscow`,
@@ -446,6 +438,25 @@ const sendTemperatureAndSunRiseData = async () => {
         minute: 'numeric',
       });
 
+  await bot.telegram.sendMessage(
+      MY_ID,
+      `${SUNRISE_TIME} (sunrise)
+${SUNSET_TIME} (sunset)`,
+  );
+};
+
+const sendTemperatureData = async () => {
+  const LA = '55.80852';
+  const LO = '37.70758';
+
+  const ROOM_TEMPERATURE_QUERY = await AXIOS.post(
+      'https://qjalti.ru/api/arduino/select',
+  );
+
+  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
+      `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
+  );
+
   const ROOM_TEMPERATURE = ROOM_TEMPERATURE_QUERY.data.data[0].temperature;
   const OUTDOOR_TEMPERATURE = OUTDOOR_TEMPERATURE_QUERY
       .data.current.temperature_2m +
@@ -454,9 +465,7 @@ const sendTemperatureAndSunRiseData = async () => {
   await bot.telegram.sendMessage(
       MY_ID,
       `${OUTDOOR_TEMPERATURE} (outdoor)
-${ROOM_TEMPERATURE}°C (room)
-${SUNRISE_TIME} (sunrise)
-${SUNSET_TIME} (sunset)`,
+${ROOM_TEMPERATURE}°C (room)`,
   );
 };
 
@@ -571,11 +580,12 @@ bot.on('message', async (ctx) => {
  * Every day at 5 AM
  */
 CRON.schedule('0 5 * * *', collectAndSendData, {});
+CRON.schedule('0 5 * * *', setSunriseSunsetData, {});
 
 /**
- * Every day from 5 AM to 11 PM every 4 hours
+ * Every hour
  */
-CRON.schedule('0 5-23/1 * * *', sendTemperatureAndSunRiseData, {});
+CRON.schedule('0 * * * *', sendTemperatureData, {});
 
 /**
  * Every day from 5 AM to 11 PM every 4 hours
