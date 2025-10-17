@@ -6,12 +6,12 @@ const BOT_TOKEN = process.env.RODIYAR_BOT_TOKEN;
 const CHAT_ID = 738829247;
 
 const SITES = [
-  'https://www.patriot-cl.ru',
-  'https://shvey-dom.ru',
-  'https://rodiyartech.ru',
-  'https://snb.group',
-  'https://rodiyar.tech',
-  'https://ohrana-objective.ru',
+  {name: 'Patriot-CL.Ru', url: 'https://patriot-cl.ru/'},
+  {name: 'Shvey-Dom.Ru', url: 'https://shvey-dom.ru/'},
+  {name: 'RodiyarTech.Ru', url: 'https://rodiyartech.ru/'},
+  {name: 'SNB.Group', url: 'https://snb.group/'},
+  {name: 'Rodiyar.Tech', url: 'https://rodiyar.tech/'},
+  {name: 'Ohrana-Objective.Ru', url: 'https://ohrana-objective.ru/'},
 ];
 
 const BOT = new Telegraf(BOT_TOKEN);
@@ -49,6 +49,7 @@ const monitorSites = async () => {
 
 // Запуск проверки каждые 5 минут
 cron.schedule('*/5 * * * *', monitorSites);
+monitorSites();
 
 // Запуск бота
 BOT.launch().then(() => false);
