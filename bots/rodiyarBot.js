@@ -102,16 +102,18 @@ const monitorSites = async () => {
 
   const results = await Promise.all(SITES.map(checkSite));
   const failed = results.filter((r) => !r.ok);
+  let sitesCounter = 0;
 
   if (failed.length > 0) {
     const messageLines = failed.map((f) => {
+      sitesCounter++;
       const code = f.status || f.errorCode;
       const link = `<a href="${f.url}">${f.name}</a>`;
-      return `— ${link}: <b>${code}</b> — ${f.description}`;
+      return `${sitesCounter}. ${link}: <b>${code}</b> — ${f.description}`;
     });
 
     const message = '🚨 Обнаружены недоступные сайты:\n\n' +
-      messageLines.join('\n');
+      messageLines.join('\n\n');
 
     for (const chatId of CHAT_IDS) {
       try {
