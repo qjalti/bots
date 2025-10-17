@@ -25,21 +25,61 @@ SITES.forEach((site) => {
 
 const BOT = new Telegraf(BOT_TOKEN);
 
+// Краткие описания ошибок на русском
+const getErrorDescription = (code) => {
+  if (typeof code === 'number') {
+    if (code >= 400 && code < 500) return 'ошибка клиента (4xx)';
+    if (code >= 500 && code < 600) return 'внутренняя ошибка сервера (5xx)';
+    return 'неизвестный HTTP-статус';
+  }
+
+  switch (code) {
+    case 'ECONNREFUSED':
+      return 'соединение отклонено';
+    case 'ETIMEDOUT':
+      return 'таймаут соединения';
+    case 'ENOTFOUND':
+      return 'домен не найден';
+    case 'EHOSTUNREACH':
+      return 'хост недоступен';
+    case 'ENETUNREACH':
+      return 'сеть недоступна';
+    case 'EAI_AGAIN':
+      return 'временный сбой DNS';
+    case 'ERR_FR_TOO_MANY_REDIRECTS':
+      return 'слишком много перенаправлений';
+    case 'ERR_INVALID_URL':
+      return 'некорректный URL';
+    default:
+      return 'неизвестная ошибка сети';
+  }
+};
+
 const checkSite = async (site) => {
   try {
     const response = await axios.head(site.url, {timeout: 10_000});
     const ok = response.status >= 200 && response.status < 400;
     return {...site, ok, status: response.status, error: null};
   } catch (error) {
-    let errorType = 'Unknown';
+    let statusCode = null;
+    let errorCode = 'UNKNOWN';
 
-    if (error.code) {
-      errorType = error.code;
-    } else if (error.response?.status) {
-      errorType = `HTTP ${error.response.status}`;
+    if (error.response?.status) {
+      statusCode = error.response.status;
+      errorCode = statusCode;
+    } else if (error.code) {
+      errorCode = error.code;
     }
 
-    return {...site, ok: false, error: errorType};
+    const description = getErrorDescription(errorCode);
+
+    return {
+      ...site,
+      ok: false,
+      status: statusCode,
+      errorCode,
+      description,
+    };
   }
 };
 
@@ -51,8 +91,9 @@ const monitorSites = async () => {
 
   if (failed.length > 0) {
     const messageLines = failed.map((f) => {
+      const code = f.status || f.errorCode;
       const link = `<a href="${f.url}">${f.name}</a>`;
-      return `— ${link}: <b>${f.error}</b>`;
+      return `— ${link}: <b>${code}</b> — ${f.description}`;
     });
 
     const message = '🚨 Обнаружены недоступные сайты:\n\n' +
