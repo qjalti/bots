@@ -18,18 +18,32 @@ const SITES = [
   {name: 'Ohrana-Objective.Ru', url: 'https://ohrana-objective.ru/'},
 ];
 
-// Очистка URL от пробелов
 SITES.forEach((site) => {
   site.url = site.url.trim();
 });
 
 const BOT = new Telegraf(BOT_TOKEN);
 
-// Краткие описания ошибок на русском
+BOT.use((ctx, next) => {
+  if (ctx.message?.text) {
+    const senderId = ctx.from?.id ?? 'unknown';
+    const chatId = ctx.chat?.id ?? 'unknown';
+    const username = ctx.from?.username ? `@${ctx.from.username}` : '';
+    const fullName = ctx.from?.first_name || ctx.from?.last_name ?
+      `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim() :
+      'no name';
+
+    console.log(
+        `[📩 Входящее сообщение] От: ID=${senderId} ${username} (${fullName}) | Чат: ${chatId} | Текст: "${ctx.message.text}"`,
+    );
+  }
+  return next();
+});
+
 const getErrorDescription = (code) => {
   if (typeof code === 'number') {
-    if (code >= 400 && code < 500) return 'ошибка клиента (4xx)';
-    if (code >= 500 && code < 600) return 'внутренняя ошибка сервера (5xx)';
+    if (code >= 400 && code < 500) return 'ошибка клиента (4XX)';
+    if (code >= 500 && code < 600) return 'внутренняя ошибка сервера (5XX)';
     return 'неизвестный HTTP-статус';
   }
 
