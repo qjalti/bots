@@ -1,6 +1,14 @@
 import {Telegraf} from 'telegraf';
 import axios from 'axios';
 import cron from 'node-cron';
+import fs from 'fs';
+import path from 'path';
+import {fileURLToPath} from 'url';
+
+// Определяем __dirname в ES-модулях
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const STATUS_FILE = path.join(__dirname, 'statuses.json');
 
 const BOT_TOKEN = process.env.RODIYAR_BOT_TOKEN;
 
@@ -39,6 +47,32 @@ BOT.use((ctx, next) => {
   }
   return next();
 });
+
+// Загрузка состояния из файла
+const loadStatuses = () => {
+  if (!fs.existsSync(STATUS_FILE)) {
+    const initial = {};
+    SITES.forEach((site) => {
+      initial[site.url] = true; // по умолчанию считаем, что всё работает
+    });
+    fs.writeFileSync(STATUS_FILE, JSON.stringify(initial, null, 2));
+    return initial;
+  }
+  try {
+    return JSON.parse(fs.readFileSync(STATUS_FILE, 'utf8'));
+  } catch (e) {
+    console.error('❌ Ошибка чтения statuses.json, создаём заново');
+    const initial = {};
+    SITES.forEach((site) => initial[site.url] = true);
+    fs.writeFileSync(STATUS_FILE, JSON.stringify(initial, null, 2));
+    return initial;
+  }
+};
+
+// Сохранение состояния в файл
+const saveStatuses = (statuses) => {
+  fs.writeFileSync(STATUS_FILE, JSON.stringify(statuses, null, 2));
+};
 
 const getErrorDescription = (code) => {
   if (typeof code === 'number') {
@@ -100,32 +134,55 @@ const checkSite = async (site) => {
 const monitorSites = async () => {
   console.log('🔍 Проверка доступности сайтов...');
 
+  const statuses = loadStatuses();
   const results = await Promise.all(SITES.map(checkSite));
-  const failed = results.filter((r) => !r.ok);
-  let sitesCounter = 0;
+  let hasChanges = false;
+  const sitesCounter = 0;
 
-  if (failed.length > 0) {
-    const messageLines = failed.map((f) => {
-      sitesCounter++;
-      const code = f.status || f.errorCode;
-      const link = `<a href="${f.url}">${f.name}</a>`;
-      return `${sitesCounter}. ${link}: <b>${code}</b> — ${f.description}`;
-    });
+  for (const result of results) {
+    const wasOk = statuses[result.url] === true;
+    const nowOk = result.ok;
 
-    const message = '🚨 Обнаружены недоступные сайты:\n\n' +
-      messageLines.join('\n\n');
-
-    for (const chatId of CHAT_IDS) {
-      try {
-        await BOT.telegram.sendMessage(chatId, message, {
-          parse_mode: 'HTML',
-          disable_web_page_preview: true,
-        });
-        console.log(`📤 Уведомление отправлено в чат ${chatId}`);
-      } catch (err) {
-        console.error(`❌ Не удалось отправить в чат ${chatId}:`, err.message);
+    if (wasOk && !nowOk) {
+      // Сайт упал — отправить уведомление
+      const link = `<a href="${result.url}">${result.name}</a>`;
+      const code = result.status || result.errorCode;
+      const message = `⚠️ Сайт упал!\n\n— ${link}: <b>${code}</b> — ${result.description}`;
+      for (const chatId of CHAT_IDS) {
+        try {
+          await BOT.telegram.sendMessage(chatId, message, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+          });
+          console.log(`📤 Уведомление о падении отправлено в чат ${chatId}`);
+        } catch (err) {
+          console.error(`❌ Ошибка отправки в чат ${chatId}:`, err.message);
+        }
       }
+      statuses[result.url] = false;
+      hasChanges = true;
+    } else if (!wasOk && nowOk) {
+      // Сайт восстановился
+      const link = `<a href="${result.url}">${result.name}</a>`;
+      const message = `✅ Сайт восстановлен!\n\n— ${link} снова работает.`;
+      for (const chatId of CHAT_IDS) {
+        try {
+          await BOT.telegram.sendMessage(chatId, message, {
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+          });
+          console.log(`📤 Уведомление о восстановлении отправлено в чат ${chatId}`);
+        } catch (err) {
+          console.error(`❌ Ошибка отправки в чат ${chatId}:`, err.message);
+        }
+      }
+      statuses[result.url] = true;
+      hasChanges = true;
     }
+  }
+
+  if (hasChanges) {
+    saveStatuses(statuses);
   }
 };
 
