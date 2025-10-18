@@ -48,6 +48,32 @@ BOT.use((ctx, next) => {
   return next();
 });
 
+BOT.start((ctx) => {
+  const message = `
+🤖 <b>Привет! Я — бот мониторинга доступности сайтов</b>
+
+Я слежу за работой следующих ресурсов:
+• <a href="https://patriot-cl.ru/">Patriot-CL.Ru</a>
+• <a href="https://shvey-dom.ru/">Shvey-Dom.Ru</a>
+• <a href="https://rodiyartech.ru/">RodiyarTech.Ru</a>
+• <a href="https://snb.group/">SNB.Group</a>
+• <a href="https://rodiyar.tech/">Rodiyar.Tech</a>
+• <a href="https://ohrana-objective.ru/">Ohrana-Objective.Ru</a>
+
+🔔 Вы получите уведомление:
+— если сайт упадёт (только один раз),
+— когда он восстановится.
+
+🛠 Доступные команды:
+• /status — текущее состояние всех сайтов
+• /reload — запустить проверку вручную
+
+ℹ️ Бот работает автоматически каждые 5 минут.
+Все сообщения логируются`;
+
+  return ctx.replyWithHTML(message, {disable_web_page_preview: true});
+});
+
 BOT.command('status', async (ctx) => {
   const results = await Promise.all(SITES.map(checkSite));
   const working = results.filter((r) => r.ok).length;
