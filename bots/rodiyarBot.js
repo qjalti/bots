@@ -148,28 +148,17 @@ const getErrorDescription = (code) => {
 
 const checkSite = async (site) => {
   try {
-    const response = await axios.get(site.url, {
+    const response = await axios.head(site.url, {
       timeout: 10_000,
       maxRedirects: 5,
-      validateStatus: () => true, // не выбрасывать исключение по статусу
     });
-
-    const isOkStatus = response.status >= 200 && response.status < 400;
-    const hasKeyword = response.data.includes(site.keyword);
-
-    if (!isOkStatus) {
-      throw {response};
-    }
-    if (!hasKeyword) {
-      throw new Error('MISSING_KEYWORD');
-    }
-
+    const ok = response.status >= 200 && response.status < 400;
     return {
       ...site,
-      ok: true,
+      ok,
       httpStatus: response.status,
       errorCode: String(response.status),
-      description: 'работает корректно',
+      description: getErrorDescription(response.status),
     };
   } catch (error) {
     let httpStatus = null;
@@ -180,13 +169,9 @@ const checkSite = async (site) => {
       errorCode = String(httpStatus);
     } else if (error.code) {
       errorCode = error.code;
-    } else if (error.message === 'MISSING_KEYWORD') {
-      errorCode = 'MISSING_KEYWORD';
     }
 
-    const description = errorCode === 'MISSING_KEYWORD' ?
-        'ключевое слово не найдено на странице' :
-        getErrorDescription(errorCode);
+    const description = getErrorDescription(errorCode);
 
     return {
       ...site,
