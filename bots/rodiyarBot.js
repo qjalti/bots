@@ -38,14 +38,38 @@ BOT.use((ctx, next) => {
     const chatId = ctx.chat?.id ?? 'unknown';
     const username = ctx.from?.username ? `@${ctx.from.username}` : '';
     const fullName = ctx.from?.first_name || ctx.from?.last_name ?
-      `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim() :
-      'no name';
+        `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim() :
+        'no name';
 
     console.log(
         `[📩 Входящее сообщение] От: ID=${senderId} ${username} (${fullName}) | Чат: ${chatId} | Текст: "${ctx.message.text}"`,
     );
   }
   return next();
+});
+
+BOT.command('status', async (ctx) => {
+  const results = await Promise.all(SITES.map(checkSite));
+  const working = results.filter((r) => r.ok).length;
+  const total = SITES.length;
+  const lines = results.map((r) => {
+    const statusEmoji = r.ok ? '✅' : '❌';
+    const link = `<a href="${r.url}">${r.name}</a>`;
+    if (r.ok) {
+      return `${statusEmoji} ${link}`;
+    } else {
+      const code = r.httpStatus ? `${r.httpStatus} (${r.errorCode})` : r.errorCode;
+      return `${statusEmoji} ${link}: <b>${code}</b> — ${r.description}`;
+    }
+  });
+
+  const message = `📊 Состояние мониторинга (${working}/${total} работают):\n\n` + lines.join('\n');
+  await ctx.replyWithHTML(message, {disable_web_page_preview: true});
+});
+
+BOT.command('reload', async (ctx) => {
+  await ctx.reply('🔄 Запускаю немедленную проверку...');
+  await monitorSites();
 });
 
 // Загрузка состояния из файла
@@ -104,7 +128,7 @@ const getErrorDescription = (code) => {
     case 'EAI_NONAME':
       return 'некорректное имя хоста';
 
-    // --- Соединение ---
+      // --- Соединение ---
     case 'ECONNREFUSED':
       return 'соединение отклонено';
     case 'ECONNRESET':
@@ -122,13 +146,13 @@ const getErrorDescription = (code) => {
     case 'EAFNOSUPPORT':
       return 'семейство адресов не поддерживается';
 
-    // --- Таймауты ---
+      // --- Таймауты ---
     case 'ETIMEDOUT':
       return 'таймаут соединения';
     case 'ETIME':
       return 'таймаут системного вызова';
 
-    // --- SSL/TLS ---
+      // --- SSL/TLS ---
     case 'DEPTH_ZERO_SELF_SIGNED_CERT':
     case 'SELF_SIGNED_CERT_IN_CHAIN':
       return 'самоподписанный SSL-сертификат';
@@ -144,7 +168,7 @@ const getErrorDescription = (code) => {
     case 'ERR_SSL_PROTOCOL_ERROR':
       return 'ошибка протокола SSL/TLS';
 
-    // --- URL и редиректы ---
+      // --- URL и редиректы ---
     case 'ERR_INVALID_URL':
       return 'некорректный URL';
     case 'ERR_FR_TOO_MANY_REDIRECTS':
@@ -158,7 +182,7 @@ const getErrorDescription = (code) => {
     case 'ERR_HTTP2_INVALID_SESSION':
       return 'недопустимая HTTP/2-сессия';
 
-    // --- Axios-специфичные ---
+      // --- Axios-специфичные ---
     case 'ERR_NETWORK':
       return 'сетевая ошибка';
     case 'ERR_BAD_RESPONSE':
@@ -168,7 +192,7 @@ const getErrorDescription = (code) => {
     case 'ERR_DEPRECATED':
       return 'используется устаревший метод';
 
-    // --- Прочие системные ---
+      // --- Прочие системные ---
     case 'EACCES':
       return 'доступ запрещён (нет прав)';
     case 'EEXIST':
@@ -188,7 +212,7 @@ const getErrorDescription = (code) => {
     case 'EROFS':
       return 'файловая система только для чтения';
 
-    // --- Неизвестные ---
+      // --- Неизвестные ---
     default:
       return code ? `неизвестная ошибка: ${code}` : 'неизвестная ошибка';
   }
