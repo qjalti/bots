@@ -5,17 +5,16 @@ import fs from 'fs';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
-// Определяем __dirname в ES-модулях
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATUS_FILE = path.join(__dirname, 'statuses.json');
+const SUBSCRIBERS_FILE = path.join(__dirname, 'subscribers.json');
 
 const BOT_TOKEN = process.env.RODIYAR_BOT_TOKEN;
-
-const CHAT_IDS = [
-  738829247,
-  -4802395189,
-];
+if (!BOT_TOKEN) {
+  console.error('❌ Переменная окружения RODIYAR_BOT_TOKEN не задана!');
+  process.exit(1);
+}
 
 const SITES = [
   {name: 'Patriot-CL.Ru', url: 'https://patriot-cl.ru/'},
@@ -48,63 +47,33 @@ BOT.use((ctx, next) => {
   return next();
 });
 
-BOT.start((ctx) => {
-  const message = `
-🤖 <b>Привет! Я — бот мониторинга доступности сайтов</b>
+const loadSubscribers = () => {
+  if (!fs.existsSync(SUBSCRIBERS_FILE)) {
+    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify({}));
+    return {};
+  }
+  try {
+    return JSON.parse(fs.readFileSync(SUBSCRIBERS_FILE, 'utf8'));
+  } catch (e) {
+    console.error('❌ Ошибка чтения subscribers.json, создаём заново');
+    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify({}));
+    return {};
+  }
+};
 
-Я слежу за работой следующих ресурсов:
-• <a href="https://patriot-cl.ru/">Patriot-CL.Ru</a>
-• <a href="https://shvey-dom.ru/">Shvey-Dom.Ru</a>
-• <a href="https://rodiyartech.ru/">RodiyarTech.Ru</a>
-• <a href="https://snb.group/">SNB.Group</a>
-• <a href="https://rodiyar.tech/">Rodiyar.Tech</a>
-• <a href="https://ohrana-objective.ru/">Ohrana-Objective.Ru</a>
+const saveSubscribers = (subscribers) => {
+  fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+};
 
-🔔 Вы получите уведомление:
-— если сайт упадёт (только один раз),
-— когда он восстановится.
+const getSubscriberIds = () => {
+  const subs = loadSubscribers();
+  return Object.keys(subs).map(Number);
+};
 
-🛠 Доступные команды:
-• /status — текущее состояние всех сайтов
-• /reload — запустить проверку вручную
-
-ℹ️ Бот работает автоматически каждые 5 минут.
-Все сообщения логируются`;
-
-  return ctx.replyWithHTML(message, {disable_web_page_preview: true});
-});
-
-BOT.command('status', async (ctx) => {
-  const results = await Promise.all(SITES.map(checkSite));
-  const working = results.filter((r) => r.ok).length;
-  const total = SITES.length;
-  const lines = results.map((r) => {
-    const statusEmoji = r.ok ? '✅' : '❌';
-    const link = `<a href="${r.url}">${r.name}</a>`;
-    if (r.ok) {
-      return `${statusEmoji} ${link}`;
-    } else {
-      const code = r.httpStatus ? `${r.httpStatus} (${r.errorCode})` : r.errorCode;
-      return `${statusEmoji} ${link}: <b>${code}</b> — ${r.description}`;
-    }
-  });
-
-  const message = `📊 Состояние мониторинга (${working}/${total} работают):\n\n` + lines.join('\n');
-  await ctx.replyWithHTML(message, {disable_web_page_preview: true});
-});
-
-BOT.command('reload', async (ctx) => {
-  await ctx.reply('🔄 Запускаю немедленную проверку...');
-  await monitorSites();
-});
-
-// Загрузка состояния из файла
 const loadStatuses = () => {
   if (!fs.existsSync(STATUS_FILE)) {
     const initial = {};
-    SITES.forEach((site) => {
-      initial[site.url] = true; // по умолчанию считаем, что всё работает
-    });
+    SITES.forEach((site) => initial[site.url] = true);
     fs.writeFileSync(STATUS_FILE, JSON.stringify(initial, null, 2));
     return initial;
   }
@@ -119,13 +88,11 @@ const loadStatuses = () => {
   }
 };
 
-// Сохранение состояния в файл
 const saveStatuses = (statuses) => {
   fs.writeFileSync(STATUS_FILE, JSON.stringify(statuses, null, 2));
 };
 
 const getErrorDescription = (code) => {
-  // HTTP-статусы
   if (typeof code === 'number') {
     if (code === 400) return 'некорректный запрос (400)';
     if (code === 401) return 'неавторизован (401)';
@@ -142,43 +109,19 @@ const getErrorDescription = (code) => {
     return `неизвестный HTTP-статус ${code}`;
   }
 
-  // Сетевые, DNS, SSL и системные ошибки
   switch (code) {
-    // --- DNS ---
     case 'ENOTFOUND':
       return 'домен не найден';
     case 'EAI_AGAIN':
       return 'временный сбой DNS';
-    case 'EAI_NODATA':
-      return 'данные DNS отсутствуют';
-    case 'EAI_NONAME':
-      return 'некорректное имя хоста';
-
-      // --- Соединение ---
     case 'ECONNREFUSED':
       return 'соединение отклонено';
-    case 'ECONNRESET':
-      return 'соединение сброшено';
-    case 'EPIPE':
-      return 'разорван канал передачи данных';
+    case 'ETIMEDOUT':
+      return 'таймаут соединения';
     case 'EHOSTUNREACH':
       return 'хост недоступен';
     case 'ENETUNREACH':
       return 'сеть недоступна';
-    case 'EADDRINUSE':
-      return 'адрес уже используется';
-    case 'EADDRNOTAVAIL':
-      return 'адрес недоступен';
-    case 'EAFNOSUPPORT':
-      return 'семейство адресов не поддерживается';
-
-      // --- Таймауты ---
-    case 'ETIMEDOUT':
-      return 'таймаут соединения';
-    case 'ETIME':
-      return 'таймаут системного вызова';
-
-      // --- SSL/TLS ---
     case 'DEPTH_ZERO_SELF_SIGNED_CERT':
     case 'SELF_SIGNED_CERT_IN_CHAIN':
       return 'самоподписанный SSL-сертификат';
@@ -189,56 +132,15 @@ const getErrorDescription = (code) => {
     case 'CERT_NOT_YET_VALID':
       return 'SSL-сертификат ещё не действителен';
     case 'ERR_TLS_CERT_ALTNAME_INVALID':
-      return 'недопустимое имя в SSL-сертификате (не совпадает домен)';
-    case 'SSL_ERROR':
-    case 'ERR_SSL_PROTOCOL_ERROR':
-      return 'ошибка протокола SSL/TLS';
-
-      // --- URL и редиректы ---
+      return 'недопустимое имя в SSL-сертификате';
     case 'ERR_INVALID_URL':
       return 'некорректный URL';
     case 'ERR_FR_TOO_MANY_REDIRECTS':
       return 'слишком много перенаправлений';
-    case 'ERR_BAD_REQUEST':
-      return 'некорректный HTTP-запрос';
-    case 'ERR_HTTP_HEADERS_SENT':
-      return 'заголовки уже отправлены';
-    case 'ERR_HTTP2_ERROR':
-      return 'ошибка HTTP/2';
-    case 'ERR_HTTP2_INVALID_SESSION':
-      return 'недопустимая HTTP/2-сессия';
-
-      // --- Axios-специфичные ---
     case 'ERR_NETWORK':
       return 'сетевая ошибка';
     case 'ERR_BAD_RESPONSE':
       return 'некорректный ответ сервера';
-    case 'ERR_CANCELED':
-      return 'запрос отменён';
-    case 'ERR_DEPRECATED':
-      return 'используется устаревший метод';
-
-      // --- Прочие системные ---
-    case 'EACCES':
-      return 'доступ запрещён (нет прав)';
-    case 'EEXIST':
-      return 'файл/ресурс уже существует';
-    case 'EISDIR':
-      return 'ожидается файл, но это директория';
-    case 'EMFILE':
-      return 'превышено количество открытых файлов';
-    case 'ENOENT':
-      return 'файл или ресурс не найден';
-    case 'ENOMEM':
-      return 'недостаточно памяти';
-    case 'ENOSPC':
-      return 'нет свободного места на диске';
-    case 'EPROTO':
-      return 'ошибка протокола';
-    case 'EROFS':
-      return 'файловая система только для чтения';
-
-      // --- Неизвестные ---
     default:
       return code ? `неизвестная ошибка: ${code}` : 'неизвестная ошибка';
   }
@@ -246,26 +148,50 @@ const getErrorDescription = (code) => {
 
 const checkSite = async (site) => {
   try {
-    const response = await axios.head(site.url, {timeout: 10_000});
-    const ok = response.status >= 200 && response.status < 400;
-    return {...site, ok, status: response.status, error: null};
+    const response = await axios.get(site.url, {
+      timeout: 10_000,
+      maxRedirects: 5,
+      validateStatus: () => true, // не выбрасывать исключение по статусу
+    });
+
+    const isOkStatus = response.status >= 200 && response.status < 400;
+    const hasKeyword = response.data.includes(site.keyword);
+
+    if (!isOkStatus) {
+      throw {response};
+    }
+    if (!hasKeyword) {
+      throw new Error('MISSING_KEYWORD');
+    }
+
+    return {
+      ...site,
+      ok: true,
+      httpStatus: response.status,
+      errorCode: String(response.status),
+      description: 'работает корректно',
+    };
   } catch (error) {
-    let statusCode = null;
+    let httpStatus = null;
     let errorCode = 'UNKNOWN';
 
     if (error.response?.status) {
-      statusCode = error.response.status;
-      errorCode = statusCode;
+      httpStatus = error.response.status;
+      errorCode = String(httpStatus);
     } else if (error.code) {
       errorCode = error.code;
+    } else if (error.message === 'MISSING_KEYWORD') {
+      errorCode = 'MISSING_KEYWORD';
     }
 
-    const description = getErrorDescription(errorCode);
+    const description = errorCode === 'MISSING_KEYWORD' ?
+        'ключевое слово не найдено на странице' :
+        getErrorDescription(errorCode);
 
     return {
       ...site,
       ok: false,
-      status: statusCode,
+      httpStatus,
       errorCode,
       description,
     };
@@ -284,36 +210,38 @@ const monitorSites = async () => {
     const nowOk = result.ok;
 
     if (wasOk && !nowOk) {
-      // Сайт упал — отправить уведомление
       const link = `<a href="${result.url}">${result.name}</a>`;
-      const code = result.status || result.errorCode;
-      const message = `🚨 Сайт упал!\n\n— ${link}: <b>${code}</b> — ${result.description}`;
-      for (const chatId of CHAT_IDS) {
+      const codePart = result.httpStatus ?
+          `<b>${result.httpStatus} (${result.errorCode})</b>` :
+          `<b>${result.errorCode}</b>`;
+      const message = `🚨 Сайт упал!\n\n— ${link}: ${codePart} — ${result.description}`;
+
+      const subscriberIds = getSubscriberIds();
+      for (const id of subscriberIds) {
         try {
-          await BOT.telegram.sendMessage(chatId, message, {
+          await BOT.telegram.sendMessage(id, message, {
             parse_mode: 'HTML',
             disable_web_page_preview: true,
           });
-          console.log(`📤 Уведомление о падении отправлено в чат ${chatId}`);
         } catch (err) {
-          console.error(`❌ Ошибка отправки в чат ${chatId}:`, err.message);
+          console.error(`❌ Не удалось отправить в ${id}:`, err.message);
         }
       }
       statuses[result.url] = false;
       hasChanges = true;
     } else if (!wasOk && nowOk) {
-      // Сайт восстановился
       const link = `<a href="${result.url}">${result.name}</a>`;
       const message = `✅ Сайт восстановлен!\n\n— ${link} снова работает.`;
-      for (const chatId of CHAT_IDS) {
+
+      const subscriberIds = getSubscriberIds();
+      for (const id of subscriberIds) {
         try {
-          await BOT.telegram.sendMessage(chatId, message, {
+          await BOT.telegram.sendMessage(id, message, {
             parse_mode: 'HTML',
             disable_web_page_preview: true,
           });
-          console.log(`📤 Уведомление о восстановлении отправлено в чат ${chatId}`);
         } catch (err) {
-          console.error(`❌ Ошибка отправки в чат ${chatId}:`, err.message);
+          console.error(`❌ Не удалось отправить в ${id}:`, err.message);
         }
       }
       statuses[result.url] = true;
@@ -326,11 +254,133 @@ const monitorSites = async () => {
   }
 };
 
+BOT.start(async (ctx) => {
+  const chatId = ctx.chat.id;
+  const subscribers = loadSubscribers();
+
+  if (ctx.chat.type === 'private') {
+    const name = ctx.from?.first_name ?
+        `${ctx.from.first_name} ${ctx.from.last_name || ''}`.trim() :
+        `@${ctx.from?.username || 'unknown'}`;
+    subscribers[chatId] = {type: 'private', name};
+  } else {
+    subscribers[chatId] = {
+      type: ctx.chat.type,
+      title: ctx.chat.title || 'Без названия',
+    };
+  }
+
+  saveSubscribers(subscribers);
+
+  const msg = `
+🤖 <b>Привет! Я — бот мониторинга</b>
+
+Вы подписаны на уведомления о недоступности сайтов:
+• Patriot-CL.Ru
+• Shvey-Dom.Ru
+• RodiyarTech.Ru
+• SNB.Group
+• Rodiyar.Tech
+• Ohrana-Objective.Ru
+
+🔔 Вы получите сообщение:
+— если сайт упадёт (только один раз),
+— когда он восстановится.
+
+🛠 Команды:
+• /status — текущее состояние
+• /reload — проверить сейчас
+• /stop — отписаться`;
+  return ctx.replyWithHTML(msg, {disable_web_page_preview: true});
+});
+
+BOT.command('stop', (ctx) => {
+  const chatId = ctx.chat.id;
+  const subscribers = loadSubscribers();
+  if (subscribers[chatId]) {
+    delete subscribers[chatId];
+    saveSubscribers(subscribers);
+    return ctx.reply('🔕 Вы отписались от уведомлений.');
+  }
+  return ctx.reply('Вы не были подписаны.');
+});
+
+BOT.command('status', async (ctx) => {
+  const results = await Promise.all(SITES.map(checkSite));
+  const working = results.filter((r) => r.ok).length;
+  const lines = results.map((r) => {
+    const emoji = r.ok ? '✅' : '❌';
+    const link = `<a href="${r.url}">${r.name}</a>`;
+    if (r.ok) {
+      return `${emoji} ${link}`;
+    } else {
+      const codePart = r.httpStatus ?
+          `${r.httpStatus} (${r.errorCode})` :
+          r.errorCode;
+      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}`;
+    }
+  });
+  const msg = `📊 Состояние (${working}/${SITES.length} работают):\n\n` + lines.join('\n');
+  return ctx.replyWithHTML(msg, {disable_web_page_preview: true});
+});
+
+BOT.command('reload', async (ctx) => {
+  await ctx.reply('🔄 Запускаю проверку...');
+  const statusesBefore = loadStatuses();
+  const results = await Promise.all(SITES.map(checkSite));
+  const statusesAfter = {...statusesBefore};
+  let hasChanges = false;
+
+  for (const r of results) {
+    const wasOk = statusesBefore[r.url] === true;
+    const nowOk = r.ok;
+    if (wasOk !== nowOk) {
+      statusesAfter[r.url] = nowOk;
+      hasChanges = true;
+    }
+  }
+
+  if (hasChanges) {
+    saveStatuses(statusesAfter);
+  }
+
+  const working = results.filter((r) => r.ok).length;
+  const lines = results.map((r) => {
+    const emoji = r.ok ? '✅' : '❌';
+    const link = `<a href="${r.url}">${r.name}</a>`;
+    if (r.ok) {
+      return `${emoji} ${link}`;
+    } else {
+      const codePart = r.httpStatus ?
+          `${r.httpStatus} (${r.errorCode})` :
+          r.errorCode;
+      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}`;
+    }
+  });
+  const msg = `📊 Ручная проверка завершена (${working}/${SITES.length}):\n\n` + lines.join('\n');
+  return ctx.replyWithHTML(msg, {disable_web_page_preview: true});
+});
+
+BOT.on('message', (ctx) => {
+  if (ctx.message?.new_chat_members?.some((user) => user.id === ctx.botInfo.id)) {
+    const chatId = ctx.chat.id;
+    const subscribers = loadSubscribers();
+    subscribers[chatId] = {
+      type: ctx.chat.type,
+      title: ctx.chat.title || 'Новая группа',
+    };
+    saveSubscribers(subscribers);
+    ctx.reply('✅ Бот добавлен! Буду присылать уведомления о недоступности сайтов.')
+        .catch(() => {
+        });
+  }
+});
+
 cron.schedule('*/5 * * * *', monitorSites);
-
 monitorSites().catch(console.error);
-
-BOT.launch().catch(console.error);
+BOT.launch().then(() => {
+  console.log('🟢 Бот запущен и готов к работе.');
+});
 
 process.once('SIGINT', () => BOT.stop('SIGINT'));
 process.once('SIGTERM', () => BOT.stop('SIGTERM'));
