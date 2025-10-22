@@ -1,7 +1,7 @@
-import {Configuration, OpenAIApi} from 'openai';
-import {createReadStream} from 'fs';
-import {ERROR_MESSAGE} from './constants.js';
-import * as dotenv from 'dotenv';
+import { Configuration, OpenAIApi } from "openai";
+import { createReadStream } from "fs";
+import { ERROR_MESSAGE } from "./constants.js";
+import * as dotenv from "dotenv";
 
 /**
  * Modules settings
@@ -13,9 +13,9 @@ dotenv.config();
  */
 class OpenAI {
   roles = {
-    ASSISTANT: 'assistant',
-    USER: 'user',
-    SYSTEM: 'system',
+    ASSISTANT: "assistant",
+    USER: "user",
+    SYSTEM: "system",
   };
 
   /**
@@ -37,7 +37,7 @@ class OpenAI {
   async chat(messages) {
     try {
       const RESPONSE = await this.OPEN_AI.createChatCompletion({
-        model: 'gpt-3.5-turbo',
+        model: "gpt-3.5-turbo",
         messages,
       });
       return {
@@ -46,7 +46,7 @@ class OpenAI {
         data: RESPONSE.data.choices[0].message,
       };
     } catch (err) {
-      console.log(err, 'err');
+      console.log(err, "err");
       return {
         success: false,
         code: err.response.status,
@@ -63,15 +63,15 @@ class OpenAI {
   async transcription(filepath) {
     try {
       const REPONSE = await this.OPEN_AI.createTranscription(
-          createReadStream(filepath),
-          'whisper-1',
+        createReadStream(filepath),
+        "whisper-1",
       );
       return {
         success: true,
         data: REPONSE.data.text,
       };
     } catch (err) {
-      console.log('Error in transcription() method', err.message, err);
+      console.log("Error in transcription() method", err.message, err);
       return {
         success: false,
         content: ERROR_MESSAGE,

@@ -1,14 +1,14 @@
 /**
  * Класс для работы с голосовыми сообщениями
  */
-import axios from 'axios';
-import {createWriteStream} from 'fs';
-import {dirname, resolve} from 'path';
-import {fileURLToPath} from 'url';
-import ffmpeg from 'fluent-ffmpeg';
-import installer from '@ffmpeg-installer/ffmpeg';
-import {removeFile} from './utils.js';
-import {ERROR_MESSAGE} from './constants.js';
+import axios from "axios";
+import { createWriteStream } from "fs";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+import ffmpeg from "fluent-ffmpeg";
+import installer from "@ffmpeg-installer/ffmpeg";
+import { removeFile } from "./utils.js";
+import { ERROR_MESSAGE } from "./constants.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -35,17 +35,17 @@ class OggConverter {
       const OUTPUT_PATH = resolve(dirname(input), `${output}.mp3`);
       return new Promise((resolve, reject) => {
         ffmpeg(input)
-            .inputOption('-t 30')
-            .output(OUTPUT_PATH)
-            .on('end', () => {
-              removeFile(input);
-              resolve(OUTPUT_PATH);
-            })
-            .on('error', (err) => reject(err.message))
-            .run();
+          .inputOption("-t 30")
+          .output(OUTPUT_PATH)
+          .on("end", () => {
+            removeFile(input);
+            resolve(OUTPUT_PATH);
+          })
+          .on("error", (err) => reject(err.message))
+          .run();
       });
     } catch (err) {
-      console.log('Error while trying to MP3. ', err.message, err);
+      console.log("Error while trying to MP3. ", err.message, err);
       return {
         success: false,
         data: ERROR_MESSAGE,
@@ -62,31 +62,27 @@ class OggConverter {
    */
   async create(url, filename) {
     try {
-      const OGGPath = resolve(
-          __dirname,
-          '../voices_temp',
-          `${filename}.ogg`,
-      );
+      const OGGPath = resolve(__dirname, "../voices_temp", `${filename}.ogg`);
       const RESPONSE = await axios({
-        method: 'get',
+        method: "get",
         url,
-        responseType: 'stream',
+        responseType: "stream",
       });
       return new Promise((resolve) => {
         const STREAM = createWriteStream(OGGPath);
         RESPONSE.data.pipe(STREAM);
-        STREAM.on('finish', () => {
+        STREAM.on("finish", () => {
           resolve(OGGPath);
         });
       });
     } catch (err) {
-      console.log('Error while creating OGG file. ', err.message, err);
+      console.log("Error while creating OGG file. ", err.message, err);
       return {
         success: false,
         data: ERROR_MESSAGE,
       };
     }
   }
-};
+}
 
 export const OGG = new OggConverter();

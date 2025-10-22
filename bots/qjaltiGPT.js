@@ -1,9 +1,9 @@
-const TELEGRAM_TOKEN = '7992334674:AAHwhpaBxpTSl2FNez9DYeuSzTz4jfPN8FU';
+const TELEGRAM_TOKEN = "7992334674:AAHwhpaBxpTSl2FNez9DYeuSzTz4jfPN8FU";
 
-import {Telegraf} from 'telegraf';
-import fs from 'fs';
-import natural from 'natural'; // Библиотека для обработки текста
-import dotenv from 'dotenv';
+import { Telegraf } from "telegraf";
+import fs from "fs";
+import natural from "natural"; // Библиотека для обработки текста
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -13,11 +13,11 @@ const bot = new Telegraf(TELEGRAM_TOKEN);
 // Загрузка переписки из JSON
 let messages = [];
 try {
-  const data = fs.readFileSync('data/alya-chat.json', 'utf-8');
+  const data = fs.readFileSync("data/alya-chat.json", "utf-8");
   const parsedData = JSON.parse(data);
   messages = parsedData.messages;
 } catch (error) {
-  console.error('Ошибка при чтении JSON файла:', error);
+  console.error("Ошибка при чтении JSON файла:", error);
 }
 
 /**
@@ -44,7 +44,7 @@ function splitMessage(text) {
  * @return {string} - Текст, в котором все 'ё' заменены на 'е'
  */
 function sanitizeText(text) {
-  return text.replace(/ё/g, 'е'); // Заменяет 'ё' на 'е'
+  return text.replace(/ё/g, "е"); // Заменяет 'ё' на 'е'
 }
 
 /**
@@ -57,11 +57,11 @@ function sanitizeHtml(text) {
   // Преобразуем все <strong> в правильный формат
   return text.replace(/<[^>]*>/g, (match) => {
     // Проверим, что тег открыт и закрыт правильно
-    const tagName = match.replace(/[<>]/g, '').split(' ')[0];
-    if (['strong', 'em', 'b', 'i'].includes(tagName)) {
+    const tagName = match.replace(/[<>]/g, "").split(" ")[0];
+    if (["strong", "em", "b", "i"].includes(tagName)) {
       return match;
     }
-    return '';
+    return "";
   });
 }
 
@@ -80,15 +80,11 @@ async function sendMessage(bot, chatId, text) {
   const messages = splitMessage(cleanText);
   for (const message of messages) {
     try {
-      await bot.telegram.sendMessage(
-          chatId,
-          message,
-          {
-            parse_mode: 'HTML',
-          },
-      );
+      await bot.telegram.sendMessage(chatId, message, {
+        parse_mode: "HTML",
+      });
     } catch (error) {
-      console.error('Ошибка при отправке сообщения:', error);
+      console.error("Ошибка при отправке сообщения:", error);
     }
   }
 }
@@ -105,7 +101,7 @@ function searchChat(query) {
 
   // Ищем совпадения в сообщениях
   return messages.filter((msg) => {
-    if (!msg.text || typeof msg.text !== 'string') return false;
+    if (!msg.text || typeof msg.text !== "string") return false;
     const messageTokens = tokenizer.tokenize(msg.text.toLowerCase());
     // Проверяем, есть ли пересечение токенов
     return queryTokens.some((token) => messageTokens.includes(token));
@@ -118,12 +114,12 @@ function searchChat(query) {
  * @param {Object} ctx Контекст сообщения,
  * содержащий информацию о чате и пользователе
  */
-bot.on('text', async (ctx) => {
+bot.on("text", async (ctx) => {
   const query = ctx.message.text;
 
   // Игнорируем команды (начинаются с '/')
-  if (query.startsWith('/')) {
-    ctx.reply('Команды пока не поддерживаются.');
+  if (query.startsWith("/")) {
+    ctx.reply("Команды пока не поддерживаются.");
     return;
   }
 
@@ -136,32 +132,33 @@ bot.on('text', async (ctx) => {
       const dateTimeString = msg.date;
       const date = new Date(dateTimeString);
       const options = {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       };
       const formattedDateTime = new Intl.DateTimeFormat(
-          'ru-RU', options,
+        "ru-RU",
+        options,
       ).format(date);
 
-      response +=
-        `————————————————\n<strong>${formattedDateTime}</strong>\n<strong>${msg.from}</strong>:\n${msg.text}\n`;
+      response += `————————————————\n<strong>${formattedDateTime}</strong>\n<strong>${msg.from}</strong>:\n${msg.text}\n`;
     });
     response += `————————————————`;
     // Отправляем найденные сообщения
     sendMessage(bot, ctx.chat.id, response);
   } else {
-    ctx.reply('К сожалению, я не нашел ничего по вашему запросу.');
+    ctx.reply("К сожалению, я не нашел ничего по вашему запросу.");
   }
 });
 
 // Запуск бота
-bot.launch()
-    .then(() => console.log('Бот запущен!'))
-    .catch((error) => console.error('Ошибка запуска бота:', error));
+bot
+  .launch()
+  .then(() => console.log("Бот запущен!"))
+  .catch((error) => console.error("Ошибка запуска бота:", error));
 
 // Остановка при завершении работы
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));

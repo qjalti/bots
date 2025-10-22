@@ -1,17 +1,17 @@
 /**
  * Блок подключения модулей
  */
-import TelegramBot from 'node-telegram-bot-api';
-import FS from 'fs';
-import CRON from 'node-cron';
+import TelegramBot from "node-telegram-bot-api";
+import FS from "fs";
+import CRON from "node-cron";
 // import MOMENT from 'moment';
-import PATH from 'path';
+import PATH from "path";
 
 /**
  * Блок определения констант
  */
 // const TEST_MODE = false;
-const DATA_FILENAME = 'active_users.json';
+const DATA_FILENAME = "active_users.json";
 const AUTHOR_TELEGRAM_ID = 738829247;
 const MY_BOT_ID = 1087968824;
 const MESSAGE_TO_NOT_ACTIVE_USERS = `
@@ -22,8 +22,8 @@ const MESSAGE_TO_NOT_ACTIVE_USERS = `
 /**
  * Настройки бота Telegram
  */
-const TOKEN = '5871273249:AAE9il90C1TWFZJkXABpynysqSBZOQWb18U';
-const BOT = new TelegramBot(TOKEN, {polling: true});
+const TOKEN = "5871273249:AAE9il90C1TWFZJkXABpynysqSBZOQWb18U";
+const BOT = new TelegramBot(TOKEN, { polling: true });
 // const CHAT_ID = -1001834442451;
 
 /**
@@ -48,20 +48,16 @@ const bufferParse = (data) => {
 const readOldData = () => {
   return new Promise((resolve, reject) => {
     FS.readFile(
-        PATH.join(
-            __dirname,
-            '..',
-            'data',
-            DATA_FILENAME,
-        ),
-        'utf-8',
-        (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(JSON.parse(bufferParse(data)));
-          }
-        });
+      PATH.join(__dirname, "..", "data", DATA_FILENAME),
+      "utf-8",
+      (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(JSON.parse(bufferParse(data)));
+        }
+      },
+    );
   });
 };
 
@@ -72,18 +68,14 @@ const readOldData = () => {
  */
 const writeNewData = async (newData) => {
   await FS.writeFile(
-      PATH.join(
-          __dirname,
-          '..',
-          'data',
-          DATA_FILENAME,
-      ),
-      JSON.stringify(newData),
-      (err) => {
-        if (err) {
-          throw err;
-        }
-      });
+    PATH.join(__dirname, "..", "data", DATA_FILENAME),
+    JSON.stringify(newData),
+    (err) => {
+      if (err) {
+        throw err;
+      }
+    },
+  );
 };
 
 const checkActiveUsers = async () => {
@@ -143,15 +135,15 @@ const registerEnglish = async (userId, userSignature) => {
  * Обработка новых постов в канале
  * @param post Объект с данными о посте
  */
-BOT.on('channel_post', async (post) => {
+BOT.on("channel_post", async (post) => {
   const AUTHOR_SIGNATURE = post.author_signature;
   const OLD_DATA = await readOldData();
   const OBJ = OLD_DATA.find((o) => o.name === AUTHOR_SIGNATURE);
   if (OBJ) {
     OLD_DATA.find((el) => {
       if (el.name === AUTHOR_SIGNATURE) {
-        el.total_messages = (el.total_messages) + 1;
-        el.week_messages = (el.week_messages) + 1;
+        el.total_messages = el.total_messages + 1;
+        el.week_messages = el.week_messages + 1;
       }
     });
     writeNewData(OLD_DATA);
@@ -171,31 +163,27 @@ BOT.on('channel_post', async (post) => {
  * Обработка всех входящих сообщений
  * @param callback Объект с данными о сообщении
  */
-BOT.on('message', async (callback) => {
+BOT.on("message", async (callback) => {
   if (callback.from.id !== MY_BOT_ID) {
     /**
      * Если команда /start
      */
-    if (callback.text === '/myid') {
-      BOT.sendMessage(callback.from.id, 'Ваш ID:').then(() => {
-        BOT.sendMessage(
-            callback.from.id, callback.from.id,
-        ).then((r) => false);
+    if (callback.text === "/myid") {
+      BOT.sendMessage(callback.from.id, "Ваш ID:").then(() => {
+        BOT.sendMessage(callback.from.id, callback.from.id).then((r) => false);
       });
       BOT.sendMessage(
-          AUTHOR_TELEGRAM_ID,
-          `Пользователь с ID ${callback.from.id} запросил свой ID`,
-      )
-          .then(() => false);
-    } else if (callback.text === '/start') {
+        AUTHOR_TELEGRAM_ID,
+        `Пользователь с ID ${callback.from.id} запросил свой ID`,
+      ).then(() => false);
+    } else if (callback.text === "/start") {
       BOT.sendMessage(
-          AUTHOR_TELEGRAM_ID,
-          `Пользователь с ID ${callback.from.id} (${callback.from.last_name ? callback.from.last_name + ' ' + callback.from.first_name : callback.from.first_name}) начал чат с ботом!`,
-      )
-          .then(() => {
-            BOT.sendMessage(
-                callback.from.id,
-                `Привет!
+        AUTHOR_TELEGRAM_ID,
+        `Пользователь с ID ${callback.from.id} (${callback.from.last_name ? callback.from.last_name + " " + callback.from.first_name : callback.from.first_name}) начал чат с ботом!`,
+      ).then(() => {
+        BOT.sendMessage(
+          callback.from.id,
+          `Привет!
 Я могу подсказать тебе твой ID
 или зарегистрировать тебя в канале по изучению английского языка
 Для выбора команд открой меню бота или используй команды:
@@ -204,49 +192,43 @@ BOT.on('message', async (callback) => {
 /eng_reg — зарегистрироваться в канале по изучению английского языка
 
 Если у тебя есть какие-то вопросы — напиши моему автору:`,
-            ).then(() => {
-              BOT.sendContact(
-                  callback.from.id,
-                  '+79883857654',
-                  'Qjalti',
-              ).then(() => false);
-            });
-          });
-    } else if (callback.text === '/eng_reg') {
-      BOT.sendMessage(callback.from.id, 'Регистрация...').then(async () => {
+        ).then(() => {
+          BOT.sendContact(callback.from.id, "+79883857654", "Qjalti").then(
+            () => false,
+          );
+        });
+      });
+    } else if (callback.text === "/eng_reg") {
+      BOT.sendMessage(callback.from.id, "Регистрация...").then(async () => {
         const START_TRIGGER = process.hrtime()[1];
-        const SIGNATURE = callback.from.last_name ?
-          callback.from.first_name + ' ' + callback.from.last_name :
-          callback.from.first_name;
+        const SIGNATURE = callback.from.last_name
+          ? callback.from.first_name + " " + callback.from.last_name
+          : callback.from.first_name;
         const REG_STATUS = await registerEnglish(callback.from.id, SIGNATURE);
         const END_TRIGGER = process.hrtime()[1];
         const RUNTIME = (END_TRIGGER - START_TRIGGER) / 1000000;
         if (REG_STATUS) {
           BOT.sendMessage(
-              callback.from.id,
-              `Регистрация завершена! (за ${RUNTIME.toFixed(2)} мс)`,
-          )
-              .then(() => false);
+            callback.from.id,
+            `Регистрация завершена! (за ${RUNTIME.toFixed(2)} мс)`,
+          ).then(() => false);
         } else {
-          BOT.sendMessage(
-              callback.from.id, `Вы уже зарегистрированы`,
-          )
-              .then(() => false);
+          BOT.sendMessage(callback.from.id, `Вы уже зарегистрированы`).then(
+            () => false,
+          );
         }
       });
     } else if (callback.from.id !== 777000) {
       BOT.sendMessage(
-          callback.from.id,
-          `Привет!
+        callback.from.id,
+        `Привет!
 Рад, что пользуешься моим функционалом!
 Большое спасибо за это.
 Если у тебя есть какие-то вопросы — напиши моему автору:`,
       ).then(() => {
-        BOT.sendContact(
-            callback.from.id,
-            '+79883857654',
-            'Qjalti',
-        ).then(() => false);
+        BOT.sendContact(callback.from.id, "+79883857654", "Qjalti").then(
+          () => false,
+        );
       });
     }
   }
@@ -254,5 +236,5 @@ BOT.on('message', async (callback) => {
 
 // BOT.getChat(CHAT_ID).then(r => console.log(r));
 
-CRON.schedule('0 15 * * 0', checkActiveUsers, {});
+CRON.schedule("0 15 * * 0", checkActiveUsers, {});
 // CRON.schedule('* * * * *', checkActiveUsers, {});

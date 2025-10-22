@@ -1,9 +1,9 @@
-import {Telegraf} from 'telegraf';
-import fs from 'fs';
-import path from 'path';
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg'; // Локальный
-import ffmpeg from 'fluent-ffmpeg'; // FFmpeg
-import axios from 'axios';
+import { Telegraf } from "telegraf";
+import fs from "fs";
+import path from "path";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg"; // Локальный
+import ffmpeg from "fluent-ffmpeg"; // FFmpeg
+import axios from "axios";
 
 // Указываем fluent-ffmpeg использовать локальный FFmpeg
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -12,13 +12,13 @@ ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 const bot = new Telegraf(process.env.VTV_BOT_TOKEN);
 
 // Путь для временного хранения файлов
-const tempDir = './temp';
+const tempDir = "./temp";
 if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir);
 }
 
 // Обработка видеофайлов
-bot.on('video', async (ctx) => {
+bot.on("video", async (ctx) => {
   try {
     const videoFile = await ctx.telegram.getFileLink(ctx.message.video.file_id);
     const videoFilePath = path.join(tempDir, `${ctx.chat.id}.mp4`);
@@ -27,43 +27,43 @@ bot.on('video', async (ctx) => {
     // Скачиваем видео с помощью axios
     // ctx.reply('Скачиваю видео...');
     const response = await axios({
-      method: 'get',
+      method: "get",
       url: videoFile.href,
-      responseType: 'stream', // Устанавливаем тип ответа как поток
+      responseType: "stream", // Устанавливаем тип ответа как поток
     });
 
     // Сохраняем файл
     const writer = fs.createWriteStream(videoFilePath);
     response.data.pipe(writer); // Передаём поток в файл
     await new Promise((resolve, reject) => {
-      writer.on('finish', resolve);
-      writer.on('error', reject);
+      writer.on("finish", resolve);
+      writer.on("error", reject);
     });
 
     // Извлекаем аудиодорожку с использованием fluent-ffmpeg
-    ctx.reply('Обрабатываю видео...');
+    ctx.reply("Обрабатываю видео...");
     await new Promise((resolve, reject) => {
       ffmpeg(videoFilePath)
-          .noVideo() // Отключаем видео
-          .audioCodec('libopus') // Устанавливаем кодек Opus
-          .audioBitrate('64k') // Устанавливаем битрейт
-          .audioFrequency(48000) // Устанавливаем частоту дискретизации
-          .save(audioFilePath) // Сохраняем как OGG
-          .on('end', resolve)
-          .on('error', (err) => reject(err));
+        .noVideo() // Отключаем видео
+        .audioCodec("libopus") // Устанавливаем кодек Opus
+        .audioBitrate("64k") // Устанавливаем битрейт
+        .audioFrequency(48000) // Устанавливаем частоту дискретизации
+        .save(audioFilePath) // Сохраняем как OGG
+        .on("end", resolve)
+        .on("error", (err) => reject(err));
     });
 
     // Отправляем голосовое сообщение
     const voiceStream = fs.createReadStream(audioFilePath);
-    await ctx.replyWithVoice({source: voiceStream});
+    await ctx.replyWithVoice({ source: voiceStream });
     // ctx.reply('Готово! Вот ваше голосовое сообщение');
 
     // Очистка временных файлов
     fs.unlinkSync(videoFilePath);
     fs.unlinkSync(audioFilePath);
   } catch (error) {
-    console.error('Ошибка:', error.message);
-    ctx.reply('Произошла ошибка при обработке видео');
+    console.error("Ошибка:", error.message);
+    ctx.reply("Произошла ошибка при обработке видео");
   }
 });
 
@@ -71,5 +71,5 @@ bot.on('video', async (ctx) => {
 bot.launch().then(() => false);
 
 // Готовим бот к завершению работы
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));

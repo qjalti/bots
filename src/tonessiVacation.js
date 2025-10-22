@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from "moment";
 
 /**
  * Класс для расчета времени до отпуска Тонесси
@@ -14,8 +14,8 @@ class TonessiVacation {
     this.currentDate = moment();
     this.vacationDate = moment([2023, 6, 18, 13, 0, 0]);
     return {
-      hoursLeft: this.vacationDate.diff(this.currentDate, 'hours'),
-      daysLeft: this.vacationDate.diff(this.currentDate, 'days'),
+      hoursLeft: this.vacationDate.diff(this.currentDate, "hours"),
+      daysLeft: this.vacationDate.diff(this.currentDate, "days"),
     };
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Modules block
  */
-const crypto = require('crypto');
+const crypto = require("crypto");
 
 /**
  * Encrypt to SHA-256
@@ -9,23 +9,23 @@ const crypto = require('crypto');
  * @return {string} Encrypted string
  */
 function encryptSHA256(data) {
-  const hash = crypto.createHash('sha256');
+  const hash = crypto.createHash("sha256");
   hash.update(data);
-  return hash.digest('hex');
+  return hash.digest("hex");
 }
 
 let n = 0;
 
-console.log('Поиск ключа начат!');
+console.log("Поиск ключа начат!");
 
 while (1 === 1) {
   const CRYPTED = encryptSHA256(`${n}`);
   if (
     CRYPTED.match(
-        /47cc4fa0e4c9269826a661d31fdb87123012e88959bbbd459e35bb0636499b9d/,
+      /47cc4fa0e4c9269826a661d31fdb87123012e88959bbbd459e35bb0636499b9d/,
     )
   ) {
-    console.log(n, 'n');
+    console.log(n, "n");
     console.log(CRYPTED);
     // break;
   }

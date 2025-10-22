@@ -1,1 +1,15 @@
-[{"name":"DXCancri","total_messages":0,"week_messages":0,"user_id":2133256301},{"name":"Qjalti","total_messages":1,"week_messages":0,"user_id":738829247},{"name":"Аля","total_messages":3,"week_messages":0}]
+[
+  {
+    "name": "DXCancri",
+    "total_messages": 0,
+    "week_messages": 0,
+    "user_id": 2133256301
+  },
+  {
+    "name": "Qjalti",
+    "total_messages": 1,
+    "week_messages": 0,
+    "user_id": 738829247
+  },
+  { "name": "Аля", "total_messages": 3, "week_messages": 0 }
+]

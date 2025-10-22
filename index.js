@@ -1,23 +1,23 @@
 /**
  * Блок подключения модулей
  */
-import express from 'express';
-import bodyParser from 'body-parser';
-import * as dotenv from 'dotenv';
+import express from "express";
+import bodyParser from "body-parser";
+import * as dotenv from "dotenv";
 
 /**
  * Боты
  */
-import './bots/myBot.js';
+import "./bots/myBot.js";
 // import './bots/alya_english.js';
 // import './bots/vk_mutabor.js';
-import './bots/personalBot.js';
+import "./bots/personalBot.js";
 // import './bots/ultimaBot.js';
 // import './bots/chatgpt.js';
 // import './bots/tonessiBot.js';
 // import './bots/tonessiNotifier.js';
-import './bots/vTv.js';
-import './bots/rodiyarBot.js';
+import "./bots/vTv.js";
+import "./bots/rodiyarBot.js";
 
 /**
  * Блок определения констант

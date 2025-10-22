@@ -1,5 +1,5 @@
-import moment from 'moment';
-import {TONESSI_PILLS_END} from './constants.js';
+import moment from "moment";
+import { TONESSI_PILLS_END } from "./constants.js";
 
 /**
  * Класс для управления расписанием приема таблеток по методу Тонесси
@@ -34,22 +34,18 @@ class TonessiPills {
     this.morningNumeration = 1;
 
     if (
-      this.currentDate.diff(this.startDate, 'days') <= 10 ||
-      (
-        this.currentDate.diff(this.startDate, 'days') > 30 &&
-        this.currentDate.diff(this.startDate, 'days') <= 40
-      ) ||
-      (
-        this.currentDate.diff(this.startDate, 'days') > 60 &&
-        this.currentDate.diff(this.startDate, 'days') <= 70
-      )
+      this.currentDate.diff(this.startDate, "days") <= 10 ||
+      (this.currentDate.diff(this.startDate, "days") > 30 &&
+        this.currentDate.diff(this.startDate, "days") <= 40) ||
+      (this.currentDate.diff(this.startDate, "days") > 60 &&
+        this.currentDate.diff(this.startDate, "days") <= 70)
     ) {
       this.MORNING = `${this.morningNumeration}. *Исмиген* (иммунное) 
 _1 таблетка под язык натощак, за 30 минут до завтрака_\n\n`;
       this.morningNumeration++;
     }
 
-    if (this.currentDate.diff(this.startDate, 'days') <= this.ecoclav) {
+    if (this.currentDate.diff(this.startDate, "days") <= this.ecoclav) {
       if (this.MORNING === undefined) {
         this.MORNING = `${this.morningNumeration}. *Экоклав* (антибиотик)
 _1 таблетка (следующая через 12 часов)_\n\n`;
@@ -61,7 +57,7 @@ _1 таблетка (следующая через 12 часов)_\n\n`;
     }
 
     if (
-      this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront
+      this.currentDate.diff(this.startDate, "days") <= this.malavitLevopront
     ) {
       this.MORNING += `${this.morningNumeration}. *Левопронт* (полоскание)
 _10 мл/0,5 стакана воды_
@@ -70,7 +66,7 @@ _(Следующий через 6 часов)_\n\n`;
     }
 
     if (
-      this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront
+      this.currentDate.diff(this.startDate, "days") <= this.malavitLevopront
     ) {
       this.MORNING += `${this.morningNumeration}. *Малавит* (полоскание)
 _20 капель/1 стакан воды_`;
@@ -82,9 +78,7 @@ _20 капель/1 стакан воды_`;
     /**
      * 12 pm
      */
-    if (
-      this.currentDate.diff(this.startDate, 'days') <= this.linebact
-    ) {
+    if (this.currentDate.diff(this.startDate, "days") <= this.linebact) {
       this.DAY_12_00 = `1. *Линебакт* (Прибиотик) 
 _1 таблетка перед/во время еды_`;
     }
@@ -93,7 +87,7 @@ _1 таблетка перед/во время еды_`;
      * 12:30 pm
      */
     if (
-      this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront
+      this.currentDate.diff(this.startDate, "days") <= this.malavitLevopront
     ) {
       this.DAY_12_30 = `2. *Малавит* (полоскание)
 _20 капель/1 стакан воды_`;
@@ -102,7 +96,7 @@ _20 капель/1 стакан воды_`;
     /**
      * 2:30 pm
      */
-    if (this.currentDate.diff(this.startDate, 'days') <= this.ketoprofen) {
+    if (this.currentDate.diff(this.startDate, "days") <= this.ketoprofen) {
       this.DAY_14_30 = `3. *Кетопрофен* (полоскание) 
 _10 мл/200 мл воды_`;
     }
@@ -111,7 +105,7 @@ _10 мл/200 мл воды_`;
      * 3:30 pm
      */
     if (
-      this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront
+      this.currentDate.diff(this.startDate, "days") <= this.malavitLevopront
     ) {
       this.DAY_15_30 = `4. *Левопронт* (полоскание) 
 _10 мл/0,5 стакана воды 
@@ -126,15 +120,13 @@ _10 мл/0,5 стакана воды
     /**
      * 6 pm
      */
-    if (
-      this.currentDate.diff(this.startDate, 'days') <= this.vitaminC
-    ) {
+    if (this.currentDate.diff(this.startDate, "days") <= this.vitaminC) {
       this.EVENING_18 = `${this.eveningNumeration}. *Витамин C*\n\n`;
     }
     this.eveningNumeration++;
 
     if (
-      this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront
+      this.currentDate.diff(this.startDate, "days") <= this.malavitLevopront
     ) {
       if (this.EVENING_18 === undefined) {
         this.EVENING_18 = `${this.eveningNumeration}. *Малавит* (полоскание)
@@ -149,7 +141,7 @@ _20 капель/1 стакан воды_`;
     /**
      * 7 pm
      */
-    if (this.currentDate.diff(this.startDate, 'days') <= this.ketoprofen) {
+    if (this.currentDate.diff(this.startDate, "days") <= this.ketoprofen) {
       this.EVENING_19 = `${this.eveningNumeration}. *Кетопрофен* (полоскание) 
 _10 мл/200 мл воды_`;
       this.eveningNumeration++;
@@ -159,7 +151,7 @@ _10 мл/200 мл воды_`;
      * 8 pm
      */
     if (
-      this.currentDate.diff(this.startDate, 'days') <= this.malavitLevopront
+      this.currentDate.diff(this.startDate, "days") <= this.malavitLevopront
     ) {
       this.EVENING_20 = `${this.eveningNumeration}. *Левопронт* (полоскание) 
 _10 мл/0,5 стакана воды 
@@ -167,7 +159,7 @@ _10 мл/0,5 стакана воды
       this.eveningNumeration++;
     }
 
-    if (this.currentDate.diff(this.startDate, 'days') <= this.ecoclav) {
+    if (this.currentDate.diff(this.startDate, "days") <= this.ecoclav) {
       if (this.EVENING_20 === undefined) {
         this.EVENING_20 = `${this.eveningNumeration}. *Экоклав* (антибиотик)
 _1 таблетка через 12 часов от предыдущей_`;
@@ -180,11 +172,7 @@ _1 таблетка через 12 часов от предыдущей_`;
     /**
      * IF block
      */
-    if (
-      this.currentHours === 9 &&
-      this.currentMinutes === 0 &&
-      this.MORNING
-    ) {
+    if (this.currentHours === 9 && this.currentMinutes === 0 && this.MORNING) {
       return this.MORNING;
     } else if (
       this.currentHours === 12 &&
@@ -211,7 +199,8 @@ _1 таблетка через 12 часов от предыдущей_`;
     ) {
       return this.DAY_15_30;
     } else if (
-      this.currentHours === 18 && this.currentMinutes === 0 &&
+      this.currentHours === 18 &&
+      this.currentMinutes === 0 &&
       this.EVENING_18
     ) {
       return this.EVENING_18;
@@ -227,9 +216,7 @@ _1 таблетка через 12 часов от предыдущей_`;
       this.EVENING_20
     ) {
       return this.EVENING_20;
-    } else if (
-      this.currentDate.diff(this.startDate, 'days') === 71
-    ) {
+    } else if (this.currentDate.diff(this.startDate, "days") === 71) {
       return TONESSI_PILLS_END;
     } else {
       return false;
