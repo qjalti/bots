@@ -394,7 +394,7 @@ BOT.on("message", (ctx) => {
 });
 
 cron.schedule("*/5 * * * *", monitorSites);
-monitorSites().catch(console.error);
+
 BOT.launch().then(() => {
   console.log("🟢 Бот запущен и готов к работе");
 });
