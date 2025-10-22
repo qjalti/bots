@@ -217,7 +217,7 @@ const monitorSites = async () => {
       hasChanges = true;
     } else if (!wasOk && nowOk) {
       const link = `<a href="${result.url}">${result.name}</a>`;
-      const message = `✅ Сайт восстановлен!\n\n— ${link} снова работает.`;
+      const message = `✅ Сайт восстановлен!\n\n— ${link} снова работает`;
 
       const subscriberIds = getSubscriberIds();
       for (const id of subscriberIds) {
@@ -271,12 +271,7 @@ BOT.start(async (ctx) => {
 
 🔔 Вы получите сообщение:
 — если сайт упадёт (только один раз),
-— когда он восстановится.
-
-🛠 Команды:
-• /status — текущее состояние
-• /reload — проверить сейчас
-• /stop — отписаться`;
+— когда он восстановится`;
   return ctx.replyWithHTML(msg, { disable_web_page_preview: true });
 });
 
@@ -286,7 +281,7 @@ BOT.command("stop", (ctx) => {
   if (subscribers[chatId]) {
     delete subscribers[chatId];
     saveSubscribers(subscribers);
-    return ctx.reply("🔕 Вы отписались от уведомлений.");
+    return ctx.reply("🔕 Вы отписались от уведомлений");
   }
   return ctx.reply("Вы не были подписаны.");
 });
@@ -364,7 +359,7 @@ BOT.on("message", (ctx) => {
     saveSubscribers(subscribers);
     ctx
       .reply(
-        "✅ Бот добавлен! Буду присылать уведомления о недоступности сайтов.",
+        "✅ Бот добавлен! Буду присылать уведомления о недоступности сайтов",
       )
       .catch(() => {});
   }
@@ -373,7 +368,7 @@ BOT.on("message", (ctx) => {
 cron.schedule("*/5 * * * *", monitorSites);
 monitorSites().catch(console.error);
 BOT.launch().then(() => {
-  console.log("🟢 Бот запущен и готов к работе.");
+  console.log("🟢 Бот запущен и готов к работе");
 });
 
 process.once("SIGINT", () => BOT.stop("SIGINT"));
