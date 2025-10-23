@@ -321,7 +321,7 @@ BOT.command("status", async (ctx) => {
     const emoji = r.ok ? "✅" : "❌";
     const link = `<a href="${r.url}">${r.name}</a>`;
     if (r.ok) {
-      return `${emoji} ${link}`;
+      return `${emoji} ${link}\n`;
     } else {
       const codePart = r.httpStatus
         ? `${r.httpStatus} (${r.errorCode})`
@@ -360,7 +360,7 @@ BOT.command("reload", async (ctx) => {
     const emoji = r.ok ? "✅" : "❌";
     const link = `<a href="${r.url}">${r.name}</a>`;
     if (r.ok) {
-      return `${emoji} ${link}`;
+      return `${emoji} ${link}\n`;
     } else {
       const codePart = r.httpStatus
         ? `${r.httpStatus} (${r.errorCode})`
