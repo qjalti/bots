@@ -319,7 +319,7 @@ BOT.command("status", async (ctx) => {
   const working = results.filter((r) => r.ok).length;
   const lines = results.map((r) => {
     const emoji = r.ok ? "✅" : "❌";
-    const link = `<a href="${r.url}">${r.name}</a>\n\n`;
+    const link = `<a href="${r.url}">${r.name}</a>\n`;
     if (r.ok) {
       return `${emoji} ${link}`;
     } else {
@@ -358,7 +358,7 @@ BOT.command("reload", async (ctx) => {
   const working = results.filter((r) => r.ok).length;
   const lines = results.map((r) => {
     const emoji = r.ok ? "✅" : "❌";
-    const link = `<a href="${r.url}">${r.name}</a>\n\n`;
+    const link = `<a href="${r.url}">${r.name}</a>\n`;
     if (r.ok) {
       return `${emoji} ${link}`;
     } else {
