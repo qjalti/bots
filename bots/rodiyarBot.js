@@ -319,14 +319,14 @@ BOT.command("status", async (ctx) => {
   const working = results.filter((r) => r.ok).length;
   const lines = results.map((r) => {
     const emoji = r.ok ? "✅" : "❌";
-    const link = `<a href="${r.url}">${r.name}</a>\n`;
+    const link = `<a href="${r.url}">${r.name}</a>`;
     if (r.ok) {
       return `${emoji} ${link}`;
     } else {
       const codePart = r.httpStatus
         ? `${r.httpStatus} (${r.errorCode})`
         : r.errorCode;
-      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}`;
+      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}\n`;
     }
   });
   const msg =
@@ -358,14 +358,14 @@ BOT.command("reload", async (ctx) => {
   const working = results.filter((r) => r.ok).length;
   const lines = results.map((r) => {
     const emoji = r.ok ? "✅" : "❌";
-    const link = `<a href="${r.url}">${r.name}</a>\n`;
+    const link = `<a href="${r.url}">${r.name}</a>`;
     if (r.ok) {
       return `${emoji} ${link}`;
     } else {
       const codePart = r.httpStatus
         ? `${r.httpStatus} (${r.errorCode})`
         : r.errorCode;
-      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}`;
+      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}\n`;
     }
   });
   const msg =
