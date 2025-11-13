@@ -4,11 +4,13 @@ import cron from "node-cron";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import pLimit from "p-limit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATUS_FILE = path.join(__dirname, "statuses.json");
 const SUBSCRIBERS_FILE = path.join(__dirname, "subscribers.json");
+const limit = pLimit(5);
 
 const BOT_TOKEN = process.env.RODIYAR_BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -166,6 +168,9 @@ const checkSite = async (site) => {
     const response = await axios.head(site.url, {
       timeout: 10_000,
       maxRedirects: 5,
+      headers: {
+        "User-Agent": "RodiyarMonitor/1.0",
+      },
     });
     const ok = response.status >= 200 && response.status < 400;
     return {
@@ -199,10 +204,10 @@ const checkSite = async (site) => {
 };
 
 const monitorSites = async () => {
-  console.log("🔍 Проверка доступности сайтов...");
-
   const statuses = loadStatuses();
-  const results = await Promise.all(SITES.map(checkSite));
+  const results = await Promise.all(
+    SITES.map((site) => limit(() => checkSite(site))),
+  );
   let hasChanges = false;
 
   for (const result of results) {
@@ -315,7 +320,9 @@ BOT.command("stop", (ctx) => {
 });
 
 BOT.command("status", async (ctx) => {
-  const results = await Promise.all(SITES.map(checkSite));
+  const results = await Promise.all(
+    SITES.map((site) => limit(() => checkSite(site))),
+  );
   const working = results.filter((r) => r.ok).length;
   const lines = results.map((r) => {
     const emoji = r.ok ? "✅" : "❌";
@@ -338,7 +345,9 @@ BOT.command("status", async (ctx) => {
 BOT.command("reload", async (ctx) => {
   await ctx.reply("🔄 Запускаю проверку...");
   const statusesBefore = loadStatuses();
-  const results = await Promise.all(SITES.map(checkSite));
+  const results = await Promise.all(
+    SITES.map((site) => limit(() => checkSite(site))),
+  );
   const statusesAfter = { ...statusesBefore };
   let hasChanges = false;
 
