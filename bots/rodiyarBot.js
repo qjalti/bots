@@ -5,12 +5,20 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import pLimit from "p-limit";
+import axiosRetry from "axios-retry";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATUS_FILE = path.join(__dirname, "statuses.json");
 const SUBSCRIBERS_FILE = path.join(__dirname, "subscribers.json");
 const limit = pLimit(5);
+
+axiosRetry(axios, {
+  retries: 2,
+  retryDelay: (count) => count * 1000,
+  retryCondition: (error) =>
+    ["ECONNABORTED", "ETIMEDOUT", "EAI_AGAIN"].includes(error.code),
+});
 
 const BOT_TOKEN = process.env.RODIYAR_BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -64,49 +72,40 @@ BOT.use((ctx, next) => {
   return next();
 });
 
-const loadSubscribers = () => {
-  if (!fs.existsSync(SUBSCRIBERS_FILE)) {
-    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify({}));
-    return {};
-  }
+const loadSubscribers = async () => {
   try {
-    return JSON.parse(fs.readFileSync(SUBSCRIBERS_FILE, "utf8"));
-  } catch (e) {
-    console.error("❌ Ошибка чтения subscribers.json, создаём заново");
-    fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify({}));
+    const data = await fs.promises.readFile(SUBSCRIBERS_FILE, "utf8");
+    return JSON.parse(data);
+  } catch {
+    await fs.promises.writeFile(SUBSCRIBERS_FILE, JSON.stringify({}, null, 2));
     return {};
   }
 };
 
-const saveSubscribers = (subscribers) => {
-  fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2));
+const saveSubscribers = async (subscribers) => {
+  await fs.promises.writeFile(
+    SUBSCRIBERS_FILE,
+    JSON.stringify(subscribers, null, 2),
+  );
 };
 
-const getSubscriberIds = () => {
-  const subs = loadSubscribers();
+const getSubscriberIds = async () => {
+  const subs = await loadSubscribers();
   return Object.keys(subs).map(Number);
 };
 
-const loadStatuses = () => {
-  if (!fs.existsSync(STATUS_FILE)) {
-    const initial = {};
-    SITES.forEach((site) => (initial[site.url] = true));
-    fs.writeFileSync(STATUS_FILE, JSON.stringify(initial, null, 2));
-    return initial;
-  }
+const loadStatuses = async () => {
   try {
-    return JSON.parse(fs.readFileSync(STATUS_FILE, "utf8"));
-  } catch (e) {
-    console.error("❌ Ошибка чтения statuses.json, создаём заново");
-    const initial = {};
-    SITES.forEach((site) => (initial[site.url] = true));
-    fs.writeFileSync(STATUS_FILE, JSON.stringify(initial, null, 2));
-    return initial;
+    const data = await fs.promises.readFile(STATUS_FILE, "utf8");
+    return JSON.parse(data);
+  } catch {
+    await fs.promises.writeFile(STATUS_FILE, JSON.stringify({}, null, 2));
+    return {};
   }
 };
 
-const saveStatuses = (statuses) => {
-  fs.writeFileSync(STATUS_FILE, JSON.stringify(statuses, null, 2));
+const saveStatuses = async (statuses) => {
+  await fs.promises.writeFile(STATUS_FILE, JSON.stringify(statuses, null, 2));
 };
 
 const getErrorDescription = (code) => {
@@ -204,7 +203,7 @@ const checkSite = async (site) => {
 };
 
 const monitorSites = async () => {
-  const statuses = loadStatuses();
+  const statuses = await loadStatuses();
   const results = await Promise.all(
     SITES.map((site) => limit(() => checkSite(site))),
   );
@@ -221,7 +220,7 @@ const monitorSites = async () => {
         : `<b>${result.errorCode}</b>`;
       const message = `🚨 Сайт упал!\n\n— ${link}: ${codePart} — ${result.description}`;
 
-      const subscriberIds = getSubscriberIds();
+      const subscriberIds = await getSubscriberIds();
       for (const id of subscriberIds) {
         try {
           await BOT.telegram.sendMessage(id, message, {
@@ -238,7 +237,7 @@ const monitorSites = async () => {
       const link = `<a href="${result.url}">${result.name}</a>`;
       const message = `✅ Сайт восстановлен!\n\n— ${link} снова работает`;
 
-      const subscriberIds = getSubscriberIds();
+      const subscriberIds = await getSubscriberIds();
       for (const id of subscriberIds) {
         try {
           await BOT.telegram.sendMessage(id, message, {
@@ -255,13 +254,13 @@ const monitorSites = async () => {
   }
 
   if (hasChanges) {
-    saveStatuses(statuses);
+    await saveStatuses(statuses);
   }
 };
 
 BOT.start(async (ctx) => {
   const chatId = ctx.chat.id;
-  const subscribers = loadSubscribers();
+  const subscribers = await loadSubscribers();
 
   if (ctx.chat.type === "private") {
     const name = ctx.from?.first_name
@@ -275,7 +274,7 @@ BOT.start(async (ctx) => {
     };
   }
 
-  saveSubscribers(subscribers);
+  await saveSubscribers(subscribers);
 
   const msg = `
 🤖 <b>Привет! Я — бот мониторинга</b>
@@ -308,12 +307,12 @@ BOT.start(async (ctx) => {
   return ctx.replyWithHTML(msg, { disable_web_page_preview: true });
 });
 
-BOT.command("stop", (ctx) => {
+BOT.command("stop", async (ctx) => {
   const chatId = ctx.chat.id;
-  const subscribers = loadSubscribers();
+  const subscribers = await loadSubscribers();
   if (subscribers[chatId]) {
     delete subscribers[chatId];
-    saveSubscribers(subscribers);
+    await saveSubscribers(subscribers);
     return ctx.reply("🔕 Вы отписались от уведомлений");
   }
   return ctx.reply("Вы не были подписаны.");
@@ -344,7 +343,7 @@ BOT.command("status", async (ctx) => {
 
 BOT.command("reload", async (ctx) => {
   await ctx.reply("🔄 Запускаю проверку...");
-  const statusesBefore = loadStatuses();
+  const statusesBefore = await loadStatuses();
   const results = await Promise.all(
     SITES.map((site) => limit(() => checkSite(site))),
   );
@@ -361,7 +360,7 @@ BOT.command("reload", async (ctx) => {
   }
 
   if (hasChanges) {
-    saveStatuses(statusesAfter);
+    await saveStatuses(statusesAfter);
   }
 
   const working = results.filter((r) => r.ok).length;
@@ -383,17 +382,17 @@ BOT.command("reload", async (ctx) => {
   return ctx.replyWithHTML(msg, { disable_web_page_preview: true });
 });
 
-BOT.on("message", (ctx) => {
+BOT.on("message", async (ctx) => {
   if (
     ctx.message?.new_chat_members?.some((user) => user.id === ctx.botInfo.id)
   ) {
     const chatId = ctx.chat.id;
-    const subscribers = loadSubscribers();
+    const subscribers = await loadSubscribers();
     subscribers[chatId] = {
       type: ctx.chat.type,
       title: ctx.chat.title || "Новая группа",
     };
-    saveSubscribers(subscribers);
+    await saveSubscribers(subscribers);
     ctx
       .reply(
         "✅ Бот добавлен! Буду присылать уведомления о недоступности сайтов",
