@@ -14,8 +14,8 @@ const SUBSCRIBERS_FILE = path.join(__dirname, "subscribers.json");
 const limit = pLimit(5);
 
 axiosRetry(axios, {
-  retries: 2,
-  retryDelay: (count) => count * 1000,
+  retries: 5,
+  retryDelay: (count) => count * 3000,
   retryCondition: (error) =>
     ["ECONNABORTED", "ETIMEDOUT", "EAI_AGAIN"].includes(error.code),
 });
@@ -165,10 +165,11 @@ const getErrorDescription = (code) => {
 const checkSite = async (site) => {
   try {
     const response = await axios.head(site.url, {
-      timeout: 10_000,
+      timeout: 15000,
       maxRedirects: 5,
       headers: {
         "User-Agent": "RodiyarMonitor/1.0",
+        Connection: "close",
       },
     });
     const ok = response.status >= 200 && response.status < 400;
