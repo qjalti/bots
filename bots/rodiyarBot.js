@@ -165,10 +165,10 @@ const getErrorDescription = (code) => {
 const checkSite = async (site) => {
   try {
     const response = await axios.head(site.url, {
-      timeout: 15000,
+      timeout: 25000,
       maxRedirects: 5,
       headers: {
-        "User-Agent": "RodiyarMonitor/1.0",
+        "User-Agent": `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 (compatible; RodiyarMonitor/1.0)`,
         Connection: "close",
       },
     });
@@ -229,7 +229,21 @@ const monitorSites = async () => {
             disable_web_page_preview: true,
           });
         } catch (err) {
-          console.error(`❌ Не удалось отправить в ${id}:`, err.message);
+          const errorMsg =
+            err?.response?.error?.description || err.message || "";
+
+          if (errorMsg.includes("bot was blocked by the user")) {
+            console.log(
+              `🗑️ Пользователь ${id} заблокировал бота — удаляем из подписчиков`,
+            );
+            const subscribers = await loadSubscribers();
+            if (subscribers.hasOwnProperty(id)) {
+              delete subscribers[id];
+              await saveSubscribers(subscribers);
+            }
+          } else {
+            console.error(`❌ Не удалось отправить в ${id}:`, errorMsg);
+          }
         }
       }
       statuses[result.url] = false;
@@ -246,7 +260,21 @@ const monitorSites = async () => {
             disable_web_page_preview: true,
           });
         } catch (err) {
-          console.error(`❌ Не удалось отправить в ${id}:`, err.message);
+          const errorMsg =
+            err?.response?.error?.description || err.message || "";
+
+          if (errorMsg.includes("bot was blocked by the user")) {
+            console.log(
+              `🗑️ Пользователь ${id} заблокировал бота — удаляем из подписчиков`,
+            );
+            const subscribers = await loadSubscribers();
+            if (subscribers.hasOwnProperty(id)) {
+              delete subscribers[id];
+              await saveSubscribers(subscribers);
+            }
+          } else {
+            console.error(`❌ Не удалось отправить в ${id}:`, errorMsg);
+          }
         }
       }
       statuses[result.url] = true;
