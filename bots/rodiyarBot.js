@@ -430,7 +430,7 @@ BOT.on("message", async (ctx) => {
   }
 });
 
-cron.schedule("*/5 * * * *", monitorSites);
+cron.schedule("*/10 * * * *", monitorSites);
 
 BOT.launch().then(() => {
   console.log("🟢 Бот запущен и готов к работе");
