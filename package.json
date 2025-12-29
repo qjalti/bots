@@ -8,7 +8,7 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "lint": "eslint . --fix",
-    "epf": " npx prettier . --write && npx eslint . --fix"
+    "epf": "npx prettier . --write && npx eslint . --fix"
   },
   "author": "NikitaGuriev <stig.guriev@gmail.com>",
   "license": "ISC",

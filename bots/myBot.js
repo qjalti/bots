@@ -493,7 +493,7 @@ ${OUTDOOR_TEMPERATURE}`,
 };
 
 const vacationLeft = async () => {
-  const VACATION_DATE = moment([2026, 21, 3, 0, 0]);
+  const VACATION_DATE = moment([2026, 3, 21, 0, 0]);
 
   const VD_MONTHS = VACATION_DATE.diff(moment(), "months");
   VACATION_DATE.subtract(VD_MONTHS, "months");
