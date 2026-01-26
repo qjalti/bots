@@ -15,9 +15,13 @@ const limit = pLimit(5);
 
 axiosRetry(axios, {
   retries: 5,
-  retryDelay: (count) => count * 3000,
-  retryCondition: (error) =>
-    ["ECONNABORTED", "ETIMEDOUT", "EAI_AGAIN"].includes(error.code),
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    return (
+      axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+      (error.response && error.response.status >= 500)
+    );
+  },
 });
 
 const BOT_TOKEN = process.env.RODIYAR_BOT_TOKEN;
@@ -169,7 +173,11 @@ const checkSite = async (site) => {
       maxRedirects: 5,
       headers: {
         "User-Agent": `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 (compatible; RodiyarMonitor/1.0)`,
-        Connection: "close",
+        Accept:
+          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+        Connection: "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
       },
     });
     const ok = response.status >= 200 && response.status < 400;
