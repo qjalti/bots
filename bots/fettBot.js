@@ -110,15 +110,13 @@ BOT.on("message", async (ctx) => {
     ? `@${ctx.from.username}`
     : ctx.from.first_name;
 
-  const message = `📩 *НОВЫЙ ОТЗЫВ*
+  const message = `📩 <strong>НОВЫЙ ОТЗЫВ</strong>
 
-Адрес: ${state.location || "Не указан"}
+Адрес: <em>${state.location || "Не указан"}</em>
 Оценка: ⭐ ${state.rating || "Не указана"}
 
 Отзыв:
-<blockquote>
-${ctx.message.text}
-</blockquote>
+<blockquote>${ctx.message.text}</blockquote>
 От: ${user}`;
 
   logAction(ctx, "Прислал отзыв");
