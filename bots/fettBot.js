@@ -11,7 +11,16 @@ if (!BOT_TOKEN) {
 
 const BOT = new Telegraf(BOT_TOKEN);
 
+const logAction = (ctx, action, extra = "") => {
+  const { id, username, first_name } = ctx.from;
+  const date = new Date().toLocaleString("ru-RU");
+  console.log(
+    `[${date}] [ID: ${id}] [@${username || "no_nick"}] [Имя: ${first_name}] -> ${action} ${extra}`,
+  );
+};
+
 BOT.start((ctx) => {
+  logAction(ctx, "Запустил бота");
   ctx.reply(
     "Здравствуйте! Оцените, пожалуйста, наш сервис или просто напишите ваш отзыв ниже 👇",
     Markup.inlineKeyboard([
@@ -30,7 +39,8 @@ BOT.start((ctx) => {
 
 BOT.action(/rate_(\d)/, (ctx) => {
   const rating = ctx.match[1];
-  userState.set(ctx.from.id, rating); // Запоминаем оценку
+  userState.set(ctx.from.id, rating);
+  logAction(ctx, `Нажал на кнопку оценки: ${rating}`);
 
   ctx.answerCbQuery();
   ctx.reply(`Вы выбрали ${rating}. Напишите, пожалуйста, подробнее:`);
@@ -41,12 +51,14 @@ BOT.on("message", async (ctx) => {
   const user = ctx.from.username
     ? `@${ctx.from.username}`
     : ctx.from.first_name;
+  const text = ctx.message.text;
 
-  // Текст отзыва оборачиваем в тройные кавычки для MarkdownV2 или Markdown
+  logAction(ctx, `Прислал отзыв (Оценка: ${rating}):`, `"${text}"`);
+
   const message = `📩 *НОВЫЙ ОТЗЫВ*\n\nОценка: ⭐ ${rating}\n\nОтзыв:\n\`\`\`\n${ctx.message.text}\n\`\`\`\nОт: ${user}`;
 
   try {
-    await bot.telegram.sendMessage(RECIPIENT_ID, message, {
+    await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
       parse_mode: "Markdown",
     });
     await ctx.reply("Спасибо! Ваш отзыв передан руководству.");
