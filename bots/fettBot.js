@@ -116,15 +116,15 @@ BOT.on("message", async (ctx) => {
 Оценка: ⭐ ${state.rating || "Не указана"}
 
 Отзыв:
-\`\`\`text
+<blockquote>
 ${ctx.message.text}
-\`\`\`
+</blockquote>
 От: ${user}`;
 
   logAction(ctx, "Прислал отзыв");
 
   await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
-    parse_mode: "Markdown",
+    parse_mode: "HTML",
   });
 
   await ctx.reply("Спасибо! Ваш отзыв передан руководству");
