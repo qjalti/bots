@@ -20,9 +20,66 @@ const logAction = (ctx, action, extra = "") => {
 };
 
 BOT.start((ctx) => {
-  logAction(ctx, "Запустил бота");
+  const payload = ctx.startPayload;
+
+  userState.set(ctx.from.id, {
+    rating: null,
+    location: null,
+  });
+
+  logAction(ctx, "Запустил бота", payload ? `(payload: ${payload})` : "");
+
+  if (payload === "myasnitskaya") {
+    userState.get(ctx.from.id).location = "Мясницкая, 16";
+  }
+
+  if (payload === "rozhdestvenka") {
+    userState.get(ctx.from.id).location = "Рождественка 5/7, стр 2";
+  }
+
+  if (!payload) {
+    return ctx.reply(
+      "Выберите адрес, пожалуйста:",
+      Markup.inlineKeyboard([
+        [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
+        [
+          Markup.button.callback(
+            "📍 Рождественка 5/7, стр 2",
+            "loc_rozhdestvenka",
+          ),
+        ],
+      ]),
+    );
+  }
+
   ctx.reply(
-    "Здравствуйте! Оцените, пожалуйста, наш сервис или просто напишите ваш отзыв ниже 👇",
+    "Здравствуйте! Оцените, пожалуйста, наш сервис 👇",
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback("⭐️ 1", "rate_1"),
+        Markup.button.callback("⭐️ 2", "rate_2"),
+        Markup.button.callback("⭐️ 3", "rate_3"),
+      ],
+      [
+        Markup.button.callback("⭐️ 4", "rate_4"),
+        Markup.button.callback("⭐️ 5", "rate_5"),
+      ],
+    ]),
+  );
+});
+
+BOT.action(/^loc_(.+)$/, (ctx) => {
+  const state = userState.get(ctx.from.id);
+  const loc = ctx.match[1];
+
+  state.location =
+    loc === "myasnitskaya" ? "Мясницкая, 16" : "Рождественка 5/7, стр 2";
+
+  logAction(ctx, "Выбрал адрес", state.location);
+
+  ctx.answerCbQuery();
+  ctx.reply(
+    "Спасибо! Теперь оцените сервис 👇",
     Markup.inlineKeyboard([
       [
         Markup.button.callback("⭐️ 1", "rate_1"),
@@ -39,32 +96,39 @@ BOT.start((ctx) => {
 
 BOT.action(/rate_(\d)/, (ctx) => {
   const rating = ctx.match[1];
-  userState.set(ctx.from.id, rating);
-  logAction(ctx, `Нажал на кнопку оценки: ${rating}`);
+  userState.get(ctx.from.id).rating = rating;
+
+  logAction(ctx, `Нажал оценку`, rating);
 
   ctx.answerCbQuery();
-  ctx.reply(`Вы выбрали ${rating}. Напишите, пожалуйста, подробнее:`);
+  ctx.reply("Напишите, пожалуйста, отзыв:");
 });
 
-BOT.on("message", async (ctx) => {
-  const rating = userState.get(ctx.from.id) || "Не указана";
+BOT.on("text", async (ctx) => {
+  const state = userState.get(ctx.from.id);
   const user = ctx.from.username
     ? `@${ctx.from.username}`
     : ctx.from.first_name;
-  const text = ctx.message.text;
 
-  logAction(ctx, `Прислал отзыв (Оценка: ${rating}):`, `"${text}"`);
+  const message = `📩 *НОВЫЙ ОТЗЫВ*
 
-  const message = `📩 *НОВЫЙ ОТЗЫВ*\n\nОценка: ⭐ ${rating}\n\nОтзыв:\n\`\`\`\n${ctx.message.text}\n\`\`\`\nОт: ${user}`;
+Адрес: ${state.location || "Не указан"}
+Оценка: ⭐ ${state.rating || "Не указана"}
 
-  try {
-    await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
-      parse_mode: "Markdown",
-    });
-    await ctx.reply("Спасибо! Ваш отзыв передан руководству.");
-  } catch (e) {
-    console.error("Ошибка отправки:", e);
-  }
+Отзыв:
+\`\`\`
+${ctx.message.text}
+\`\`\`
+
+От: ${user}`;
+
+  logAction(ctx, "Прислал отзыв");
+
+  await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
+    parse_mode: "Markdown",
+  });
+
+  await ctx.reply("Спасибо! Ваш отзыв передан руководству.");
 });
 
-BOT.launch().then(() => console.log("Бот запущен!"));
+BOT.launch().then(() => console.log("🤖 Бот запущен"));
