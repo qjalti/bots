@@ -38,7 +38,7 @@ const SITES = [
   { name: "Rodiyar.Tech", url: "https://rodiyar.tech/" },
   { name: "Ohrana-Objective", url: "https://ohrana-objective.ru/" },
   { name: "ДИТ.Рф", url: "https://xn--d1ai4a.xn--p1ai/" },
-  { name: "МК5.45", url: "http://mk5-45.ru/" },
+  { name: "МК5.45", url: "https://mk5-45.ru/" },
   { name: "RodinaKB", url: "https://rodinakb.ru/" },
   { name: "Ohrana-RodinaSPB", url: "https://ohrana-rodinaspb.ru/" },
   { name: "BastionVolga", url: "https://bastionvolga.ru/" },
