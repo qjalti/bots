@@ -18,7 +18,7 @@ import "./bots/personalBot.js";
 // import './bots/tonessiNotifier.js';
 import "./bots/vTv.js";
 import "./bots/rodiyarBot.js";
-import "./bots/fettBot";
+import "./bots/fettBot.js";
 
 /**
  * Блок определения констант
