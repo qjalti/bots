@@ -104,7 +104,7 @@ BOT.action(/rate_(\d)/, (ctx) => {
   ctx.reply("Напишите, пожалуйста, отзыв:");
 });
 
-BOT.on("text", async (ctx) => {
+BOT.on("message", async (ctx) => {
   const state = userState.get(ctx.from.id);
   const user = ctx.from.username
     ? `@${ctx.from.username}`
@@ -119,7 +119,6 @@ BOT.on("text", async (ctx) => {
 \`\`\`
 ${ctx.message.text}
 \`\`\`
-
 От: ${user}`;
 
   logAction(ctx, "Прислал отзыв");
