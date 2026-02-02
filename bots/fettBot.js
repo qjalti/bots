@@ -117,6 +117,7 @@ BOT.on("message", async (ctx) => {
 
 Отзыв:
 <blockquote>${ctx.message.text}</blockquote>
+
 От: ${user}`;
 
   logAction(ctx, "Прислал отзыв");
