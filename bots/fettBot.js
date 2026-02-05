@@ -117,18 +117,15 @@ BOT.on("my_chat_member", (ctx) => {
 });
 
 BOT.on("message", async (ctx) => {
-  userState.set(ctx.from.id, {
-    rating: null,
-    location: null,
-  });
-  const state = userState.get(ctx.from.id);
+  const state = userState.get(ctx.from.id) || { rating: null, location: null };
+
   const user = ctx.from.username
     ? `@${ctx.from.username}`
     : ctx.from.first_name;
 
   if (!state.location) {
     return ctx.reply(
-      "Выберите адрес, пожалуйста:",
+      "Сначала выберите адрес, пожалуйста:",
       Markup.inlineKeyboard([
         [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
         [
@@ -151,13 +148,20 @@ BOT.on("message", async (ctx) => {
 
 От: ${user}`;
 
-  logAction(ctx, "Прислал отзыв");
+  try {
+    logAction(ctx, "Прислал отзыв");
 
-  await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
-    parse_mode: "HTML",
-  });
+    await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
+      parse_mode: "HTML",
+    });
 
-  await ctx.reply("Спасибо! Ваш отзыв передан руководству");
+    await ctx.reply("✅ Спасибо! Ваш отзыв передан руководству");
+
+    userState.delete(ctx.from.id);
+  } catch (error) {
+    console.error("Ошибка при отправке отзыва:", error);
+    await ctx.reply("Произошла ошибка при отправке. Попробуйте позже");
+  }
 });
 
 BOT.launch({
