@@ -117,7 +117,10 @@ BOT.on("my_chat_member", (ctx) => {
 });
 
 BOT.on("message", async (ctx) => {
-  console.log(ctx);
+  userState.set(ctx.from.id, {
+    rating: null,
+    location: null,
+  });
   const state = userState.get(ctx.from.id);
   const user = ctx.from.username
     ? `@${ctx.from.username}`
