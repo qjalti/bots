@@ -1,6 +1,6 @@
 import { Telegraf, Markup } from "telegraf";
 
-const RECIPIENT_ID = 738829247;
+const RECIPIENT_ID = -1003749640851;
 const userState = new Map();
 const BOT_TOKEN = process.env.FETT_BOT_TOKEN;
 
@@ -19,7 +19,7 @@ const logAction = (ctx, action, extra = "") => {
   );
 };
 
-BOT.start((ctx) => {
+const handleStartOrRate = (ctx) => {
   const payload = ctx.startPayload;
 
   userState.set(ctx.from.id, {
@@ -27,7 +27,11 @@ BOT.start((ctx) => {
     location: null,
   });
 
-  logAction(ctx, "Запустил бота", payload ? `(payload: ${payload})` : "");
+  logAction(
+    ctx,
+    "Запустил бота (или вызвал /rate)",
+    payload ? `(payload: ${payload})` : "",
+  );
 
   if (payload === "myasnitskaya") {
     userState.get(ctx.from.id).location = "Мясницкая, 16";
@@ -66,7 +70,10 @@ BOT.start((ctx) => {
       ],
     ]),
   );
-});
+};
+
+BOT.start(handleStartOrRate);
+BOT.command("rate", handleStartOrRate);
 
 BOT.action(/^loc_(.+)$/, (ctx) => {
   const loc = ctx.match[1];
@@ -101,6 +108,9 @@ BOT.action(/^loc_(.+)$/, (ctx) => {
 
 BOT.action(/rate_(\d)/, (ctx) => {
   const rating = ctx.match[1];
+  if (!userState.has(ctx.from.id)) {
+    userState.set(ctx.from.id, { rating: null, location: null });
+  }
   userState.get(ctx.from.id).rating = rating;
 
   logAction(ctx, `Нажал оценку`, rating);
@@ -122,6 +132,8 @@ BOT.on("my_chat_member", (ctx) => {
 });
 
 BOT.on("message", async (ctx) => {
+  if (ctx.message.text && ctx.message.text.startsWith("/")) return;
+
   let state = userState.get(ctx.from.id);
 
   if (!state) {
@@ -129,19 +141,29 @@ BOT.on("message", async (ctx) => {
     userState.set(ctx.from.id, state);
   }
 
-  const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
+  const { first_name, last_name, username, id } = ctx.from;
+  const fullName = [first_name, last_name].filter(Boolean).join(" ");
+  const user = [fullName, username ? `(@${username})` : null, `[ID: ${id}]`]
+    .filter(Boolean)
+    .join(" ");
 
   if (!state.location) {
     return ctx.reply(
       "Выберите адрес, пожалуйста:",
       Markup.inlineKeyboard([
         [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
-        [Markup.button.callback("📍 Рождественка 5/7, стр 2", "loc_rozhdestvenka")],
+        [
+          Markup.button.callback(
+            "📍 Рождественка 5/7, стр 2",
+            "loc_rozhdestvenka",
+          ),
+        ],
       ]),
     );
   }
 
   const message = `📩 <strong>НОВЫЙ ОТЗЫВ</strong>
+
 Адрес: <em>${state.location}</em>
 Оценка: ⭐ ${state.rating || "Не указана"}
 
@@ -151,7 +173,9 @@ BOT.on("message", async (ctx) => {
 От: ${user}`;
 
   try {
-    await BOT.telegram.sendMessage(RECIPIENT_ID, message, { parse_mode: "HTML" });
+    await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
+      parse_mode: "HTML",
+    });
     await ctx.reply("✅ Спасибо! Ваш отзыв передан руководству");
     userState.delete(ctx.from.id);
     logAction(ctx, "Прислал отзыв и состояние очищено");
