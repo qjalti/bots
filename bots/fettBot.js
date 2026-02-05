@@ -104,7 +104,20 @@ BOT.action(/rate_(\d)/, (ctx) => {
   ctx.reply("Напишите, пожалуйста, отзыв:");
 });
 
+BOT.on("my_chat_member", (ctx) => {
+  const chat = ctx.myChatMember.chat;
+  const newStatus = ctx.myChatMember.new_chat_member.status;
+
+  if (newStatus === "member" || newStatus === "administrator") {
+    console.log(`[LOG] Бот добавлен в новый чат:`);
+    console.log(`ID: ${chat.id}`);
+    console.log(`Тип: ${chat.type}`);
+    console.log(`Название: ${chat.title || "Личный чат"}`);
+  }
+});
+
 BOT.on("message", async (ctx) => {
+  console.log(ctx);
   const state = userState.get(ctx.from.id);
   const user = ctx.from.username
     ? `@${ctx.from.username}`
@@ -129,4 +142,6 @@ BOT.on("message", async (ctx) => {
   await ctx.reply("Спасибо! Ваш отзыв передан руководству");
 });
 
-BOT.launch().then(() => console.log("🤖 Бот запущен"));
+BOT.launch({
+  allowedUpdates: ["message", "callback_query", "my_chat_member"],
+}).then(() => console.log("🤖 Бот запущен"));
