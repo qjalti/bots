@@ -69,8 +69,13 @@ BOT.start((ctx) => {
 });
 
 BOT.action(/^loc_(.+)$/, (ctx) => {
-  const state = userState.get(ctx.from.id);
   const loc = ctx.match[1];
+
+  if (!userState.has(ctx.from.id)) {
+    userState.set(ctx.from.id, { rating: null, location: null });
+  }
+
+  const state = userState.get(ctx.from.id);
 
   state.location =
     loc === "myasnitskaya" ? "Мясницкая, 16" : "Рождественка 5/7, стр 2";
@@ -79,7 +84,7 @@ BOT.action(/^loc_(.+)$/, (ctx) => {
 
   ctx.answerCbQuery();
   ctx.reply(
-    "Спасибо! Теперь оцените сервис 👇",
+    `Вы выбрали: ${state.location}\n\nОцените, пожалуйста, сервис или просто напишите ваш отзыв ниже 👇`,
     Markup.inlineKeyboard([
       [
         Markup.button.callback("⭐️ 1", "rate_1"),
@@ -117,15 +122,18 @@ BOT.on("my_chat_member", (ctx) => {
 });
 
 BOT.on("message", async (ctx) => {
-  const state = userState.get(ctx.from.id) || { rating: null, location: null };
-
+  userState.set(ctx.from.id, {
+    rating: null,
+    location: null,
+  });
+  const state = userState.get(ctx.from.id);
   const user = ctx.from.username
     ? `@${ctx.from.username}`
     : ctx.from.first_name;
 
   if (!state.location) {
     return ctx.reply(
-      "Сначала выберите адрес, пожалуйста:",
+      "Выберите адрес, пожалуйста:",
       Markup.inlineKeyboard([
         [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
         [
@@ -148,20 +156,13 @@ BOT.on("message", async (ctx) => {
 
 От: ${user}`;
 
-  try {
-    logAction(ctx, "Прислал отзыв");
+  logAction(ctx, "Прислал отзыв");
 
-    await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
-      parse_mode: "HTML",
-    });
+  await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
+    parse_mode: "HTML",
+  });
 
-    await ctx.reply("✅ Спасибо! Ваш отзыв передан руководству");
-
-    userState.delete(ctx.from.id);
-  } catch (error) {
-    console.error("Ошибка при отправке отзыва:", error);
-    await ctx.reply("Произошла ошибка при отправке. Попробуйте позже");
-  }
+  await ctx.reply("Спасибо! Ваш отзыв передан руководству");
 });
 
 BOT.launch({
