@@ -123,6 +123,21 @@ BOT.on("message", async (ctx) => {
     ? `@${ctx.from.username}`
     : ctx.from.first_name;
 
+  if (!state.location) {
+    return ctx.reply(
+      "Выберите адрес, пожалуйста:",
+      Markup.inlineKeyboard([
+        [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
+        [
+          Markup.button.callback(
+            "📍 Рождественка 5/7, стр 2",
+            "loc_rozhdestvenka",
+          ),
+        ],
+      ]),
+    );
+  }
+
   const message = `📩 <strong>НОВЫЙ ОТЗЫВ</strong>
 
 Адрес: <em>${state.location || "Не указан"}</em>
