@@ -122,47 +122,42 @@ BOT.on("my_chat_member", (ctx) => {
 });
 
 BOT.on("message", async (ctx) => {
-  userState.set(ctx.from.id, {
-    rating: null,
-    location: null,
-  });
-  const state = userState.get(ctx.from.id);
-  const user = ctx.from.username
-    ? `@${ctx.from.username}`
-    : ctx.from.first_name;
+  let state = userState.get(ctx.from.id);
+
+  if (!state) {
+    state = { rating: null, location: null };
+    userState.set(ctx.from.id, state);
+  }
+
+  const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
 
   if (!state.location) {
     return ctx.reply(
       "Выберите адрес, пожалуйста:",
       Markup.inlineKeyboard([
         [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
-        [
-          Markup.button.callback(
-            "📍 Рождественка 5/7, стр 2",
-            "loc_rozhdestvenka",
-          ),
-        ],
+        [Markup.button.callback("📍 Рождественка 5/7, стр 2", "loc_rozhdestvenka")],
       ]),
     );
   }
 
   const message = `📩 <strong>НОВЫЙ ОТЗЫВ</strong>
-
-Адрес: <em>${state.location || "Не указан"}</em>
+Адрес: <em>${state.location}</em>
 Оценка: ⭐ ${state.rating || "Не указана"}
 
 Отзыв:
-<blockquote>${ctx.message.text}</blockquote>
+<blockquote>${ctx.message.text || "Текст отсутствует"}</blockquote>
 
 От: ${user}`;
 
-  logAction(ctx, "Прислал отзыв");
-
-  await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
-    parse_mode: "HTML",
-  });
-
-  await ctx.reply("Спасибо! Ваш отзыв передан руководству");
+  try {
+    await BOT.telegram.sendMessage(RECIPIENT_ID, message, { parse_mode: "HTML" });
+    await ctx.reply("✅ Спасибо! Ваш отзыв передан руководству");
+    userState.delete(ctx.from.id);
+    logAction(ctx, "Прислал отзыв и состояние очищено");
+  } catch (e) {
+    console.error("Ошибка отправки:", e);
+  }
 });
 
 BOT.launch({
