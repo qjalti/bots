@@ -1,6 +1,6 @@
 import { Telegraf, Markup } from "telegraf";
 
-const RECIPIENT_ID = -1003749640851;
+const RECIPIENT_ID = -1003823819498;
 const userState = new Map();
 const BOT_TOKEN = process.env.FETT_BOT_TOKEN;
 
@@ -129,6 +129,10 @@ BOT.on("my_chat_member", (ctx) => {
     console.log(`Тип: ${chat.type}`);
     console.log(`Название: ${chat.title || "Личный чат"}`);
   }
+});
+
+BOT.on("channel_post", (ctx) => {
+  console.log("ID канала, где бот считал сообщение:", ctx.chat.id);
 });
 
 BOT.on("message", async (ctx) => {
