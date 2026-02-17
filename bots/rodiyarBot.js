@@ -168,14 +168,15 @@ const getErrorDescription = (code) => {
 
 const checkSite = async (site) => {
   try {
-    const response = await axios.head(site.url, {
-      timeout: 25000,
+    const response = await axios.get(site.url, {
+      timeout: 15000,
       maxRedirects: 5,
       headers: {
         "User-Agent": `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 (compatible; RodiyarMonitor/1.0)`,
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
+        Range: 'bytes=0-0', // 🔥 главное
         Connection: "keep-alive",
         "Upgrade-Insecure-Requests": "1",
       },
@@ -438,7 +439,7 @@ BOT.on("message", async (ctx) => {
   }
 });
 
-cron.schedule("*/10 * * * *", monitorSites);
+cron.schedule("*/5 * * * *", monitorSites);
 
 BOT.launch().then(() => {
   console.log("🟢 Бот запущен и готов к работе");
