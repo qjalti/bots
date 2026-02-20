@@ -1,7 +1,7 @@
 import { Telegraf, Markup } from "telegraf";
 
-// const RECIPIENT_ID = -1003823819498; // PROD
-const RECIPIENT_ID = -1003749640851; // DEV
+const RECIPIENT_ID = -1003823819498; // PROD
+// const RECIPIENT_ID = -1003749640851; // DEV
 const userState = new Map();
 const BOT_TOKEN = process.env.FETT_BOT_TOKEN;
 
@@ -202,7 +202,6 @@ BOT.on("message", async (ctx) => {
     const cleanChatId = RECIPIENT_ID.toString().replace("-100", "");
 
     const messageLink = `https://t.me/c/${cleanChatId}/${state.lastChannelMsgId}`;
-    console.log(messageLink);
 
     await ctx.telegram.sendMessage(
       RECIPIENT_ID,
