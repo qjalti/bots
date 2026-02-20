@@ -30,6 +30,13 @@ if (!BOT_TOKEN) {
   process.exit(1);
 }
 
+const logAction = (logVar) => {
+  const date = new Date().toLocaleString("ru-RU");
+  console.log(
+    `[${date}] ${logVar}`,
+  );
+};
+
 const SITES = [
   { name: "Patriot-CL", url: "https://patriot-cl.ru/" },
   { name: "Shvey-Dom", url: "https://shvey-dom.ru/" },
@@ -51,6 +58,8 @@ const SITES = [
   { name: "YarosvetGuard", url: "https://yarosvet-guard.com/" },
   { name: "OSNGroup", url: "https://osn-group.ru/" },
   { name: "KNB-3", url: "https://knb-3.ru/" },
+  { name: "Rodiyar.Com", url: "https://rodiyar.com/" },
+  { name: "NSK-Monolit", url: "https://nsk-monolit.ru/" },
 ];
 
 SITES.forEach((site) => {
@@ -161,6 +170,8 @@ const getErrorDescription = (code) => {
       return "сетевая ошибка";
     case "ERR_BAD_RESPONSE":
       return "некорректный ответ сервера";
+    case "ECONNABORTED":
+      return "сайт временно перегружен";
     default:
       return code ? `неизвестная ошибка: ${code}` : "неизвестная ошибка";
   }
@@ -169,14 +180,14 @@ const getErrorDescription = (code) => {
 const checkSite = async (site) => {
   try {
     const response = await axios.get(site.url, {
-      timeout: 15000,
+      timeout: 60000,
       maxRedirects: 5,
       headers: {
         "User-Agent": `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 (compatible; RodiyarMonitor/1.0)`,
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-        Range: 'bytes=0-0', // 🔥 главное
+        Range: 'bytes=0-0',
         Connection: "keep-alive",
         "Upgrade-Insecure-Requests": "1",
       },
@@ -224,11 +235,14 @@ const monitorSites = async () => {
     const nowOk = result.ok;
 
     if (wasOk && !nowOk) {
+      const statusText = result.errorCode === "ECONNABORTED"
+        ? "⚠️ Сайт под интенсивной нагрузкой"
+        : "🚨 Сайт упал";
       const link = `<a href="${result.url}">${result.name}</a>`;
       const codePart = result.httpStatus
         ? `<b>${result.httpStatus} (${result.errorCode})</b>`
         : `<b>${result.errorCode}</b>`;
-      const message = `🚨 Сайт упал!\n\n— ${link}: ${codePart} — ${result.description}`;
+      const message = `${statusText}!\n\n— ${link}: ${codePart} — ${result.description}`;
 
       const subscriberIds = await getSubscriberIds();
       for (const id of subscriberIds) {
