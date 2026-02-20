@@ -1,6 +1,7 @@
 import { Telegraf, Markup } from "telegraf";
 
-const RECIPIENT_ID = -1003823819498;
+// const RECIPIENT_ID = -1003823819498; // PROD
+const RECIPIENT_ID = -1003749640851; // DEV
 const userState = new Map();
 const BOT_TOKEN = process.env.FETT_BOT_TOKEN;
 
@@ -10,6 +11,28 @@ if (!BOT_TOKEN) {
 }
 
 const BOT = new Telegraf(BOT_TOKEN);
+
+const formatChannelMessage = (state, text = null) => {
+  const reviewText = text ? text : "<i>(ожидание текста отзыва...)</i>";
+  const fullName = [state.first_name, state.last_name]
+    .filter(Boolean)
+    .join(" ");
+  const user = [
+    fullName,
+    state.username ? `(@${state.username})` : null,
+    `[ID: ${state.id}]`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    `🆔 <strong>Отзыв №${state.reviewId}</strong>\n\n` +
+    `📍 Адрес: <em>${state.location}</em>\n` +
+    `⭐ Оценка: ${state.rating}\n\n` +
+    `💬 Текст:\n<blockquote>${reviewText}</blockquote>\n\n` +
+    `👤 От: ${user}`
+  );
+};
 
 const logAction = (ctx, action, extra = "") => {
   const { id, username, first_name } = ctx.from;
@@ -106,17 +129,41 @@ BOT.action(/^loc_(.+)$/, (ctx) => {
   );
 });
 
-BOT.action(/rate_(\d)/, (ctx) => {
+BOT.action(/rate_(\d)/, async (ctx) => {
   const rating = ctx.match[1];
-  if (!userState.has(ctx.from.id)) {
-    userState.set(ctx.from.id, { rating: null, location: null });
-  }
-  userState.get(ctx.from.id).rating = rating;
-
   logAction(ctx, `Нажал оценку`, rating);
+  const userId = ctx.from.id;
 
+  const reviewId = Date.now().toString().slice(-5);
+
+  userState.set(userId, {
+    reviewId,
+    rating,
+    location: userState.get(userId)?.location || "Не указан",
+    id: userId,
+    username: ctx.from.username,
+    first_name: ctx.from.first_name,
+    last_name: ctx.from.last_name,
+  });
+
+  const state = userState.get(userId);
   ctx.answerCbQuery();
-  ctx.reply("Напишите, пожалуйста, отзыв:");
+
+  try {
+    const sentMsg = await ctx.telegram.sendMessage(
+      RECIPIENT_ID,
+      formatChannelMessage(state),
+      { parse_mode: "HTML" },
+    );
+
+    state.lastChannelMsgId = sentMsg.message_id;
+
+    await ctx.reply(
+      `Вы поставили ${rating} ⭐. Теперь напишите текст отзыва, и я дополню сообщение в канале`,
+    );
+  } catch (e) {
+    console.error("Ошибка при отправке оценки:", e);
+  }
 });
 
 BOT.on("my_chat_member", (ctx) => {
@@ -138,53 +185,37 @@ BOT.on("channel_post", (ctx) => {
 BOT.on("message", async (ctx) => {
   if (ctx.message.text && ctx.message.text.startsWith("/")) return;
 
-  let state = userState.get(ctx.from.id);
-
-  if (!state) {
-    state = { rating: null, location: null };
-    userState.set(ctx.from.id, state);
+  const state = userState.get(ctx.from.id);
+  if (!state || !state.lastChannelMsgId) {
+    return ctx.reply("Пожалуйста, сначала выберите оценку выше");
   }
-
-  const { first_name, last_name, username, id } = ctx.from;
-  const fullName = [first_name, last_name].filter(Boolean).join(" ");
-  const user = [fullName, username ? `(@${username})` : null, `[ID: ${id}]`]
-    .filter(Boolean)
-    .join(" ");
-
-  if (!state.location) {
-    return ctx.reply(
-      "Выберите адрес, пожалуйста:",
-      Markup.inlineKeyboard([
-        [Markup.button.callback("📍 Мясницкая, 16", "loc_myasnitskaya")],
-        [
-          Markup.button.callback(
-            "📍 Рождественка 5/7, стр 2",
-            "loc_rozhdestvenka",
-          ),
-        ],
-      ]),
-    );
-  }
-
-  const message = `📩 <strong>НОВЫЙ ОТЗЫВ</strong>
-
-Адрес: <em>${state.location}</em>
-Оценка: ⭐ ${state.rating || "Не указана"}
-
-Отзыв:
-<blockquote>${ctx.message.text || "Текст отсутствует"}</blockquote>
-
-От: ${user}`;
 
   try {
-    await BOT.telegram.sendMessage(RECIPIENT_ID, message, {
-      parse_mode: "HTML",
-    });
-    await ctx.reply("✅ Спасибо! Ваш отзыв передан руководству");
+    await ctx.telegram.editMessageText(
+      RECIPIENT_ID,
+      state.lastChannelMsgId,
+      null,
+      formatChannelMessage(state, ctx.message.text),
+      { parse_mode: "HTML" },
+    );
+
+    const cleanChatId = RECIPIENT_ID.toString().replace("-100", "");
+
+    const messageLink = `https://t.me/c/${cleanChatId}/${state.lastChannelMsgId}`;
+    console.log(messageLink);
+
+    await ctx.telegram.sendMessage(
+      RECIPIENT_ID,
+      `📝 <strong>Дополнение к отзыву #${state.reviewId}</strong>\n` +
+        `Пользователь прислал текст. <a href="${messageLink}">👉 Перейти к отзыву</a>`,
+      { parse_mode: "HTML" },
+    );
+
+    await ctx.reply("✅ Спасибо! Ваш отзыв дополнен и передан руководству");
     userState.delete(ctx.from.id);
     logAction(ctx, "Прислал отзыв и состояние очищено");
   } catch (e) {
-    console.error("Ошибка отправки:", e);
+    console.error("Ошибка при обновлении отзыва:", e);
   }
 });
 
