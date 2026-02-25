@@ -30,6 +30,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
  * Telegraf
  */
 const MY_ID = 738829247;
+const LERA_KUSHKULEI_ID = 761891885;
 const ORLOV_ALEXANDER_ID = 391884971;
 // let lastMessageData = null;
 
@@ -443,6 +444,34 @@ ${SUNSET_TIME} (sunset)`,
   );
 };
 
+const sendLeraSSData = async () => {
+  const LA = "55.825952";
+  const LO = "37.513422";
+
+  const SUNRISE_SUNSET_QUERY = await AXIOS.get(
+    `https://api.sunrise-sunset.org/json?lat=${LA}&lng=${LO}&date=tomorrow&formatted=0&tzid=Europe/Moscow`,
+  );
+
+  const SUNRISE_TIME = new Date(
+    SUNRISE_SUNSET_QUERY.data.results.sunrise,
+  ).toLocaleString("ru-RU", {
+    hour: "numeric",
+    minute: "numeric",
+  });
+  const SUNSET_TIME = new Date(
+    SUNRISE_SUNSET_QUERY.data.results.sunset,
+  ).toLocaleString("ru-RU", {
+    hour: "numeric",
+    minute: "numeric",
+  });
+
+  await bot.telegram.sendMessage(
+    LERA_KUSHKULEI_ID,
+    `${SUNRISE_TIME} (sunrise)
+${SUNSET_TIME} (sunset)`,
+  );
+};
+
 const sendTemperatureData = async () => {
   const LA = "55.80852";
   const LO = "37.70758";
@@ -532,7 +561,7 @@ bot.on("message", async (ctx) => {
   logMessage += DIVIDER16;
 
   if (MESSAGE_DATA.text === "/start") {
-    ctx.reply("Бот успешно запущен");
+    ctx.reply("Теперь бот может писать Вам");
   } else if (MESSAGE_DATA.text === "/author") {
     await ctx.reply(`Привет!
 Рад, что пользуешься моим функционалом!
@@ -656,6 +685,13 @@ CRON.schedule("0 15 * * *", collectAndSendData, {
  */
 CRON.schedule("0 21 * * *", collectAndSendData, {
   scheduled: false,
+});
+
+/**
+ * Every day at 9 PM
+ */
+CRON.schedule("0 21 * * *", sendLeraSSData, {
+  scheduled: true,
 });
 
 /**
