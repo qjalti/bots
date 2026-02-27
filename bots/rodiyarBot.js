@@ -32,9 +32,7 @@ if (!BOT_TOKEN) {
 
 const logAction = (logVar) => {
   const date = new Date().toLocaleString("ru-RU");
-  console.log(
-    `[${date}] ${logVar}`,
-  );
+  console.log(`[${date}] ${logVar}`);
 };
 
 const SITES = [
@@ -122,23 +120,44 @@ const saveStatuses = async (statuses) => {
 };
 
 const getErrorDescription = (code) => {
-  if (typeof code === "number") {
-    if (code === 400) return "некорректный запрос (400)";
-    if (code === 401) return "неавторизован (401)";
-    if (code === 403) return "доступ запрещён (403)";
-    if (code === 404) return "страница не найдена (404)";
-    if (code === 408) return "таймаут запроса (408)";
-    if (code === 429) return "слишком много запросов (429)";
-    if (code === 500) return "внутренняя ошибка сервера (500)";
-    if (code === 502) return "плохой шлюз (502)";
-    if (code === 503) return "сервис недоступен (503)";
-    if (code === 504) return "шлюз не ответил вовремя (504)";
-    if (code >= 400 && code < 500) return "ошибка клиента (4xx)";
-    if (code >= 500 && code < 600) return "внутренняя ошибка сервера (5xx)";
-    return `неизвестный HTTP-статус ${code}`;
-  }
+  // if (typeof code === "number") {
+  //   if (code === 400) return "некорректный запрос (400)";
+  //   if (code === 401) return "неавторизован (401)";
+  //   if (code === 403) return "доступ запрещён (403)";
+  //   if (code === 404) return "страница не найдена (404)";
+  //   if (code === 408) return "таймаут запроса (408)";
+  //   if (code === 429) return "слишком много запросов (429)";
+  //   if (code === 500) return "внутренняя ошибка сервера (500)";
+  //   if (code === 502) return "ошибка ответа вышестоящего сервера (502)";
+  //   if (code === 503) return "сервис недоступен (503)";
+  //   if (code === 504) return "шлюз не ответил вовремя (504)";
+  //   if (code >= 400 && code < 500) return "ошибка клиента (4xx)";
+  //   if (code >= 500 && code < 600) return "внутренняя ошибка сервера (5xx)";
+  //   return `неизвестный HTTP-статус ${code}`;
+  // }
 
-  switch (code) {
+  switch (String(code)) {
+    case "400":
+      return "некорректный запрос (400)";
+    case "401":
+      return "неавторизован (401)";
+    case "403":
+      return "доступ запрещён (403)";
+    case "404":
+      return "страница не найдена (404)";
+    case "408":
+      return "таймаут запроса (408)";
+    case "429":
+      return "слишком много запросов (429)";
+    case "500":
+      return "внутренняя ошибка сервера (500)";
+    case "502":
+      return "Ошибка ответа вышестоящего сервера (502)";
+    case "503":
+      return "сервис недоступен (503)";
+    case "504":
+      return "шлюз не ответил вовремя (504)";
+
     case "ENOTFOUND":
       return "домен не найден";
     case "EAI_AGAIN":
@@ -187,7 +206,7 @@ const checkSite = async (site) => {
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
         "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-        Range: 'bytes=0-0',
+        Range: "bytes=0-0",
         Connection: "keep-alive",
         "Upgrade-Insecure-Requests": "1",
       },
@@ -235,9 +254,10 @@ const monitorSites = async () => {
     const nowOk = result.ok;
 
     if (wasOk && !nowOk) {
-      const statusText = result.errorCode === "ECONNABORTED"
-        ? "⚠️ Сайт под интенсивной нагрузкой"
-        : "🚨 Сайт упал";
+      const statusText =
+        result.errorCode === "ECONNABORTED"
+          ? "⚠️ Сайт под интенсивной нагрузкой"
+          : "🚨 Сайт упал";
       const link = `<a href="${result.url}">${result.name}</a>`;
       const codePart = result.httpStatus
         ? `<b>${result.httpStatus} (${result.errorCode})</b>`
