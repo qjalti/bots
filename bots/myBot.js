@@ -180,20 +180,20 @@ const getDayPart = () => {
  * @throws {Error} Если произойдет ошибка при парсинге курсов валют
  * или отправке сообщения.
  */
-const collectAndSendData = async (chatId = MY_ID) => {
+const collectAndSendData = async () => {
   const EXCHANGE_RATES = await parseExchangeRates();
 
   const CURRENT_DAY_PART = getDayPart();
   const MESSAGE = `
 ${CURRENT_DAY_PART}, Никита!
-${EXCHANGE_RATES.USD_SIGN} $
-${EXCHANGE_RATES.EUR_SIGN} €
+$ ${EXCHANGE_RATES.USD_SIGN}
+€ ${EXCHANGE_RATES.EUR_SIGN}
 
 Курс${EXCHANGE_RATES.QUERIES_LIMIT ? "" : " (лимит запросов исчерпан)"}:
 ${formatNumber(EXCHANGE_RATES.USD, "USD")}
 ${formatNumber(EXCHANGE_RATES.EUR, "EUR")}
 `;
-  bot.telegram.sendMessage(chatId, MESSAGE).then(() => false);
+  bot.telegram.sendMessage(MY_ID, MESSAGE).then(() => false);
 };
 
 /**
