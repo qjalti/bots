@@ -625,6 +625,7 @@ CRON.schedule("0 * * * *", sendTemperatureData, {});
 CRON.schedule("0 5-23/4 * * *", upHHResume, {
   scheduled: false,
 });
+CRON.schedule("0 6 * * *", sendLeraTemperature1pm, {});
 CRON.schedule("15 6 20 * *", seventeenthDay, {});
 CRON.schedule("5 7 * * *", sendOrlovAlexanderMessage, {
   scheduled: false,
@@ -641,7 +642,6 @@ CRON.schedule("30 9 * * *", vacationLeft, {
 CRON.schedule("0 11 * * 0", freeParkingSunday, {});
 CRON.schedule("0 12 * * *", appartmentRent, {});
 CRON.schedule("0 13 * * *", moscowArrived, {});
-CRON.schedule("0 13 * * *", sendLeraTemperature1pm, {});
 CRON.schedule("30 14 * * 5", freeGiftCounter, {});
 CRON.schedule("0 15 * * *", collectAndSendData, {
   scheduled: false,
