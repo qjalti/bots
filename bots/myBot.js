@@ -472,6 +472,32 @@ ${SUNSET_TIME} (sunset)`,
   );
 };
 
+const sendLeraTemperature1pm = async () => {
+  const LA = "55.82595";
+  const LO = "37.51342";
+
+  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
+    `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&hourly=temperature_2m&timezone=Europe%2FMoscow&forecast_hours=24`,
+  );
+
+  const OUTDOOR_TEMPERATURE =
+    OUTDOOR_TEMPERATURE_QUERY.data.hourly.time.findIndex((t) =>
+      t.endsWith("T13:00"),
+    ) + OUTDOOR_TEMPERATURE_QUERY.data.hourly_units.temperature_2m;
+
+  await bot.telegram.sendMessage(
+    MY_ID,
+    `Температура на 13:00:
+${OUTDOOR_TEMPERATURE}`,
+  );
+
+  await bot.telegram.sendMessage(
+    LERA_KUSHKULEI_ID,
+    `Температура на 13:00:
+${OUTDOOR_TEMPERATURE}`,
+  );
+};
+
 const sendTemperatureData = async () => {
   const LA = "55.80852";
   const LO = "37.70758";
@@ -615,6 +641,7 @@ CRON.schedule("30 9 * * *", vacationLeft, {
 CRON.schedule("0 11 * * 0", freeParkingSunday, {});
 CRON.schedule("0 12 * * *", appartmentRent, {});
 CRON.schedule("0 13 * * *", moscowArrived, {});
+CRON.schedule("0 13 * * *", sendLeraTemperature1pm, {});
 CRON.schedule("30 14 * * 5", freeGiftCounter, {});
 CRON.schedule("0 15 * * *", collectAndSendData, {
   scheduled: false,
