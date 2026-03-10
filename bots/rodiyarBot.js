@@ -342,11 +342,15 @@ BOT.start(async (ctx) => {
       ? `${ctx.from.first_name} ${ctx.from.last_name || ""}`.trim()
       : `@${ctx.from?.username || "unknown"}`;
     subscribers[chatId] = { type: "private", name };
+    logAction(`👤 Новый подписчик: ${name} (ID: ${chatId})`);
   } else {
     subscribers[chatId] = {
       type: ctx.chat.type,
       title: ctx.chat.title || "Без названия",
     };
+    logAction(
+      `➕ /start в ${ctx.chat.type}: "${ctx.chat.title}" (ID: ${chatId})`,
+    );
   }
 
   await saveSubscribers(subscribers);
@@ -462,10 +466,20 @@ BOT.on("message", async (ctx) => {
     ctx.message?.new_chat_members?.some((user) => user.id === ctx.botInfo.id)
   ) {
     const chatId = ctx.chat.id;
+    const chatTitle = ctx.chat.title || "Без названия";
+    const chatType = ctx.chat.type;
+    const addedBy = ctx.from?.username
+      ? `@${ctx.from.username}`
+      : ctx.from?.first_name || "unknown";
+
+    logAction(
+      `➕ Бот добавлен в ${chatType}: "${chatTitle}" (ID: ${chatId}) — добавил: ${addedBy}`,
+    );
+
     const subscribers = await loadSubscribers();
     subscribers[chatId] = {
-      type: ctx.chat.type,
-      title: ctx.chat.title || "Новая группа",
+      type: chatType,
+      title: chatTitle,
     };
     await saveSubscribers(subscribers);
     ctx
