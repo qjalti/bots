@@ -13,10 +13,13 @@ const STATUS_FILE = path.join(__dirname, "statuses.json");
 const SUBSCRIBERS_FILE = path.join(__dirname, "subscribers.json");
 const limit = pLimit(5);
 
+let isRunning = false;
+
 axiosRetry(axios, {
   retries: 5,
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
+    if (error.code === "ECONNABORTED") return false;
     return (
       axiosRetry.isNetworkOrIdempotentRequestError(error) ||
       (error.response && error.response.status >= 500)
@@ -473,7 +476,18 @@ BOT.on("message", async (ctx) => {
   }
 });
 
-cron.schedule("*/5 * * * *", monitorSites);
+cron.schedule("*/5 * * * *", async () => {
+  if (isRunning) {
+    logAction("⏭️ Пропускаю проверку — предыдущая ещё не завершена");
+    return;
+  }
+  isRunning = true;
+  try {
+    await monitorSites();
+  } finally {
+    isRunning = false;
+  }
+});
 
 BOT.launch().then(() => {
   console.log("🟢 Бот запущен и готов к работе");
