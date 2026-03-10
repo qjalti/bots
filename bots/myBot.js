@@ -79,6 +79,17 @@ const readOldData = () => {
   });
 };
 
+const getOilPrice = async () => {
+  try {
+    const res = await AXIOS.get(
+      "https://query1.finance.yahoo.com/v8/finance/chart/CL=F",
+    );
+    return res.data.chart.result[0].meta.regularMarketPrice.toFixed(2);
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Парсинг REST API курса валют
  * @return {Promise} Promise with AXIOS request
@@ -87,16 +98,23 @@ const parseExchangeRates = () => {
   return new Promise((resolve) => {
     AXIOS.get(API_URI).then(async (res) => {
       const DATA = res.data;
+      const OIL_PRICE = await getOilPrice();
 
       let EUR_RUB;
       let USD_RUB;
       let EUR_SIGN;
       let USD_SIGN;
+      let OIL_SIGN;
 
       /**
        * Получение старых данных и расчет разницы
        */
       const OLD_DATA = await readOldData();
+      const OIL_DIFF = OIL_PRICE ? (OIL_PRICE - OLD_DATA.OIL).toFixed(2) : 0;
+
+      if (Math.sign(OIL_DIFF) === 1) OIL_SIGN = `↑ ${OIL_DIFF}`;
+      if (Math.sign(OIL_DIFF) === -1) OIL_SIGN = `↓ ${OIL_DIFF}`;
+      if (Math.sign(OIL_DIFF) === 0) OIL_SIGN = `= ${OIL_DIFF}`;
 
       if (DATA.result === "success") {
         EUR_RUB = DATA.conversion_rates.RUB / DATA.conversion_rates.EUR;
@@ -137,10 +155,12 @@ const parseExchangeRates = () => {
         USD: USD_RUB,
         EUR_DIFF,
         USD_DIFF,
+        OIL: OIL_PRICE ?? OLD_DATA.OIL, // сохраняем последнее известное значение
+        OIL_SIGN,
         SWING_PRICE: OLD_DATA.SWING_PRICE,
         QUERIES_LIMIT: DATA.result === "success",
-        USD_SIGN: USD_SIGN,
-        EUR_SIGN: EUR_SIGN,
+        USD_SIGN,
+        EUR_SIGN,
       };
 
       FS.writeFile(
@@ -182,19 +202,23 @@ const getDayPart = () => {
  */
 const collectAndSendData = async () => {
   const EXCHANGE_RATES = await parseExchangeRates();
+  const OIL_PRICE = await getOilPrice();
 
   const CURRENT_DAY_PART = getDayPart();
   const MESSAGE = `
 ${CURRENT_DAY_PART}, Никита!
-$ ${EXCHANGE_RATES.USD_SIGN}
-€ ${EXCHANGE_RATES.EUR_SIGN}
+${EXCHANGE_RATES.USD_SIGN} $
+${EXCHANGE_RATES.EUR_SIGN} €
+🛢 ${EXCHANGE_RATES.OIL_SIGN} $
 
 Курс${EXCHANGE_RATES.QUERIES_LIMIT ? "" : " (лимит запросов исчерпан)"}:
 ${formatNumber(EXCHANGE_RATES.USD, "USD")}
 ${formatNumber(EXCHANGE_RATES.EUR, "EUR")}
+🛢 ${formatNumber(EXCHANGE_RATES.OIL, "USD")}
 `;
   bot.telegram.sendMessage(MY_ID, MESSAGE).then(() => false);
 };
+collectAndSendData();
 
 /**
  * Send Alya notify to drink pills
