@@ -218,7 +218,6 @@ ${formatNumber(EXCHANGE_RATES.EUR, "EUR")}
 `;
   bot.telegram.sendMessage(MY_ID, MESSAGE).then(() => false);
 };
-collectAndSendData();
 
 /**
  * Send Alya notify to drink pills
