@@ -654,7 +654,7 @@ CRON.schedule("5 7 * * *", sendOrlovAlexanderMessage, {
   scheduled: false,
 });
 CRON.schedule("30 7 */3 * *", checkOil, {});
-CRON.schedule("0 9 * * *", sendAlyaMessage, {
+CRON.schedule("0 14 * * *", sendAlyaMessage, {
   scheduled: true,
 });
 CRON.schedule("15 9 * * *", workFor, {});
