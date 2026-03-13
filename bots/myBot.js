@@ -84,7 +84,7 @@ const getOilPrice = async () => {
     const res = await AXIOS.get(
       "https://query1.finance.yahoo.com/v8/finance/chart/CL=F",
     );
-    return res.data.chart.result[0].meta.regularMarketPrice.toFixed(2);
+    return res.data.chart.result[0].meta.regularMarketPrice;
   } catch {
     return null;
   }
