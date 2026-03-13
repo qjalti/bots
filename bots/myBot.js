@@ -503,10 +503,13 @@ const sendLeraTemperature1pm = async () => {
     `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&hourly=temperature_2m&timezone=Europe%2FMoscow&forecast_hours=24`,
   );
 
+  const hourlyData = OUTDOOR_TEMPERATURE_QUERY.data.hourly;
+  const idx = hourlyData.time.findIndex((t) => t.endsWith("T13:00"));
   const OUTDOOR_TEMPERATURE =
-    OUTDOOR_TEMPERATURE_QUERY.data.hourly.time.findIndex((t) =>
-      t.endsWith("T13:00"),
-    ) + OUTDOOR_TEMPERATURE_QUERY.data.hourly_units.temperature_2m;
+    idx !== -1
+      ? hourlyData.temperature_2m[idx] +
+        OUTDOOR_TEMPERATURE_QUERY.data.hourly_units.temperature_2m
+      : "н/д";
 
   await bot.telegram.sendMessage(
     MY_ID,
