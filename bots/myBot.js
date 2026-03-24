@@ -525,27 +525,43 @@ ${OUTDOOR_TEMPERATURE}`,
 };
 
 const sendTemperatureData = async () => {
-  const LA = "55.80852";
-  const LO = "37.70758";
+  try {
+    await bot.telegram.sendMessage(MY_ID, `Test`);
 
-  const ROOM_TEMPERATURE_QUERY = await AXIOS.post(
-    "https://qjalti.ru/api/arduino/select",
-  );
+    const LA = "55.80852";
+    const LO = "37.70758";
 
-  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
-    `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
-  );
+    let roomTemperature = "Ошибка";
+    let outdoorTemperature = "Ошибка";
 
-  const ROOM_TEMPERATURE = ROOM_TEMPERATURE_QUERY.data.data[0].temperature;
-  const OUTDOOR_TEMPERATURE =
-    OUTDOOR_TEMPERATURE_QUERY.data.current.temperature_2m +
-    OUTDOOR_TEMPERATURE_QUERY.data.current_units.temperature_2m;
+    try {
+      const ROOM_TEMPERATURE_QUERY = await AXIOS.post(
+        "https://qjalti.ru/api/arduino/select",
+      );
+      roomTemperature =
+        ROOM_TEMPERATURE_QUERY.data.data[0]?.temperature ?? "Ошибка";
+    } catch (e) {
+      console.error("Ошибка получения температуры комнаты:", e.message);
+    }
 
-  await bot.telegram.sendMessage(
-    MY_ID,
-    `${OUTDOOR_TEMPERATURE} (outdoor)
-${ROOM_TEMPERATURE}°C (room)`,
-  );
+    try {
+      const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
+        `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&current=temperature_2m`,
+      );
+      outdoorTemperature =
+        OUTDOOR_TEMPERATURE_QUERY.data.current.temperature_2m +
+        OUTDOOR_TEMPERATURE_QUERY.data.current_units.temperature_2m;
+    } catch (e) {
+      console.error("Ошибка получения температуры на улице:", e.message);
+    }
+
+    await bot.telegram.sendMessage(
+      MY_ID,
+      `${outdoorTemperature} (outdoor)\n${roomTemperature}°C (room)`,
+    );
+  } catch (e) {
+    console.error("Ошибка в sendTemperatureData:", e.message);
+  }
 };
 
 const sendOrlovAlexanderMessage = async () => {
