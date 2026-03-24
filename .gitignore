@@ -8,3 +8,4 @@ bots/config/default.json
 voices_temp/
 .env
 package-lock.json
+bots/statuses.json
