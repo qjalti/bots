@@ -526,8 +526,6 @@ ${OUTDOOR_TEMPERATURE}`,
 
 const sendTemperatureData = async () => {
   try {
-    await bot.telegram.sendMessage(MY_ID, `Test`);
-
     const LA = "55.80852";
     const LO = "37.70758";
 
