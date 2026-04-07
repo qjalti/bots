@@ -218,6 +218,19 @@ BOT.on("message", async (ctx) => {
   }
 });
 
+process.on("uncaughtException", (err) => {
+  console.error("uncaughtException:", err.message);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("unhandledRejection:", reason);
+});
+
 BOT.launch({
   allowedUpdates: ["message", "callback_query", "my_chat_member"],
-}).then(() => console.log("🤖 Бот запущен"));
+})
+  .then(() => console.log("🤖 Бот запущен"))
+  .catch((err) => console.error("Ошибка запуска бота:", err));
+
+process.once("SIGINT", () => BOT.stop("SIGINT"));
+process.once("SIGTERM", () => BOT.stop("SIGTERM"));
