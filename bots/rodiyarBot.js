@@ -38,6 +38,11 @@ const isBlocked = (chatId) => {
   return false;
 };
 
+const isSubscribed = async (chatId) => {
+  const subscribers = await loadSubscribers();
+  return !!subscribers[chatId];
+};
+
 const limit = pLimit(5);
 
 let isRunning = false;
@@ -365,7 +370,7 @@ BOT.start(async (ctx) => {
   const subscribers = await loadSubscribers();
 
   if (subscribers[chatId]) {
-    return ctx.reply("✅ Вы уже подписаны на уведомления.");
+    return ctx.reply("✅ Вы уже подписаны на уведомления");
   }
 
   if (isBlocked(chatId)) {
@@ -388,10 +393,13 @@ BOT.command("stop", async (ctx) => {
     await saveSubscribers(subscribers);
     return ctx.reply("🔕 Вы отписались от уведомлений");
   }
-  return ctx.reply("Вы не были подписаны.");
+  return ctx.reply("Вы не были подписаны");
 });
 
 BOT.command("status", async (ctx) => {
+  if (!(await isSubscribed(ctx.chat.id))) {
+    return ctx.reply("🔒 Нет доступа. Введите /start и пройдите авторизацию");
+  }
   const results = await Promise.all(
     SITES.map((site) => limit(() => checkSite(site))),
   );
@@ -415,6 +423,9 @@ BOT.command("status", async (ctx) => {
 });
 
 BOT.command("reload", async (ctx) => {
+  if (!(await isSubscribed(ctx.chat.id))) {
+    return ctx.reply("🔒 Нет доступа. Введите /start и пройдите авторизацию");
+  }
   await ctx.reply("🔄 Запускаю проверку...");
   const statusesBefore = await loadStatuses();
   const results = await Promise.all(
@@ -490,7 +501,7 @@ BOT.on("message", async (ctx) => {
       await saveSubscribers(subscribers);
 
       return ctx.replyWithHTML(
-        `✅ <b>Доступ разрешён!</b> Вы подписаны на уведомления.`,
+        `✅ <b>Доступ разрешён!</b> Вы подписаны на уведомления`,
       );
     } else {
       const state = getAuthState(chatId);
@@ -502,7 +513,7 @@ BOT.on("message", async (ctx) => {
         pendingAuth.delete(chatId);
         logAction(`🚫 Брутфорс от chatId=${chatId} — заблокирован на 10 мин`);
         return ctx.reply(
-          `❌ Неверный пароль. Слишком много попыток — заблокировано на 10 минут.`,
+          `❌ Неверный пароль. Слишком много попыток — заблокировано на 10 минут`,
         );
       }
 
