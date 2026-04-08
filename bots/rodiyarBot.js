@@ -11,6 +11,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const STATUS_FILE = path.join(__dirname, "statuses.json");
 const SUBSCRIBERS_FILE = path.join(__dirname, "subscribers.json");
+const BOT_PASSWORD = process.env.BOT_PASSWORD;
+if (!BOT_PASSWORD) {
+  console.error("❌ Переменная окружения BOT_PASSWORD не задана!");
+  process.exit(1);
+}
+const pendingAuth = new Map();
+const authAttempts = new Map();
+
+const MAX_ATTEMPTS = 5;
+const BLOCK_DURATION_MS = 10 * 60 * 1000;
+
+const getAuthState = (chatId) => {
+  if (!authAttempts.has(chatId)) {
+    authAttempts.set(chatId, { attempts: 0, blockedUntil: null });
+  }
+  return authAttempts.get(chatId);
+};
+
+const isBlocked = (chatId) => {
+  const state = getAuthState(chatId);
+  if (!state.blockedUntil) return false;
+  if (Date.now() < state.blockedUntil) return true;
+  state.attempts = 0;
+  state.blockedUntil = null;
+  return false;
+};
+
 const limit = pLimit(5);
 
 let isRunning = false;
@@ -337,53 +364,20 @@ BOT.start(async (ctx) => {
   const chatId = ctx.chat.id;
   const subscribers = await loadSubscribers();
 
-  if (ctx.chat.type === "private") {
-    const name = ctx.from?.first_name
-      ? `${ctx.from.first_name} ${ctx.from.last_name || ""}`.trim()
-      : `@${ctx.from?.username || "unknown"}`;
-    subscribers[chatId] = { type: "private", name };
-    logAction(`👤 Новый подписчик: ${name} (ID: ${chatId})`);
-  } else {
-    subscribers[chatId] = {
-      type: ctx.chat.type,
-      title: ctx.chat.title || "Без названия",
-    };
-    logAction(
-      `➕ /start в ${ctx.chat.type}: "${ctx.chat.title}" (ID: ${chatId})`,
+  if (subscribers[chatId]) {
+    return ctx.reply("✅ Вы уже подписаны на уведомления.");
+  }
+
+  if (isBlocked(chatId)) {
+    const state = getAuthState(chatId);
+    const minutesLeft = Math.ceil((state.blockedUntil - Date.now()) / 60000);
+    return ctx.reply(
+      `🔒 Слишком много попыток. Попробуйте через ${minutesLeft} мин.`,
     );
   }
 
-  await saveSubscribers(subscribers);
-
-  const msg = `
-🤖 <b>Привет! Я — бот мониторинга</b>
-
-Вы подписаны на уведомления о недоступности сайтов:
-• Patriot-CL.Ru
-• Shvey-Dom.Ru
-• RodiyarTech.Ru
-• SNB.Group
-• Rodiyar.Tech
-• Ohrana-Objective.Ru
-• ДИТ.Рф
-• МК5.45
-• RodinaKB
-• Ohrana-RodinaSPB
-• BastionVolga
-• GuardGroup
-• UniGuard
-• OkrugSPB
-• NABSkala
-• RazvitPro
-• RealOhrana
-• YarosvetGuard
-• OSNGroup
-• KNB-3
-
-🔔 Вы получите сообщение:
-— если сайт упадёт (только один раз),
-— когда он восстановится`;
-  return ctx.replyWithHTML(msg, { disable_web_page_preview: true });
+  pendingAuth.set(chatId, true);
+  return ctx.reply("🔐 Введите пароль для доступа:");
 });
 
 BOT.command("stop", async (ctx) => {
@@ -462,6 +456,60 @@ BOT.command("reload", async (ctx) => {
 });
 
 BOT.on("message", async (ctx) => {
+  const chatId = ctx.chat.id;
+  const text = ctx.message?.text;
+  if (pendingAuth.has(chatId) && text && !text.startsWith("/")) {
+    if (isBlocked(chatId)) {
+      const state = getAuthState(chatId);
+      const minutesLeft = Math.ceil((state.blockedUntil - Date.now()) / 60000);
+      pendingAuth.delete(chatId);
+      return ctx.reply(
+        `🔒 Слишком много попыток. Попробуйте через ${minutesLeft} мин.`,
+      );
+    }
+
+    if (text.trim() === BOT_PASSWORD) {
+      pendingAuth.delete(chatId);
+      authAttempts.delete(chatId); // сброс счётчика после успеха
+
+      const subscribers = await loadSubscribers();
+      if (ctx.chat.type === "private") {
+        const name = ctx.from?.first_name
+          ? `${ctx.from.first_name} ${ctx.from.last_name || ""}`.trim()
+          : `@${ctx.from?.username || "unknown"}`;
+        subscribers[chatId] = { type: "private", name };
+        logAction(
+          `👤 Новый подписчик (прошёл авторизацию): ${name} (ID: ${chatId})`,
+        );
+      } else {
+        subscribers[chatId] = {
+          type: ctx.chat.type,
+          title: ctx.chat.title || "Без названия",
+        };
+      }
+      await saveSubscribers(subscribers);
+
+      return ctx.replyWithHTML(
+        `✅ <b>Доступ разрешён!</b> Вы подписаны на уведомления.`,
+      );
+    } else {
+      const state = getAuthState(chatId);
+      state.attempts += 1;
+      const remaining = MAX_ATTEMPTS - state.attempts;
+
+      if (state.attempts >= MAX_ATTEMPTS) {
+        state.blockedUntil = Date.now() + BLOCK_DURATION_MS;
+        pendingAuth.delete(chatId);
+        logAction(`🚫 Брутфорс от chatId=${chatId} — заблокирован на 10 мин`);
+        return ctx.reply(
+          `❌ Неверный пароль. Слишком много попыток — заблокировано на 10 минут.`,
+        );
+      }
+
+      return ctx.reply(`❌ Неверный пароль. Осталось попыток: ${remaining}`);
+    }
+  }
+
   if (
     ctx.message?.new_chat_members?.some((user) => user.id === ctx.botInfo.id)
   ) {
