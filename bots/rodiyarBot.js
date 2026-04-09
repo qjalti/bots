@@ -303,7 +303,9 @@ const monitorSites = async () => {
     if (wasOk && !nowOk) {
       const recheck = await checkSiteWithRetry(result, 3, 15000);
       if (recheck.ok) {
-        logAction(`⚠️ ${result.name} — ложная тревога (восстановился при перепроверке)`);
+        logAction(
+          `⚠️ ${result.name} — ложная тревога (восстановился при перепроверке)`,
+        );
         continue;
       }
       const statusText =
@@ -423,8 +425,10 @@ BOT.command("status", async (ctx) => {
     const isOk = statuses[site.url] === true;
     const emoji = isOk ? "✅" : "❌";
     const link = `<a href="${site.url}">${site.name}</a>`;
-      return `${emoji} ${link}\n`;
+    return `${emoji} ${link}\n`;
   });
+
+  const working = SITES.filter((site) => statuses[site.url] === true).length;
   const msg =
     `📊 Состояние (${working}/${SITES.length} работают):\n\n` +
     lines.join("\n");
@@ -454,7 +458,7 @@ BOT.command("reload", async (ctx) => {
     const isOk = statuses[site.url] === true;
     const emoji = isOk ? "✅" : "❌";
     const link = `<a href="${site.url}">${site.name}</a>`;
-      return `${emoji} ${link}\n`;
+    return `${emoji} ${link}\n`;
   });
   const msg =
     `📊 Ручная проверка завершена (${working}/${SITES.length}):\n\n` +
