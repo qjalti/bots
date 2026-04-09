@@ -417,21 +417,13 @@ BOT.command("status", async (ctx) => {
   if (!(await isSubscribed(ctx.chat.id))) {
     return ctx.reply("🔒 Нет доступа. Введите /start и пройдите авторизацию");
   }
-  const results = await Promise.all(
-    SITES.map((site) => limit(() => checkSite(site))),
-  );
-  const working = results.filter((r) => r.ok).length;
-  const lines = results.map((r) => {
-    const emoji = r.ok ? "✅" : "❌";
-    const link = `<a href="${r.url}">${r.name}</a>`;
-    if (r.ok) {
+
+  const statuses = await loadStatuses();
+  const lines = SITES.map((site) => {
+    const isOk = statuses[site.url] === true;
+    const emoji = isOk ? "✅" : "❌";
+    const link = `<a href="${site.url}">${site.name}</a>`;
       return `${emoji} ${link}\n`;
-    } else {
-      const codePart = r.httpStatus
-        ? `${r.httpStatus} (${r.errorCode})`
-        : r.errorCode;
-      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}\n`;
-    }
   });
   const msg =
     `📊 Состояние (${working}/${SITES.length} работают):\n\n` +
@@ -443,39 +435,26 @@ BOT.command("reload", async (ctx) => {
   if (!(await isSubscribed(ctx.chat.id))) {
     return ctx.reply("🔒 Нет доступа. Введите /start и пройдите авторизацию");
   }
+
+  if (isRunning) {
+    return ctx.reply("⏳ Проверка уже выполняется, подождите...");
+  }
+
   await ctx.reply("🔄 Запускаю проверку...");
-  const statusesBefore = await loadStatuses();
-  const results = await Promise.all(
-    SITES.map((site) => limit(() => checkSite(site))),
-  );
-  const statusesAfter = { ...statusesBefore };
-  let hasChanges = false;
-
-  for (const r of results) {
-    const wasOk = statusesBefore[r.url] === true;
-    const nowOk = r.ok;
-    if (wasOk !== nowOk) {
-      statusesAfter[r.url] = nowOk;
-      hasChanges = true;
-    }
+  isRunning = true;
+  try {
+    await monitorSites();
+  } finally {
+    isRunning = false;
   }
 
-  if (hasChanges) {
-    await saveStatuses(statusesAfter);
-  }
-
-  const working = results.filter((r) => r.ok).length;
-  const lines = results.map((r) => {
-    const emoji = r.ok ? "✅" : "❌";
-    const link = `<a href="${r.url}">${r.name}</a>`;
-    if (r.ok) {
+  const statuses = await loadStatuses();
+  const working = SITES.filter((site) => statuses[site.url] === true).length;
+  const lines = SITES.map((site) => {
+    const isOk = statuses[site.url] === true;
+    const emoji = isOk ? "✅" : "❌";
+    const link = `<a href="${site.url}">${site.name}</a>`;
       return `${emoji} ${link}\n`;
-    } else {
-      const codePart = r.httpStatus
-        ? `${r.httpStatus} (${r.errorCode})`
-        : r.errorCode;
-      return `${emoji} ${link}: <b>${codePart}</b> — ${r.description}\n`;
-    }
   });
   const msg =
     `📊 Ручная проверка завершена (${working}/${SITES.length}):\n\n` +
