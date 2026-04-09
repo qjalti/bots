@@ -277,6 +277,18 @@ const checkSite = async (site) => {
   }
 };
 
+const checkSiteWithRetry = async (site, retries = 2, delayMs = 10000) => {
+  for (let i = 0; i < retries; i++) {
+    const result = await checkSite(site);
+    if (result.ok) return result;
+    if (i < retries - 1) {
+      await new Promise((res) => setTimeout(res, delayMs));
+    } else {
+      return result;
+    }
+  }
+};
+
 const monitorSites = async () => {
   const statuses = await loadStatuses();
   const results = await Promise.all(
@@ -289,6 +301,11 @@ const monitorSites = async () => {
     const nowOk = result.ok;
 
     if (wasOk && !nowOk) {
+      const recheck = await checkSiteWithRetry(result, 3, 15000);
+      if (recheck.ok) {
+        logAction(`⚠️ ${result.name} — ложная тревога (восстановился при перепроверке)`);
+        continue;
+      }
       const statusText =
         result.errorCode === "ECONNABORTED"
           ? "⚠️ Сайт под интенсивной нагрузкой"
