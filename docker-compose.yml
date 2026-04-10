@@ -9,3 +9,9 @@ services:
       - TZ=Europe/Moscow
     volumes:
       - ./logs:/app/logs
+    networks:
+      - botnet
+
+networks:
+  botnet:
+    driver: bridge
