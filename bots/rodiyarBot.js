@@ -78,7 +78,7 @@ const SITES = [
   { name: "Rodiyar.Tech", url: "https://rodiyar.tech/" },
   { name: "Ohrana-Objective", url: "https://ohrana-objective.ru/" },
   { name: "ДИТ.Рф", url: "https://xn--d1ai4a.xn--p1ai/" },
-  { name: "МК5.45", url: "https://mk5-45.ru/" },
+  // { name: "МК5.45", url: "https://mk5-45.ru/" },
   { name: "RodinaKB", url: "https://rodinakb.ru/" },
   { name: "Ohrana-RodinaSPB", url: "https://ohrana-rodinaspb.ru/" },
   { name: "BastionVolga", url: "https://bastionvolga.ru/" },
@@ -91,7 +91,7 @@ const SITES = [
   { name: "YarosvetGuard", url: "https://yarosvet-guard.com/" },
   { name: "OSNGroup", url: "https://osn-group.ru/" },
   { name: "KNB-3", url: "https://knb-3.ru/" },
-  { name: "Rodiyar.Com", url: "https://rodiyar.com/" },
+  // { name: "Rodiyar.Com", url: "https://rodiyar.com/" },
   { name: "NSK-Monolit", url: "https://nsk-monolit.ru/" },
 ];
 
@@ -237,13 +237,13 @@ const checkSite = async (site) => {
       timeout: 60000,
       maxRedirects: 5,
       headers: {
-        "User-Agent": `Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 (compatible; RodiyarMonitor/1.0)`,
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": "ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3",
-        Range: "bytes=0-0",
+  "User-Agent": `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 (compatible; RodiyarMonitor/1.0)`,
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+  "Accept-Language": "ru-RU,ru;q=0.9,en-US;q=0.5,en;q=0.3",
+  "Accept-Encoding": "gzip, deflate, br",
         Connection: "keep-alive",
         "Upgrade-Insecure-Requests": "1",
+  "Cache-Control": "max-age=0",
       },
     });
     const ok = response.status >= 200 && response.status < 400;
