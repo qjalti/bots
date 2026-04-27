@@ -605,7 +605,17 @@ const vacationLeft = async () => {
  * New message event
  */
 bot.command("wc", async (ctx) => {
-  await ctx.replyWithPhoto(WC_IMAGE_URL);
+  try {
+    const response = await AXIOS.get(WC_IMAGE_URL, {
+      responseType: "arraybuffer",
+    });
+
+    await ctx.replyWithPhoto({
+      source: Buffer.from(response.data),
+    });
+  } catch (e) {
+    await ctx.reply("Не удалось получить изображение: " + e.message);
+  }
 });
 
 bot.on(message("sticker"), (ctx) => {
