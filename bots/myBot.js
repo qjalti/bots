@@ -22,6 +22,7 @@ moment.locale("ru");
  * Constants
  */
 const API_URI = process.env.CURRENCIES_API;
+const WC_IMAGE_URL = "https://qjalti.ru/webcam/latest.jpg";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -603,6 +604,9 @@ const vacationLeft = async () => {
 /**
  * New message event
  */
+bot.command("wc", async (ctx) => {
+  await ctx.replyWithPhoto(WC_IMAGE_URL);
+});
 
 bot.on(message("sticker"), (ctx) => {
   ctx.reply("`" + ctx.update.message.sticker.file_id + "`", {
