@@ -538,7 +538,7 @@ const sendLeraTemperature1pm = async () => {
 
   const hourlyData_UL = OUTDOOR_TEMPERATURE_QUERY_UL.data.hourly;
   const idx_ul = hourlyData_UL.time.findIndex((t) => t.endsWith("T13:00"));
-  const OUTDOOR_TEMPERATURE_QUERY_UL =
+  const OUTDOOR_TEMPERATURE_UL =
     idx_ul !== -1
       ? hourlyData_UL.temperature_2m[idx_ul] +
         OUTDOOR_TEMPERATURE_QUERY_UL.data.hourly_units.temperature_2m
@@ -548,7 +548,7 @@ const sendLeraTemperature1pm = async () => {
     MY_ID,
     `Температура на 13:00:
 MSK: ${OUTDOOR_TEMPERATURE_MSK}
-KRD: ${OUTDOOR_TEMPERATURE_QUERY_UL}`,
+KRD: ${OUTDOOR_TEMPERATURE_UL}`,
   );
 
   await bot.telegram.sendMessage(
