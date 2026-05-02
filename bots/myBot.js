@@ -481,8 +481,8 @@ const setSunriseSunsetData = async () => {
 
   await bot.telegram.sendMessage(
     MY_ID,
-    `Sunrise. MSK: ${SUNRISE_TIME_MSK}. KRD: ${SUNRISE_TIME_UL} 
-      Sunset. MSK: ${SUNSET_TIME_MSK}. KRD: ${SUNSET_TIME_UL}`,
+    `Sunrise. MSK: ${SUNRISE_TIME_MSK}. KRD: ${SUNRISE_TIME_UL}
+Sunset. MSK: ${SUNSET_TIME_MSK}. KRD: ${SUNSET_TIME_UL}`,
   );
 };
 
