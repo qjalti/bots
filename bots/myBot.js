@@ -441,21 +441,39 @@ const appartmentRent = async () => {
 };
 
 const setSunriseSunsetData = async () => {
-  const LA = "55.80852";
-  const LO = "37.70758";
+  const LA_MSK = "55.80852";
+  const LO_MSK = "37.70758";
+  const LA_UL = "45.23043";
+  const LO_UL = "39.71601";
 
-  const SUNRISE_SUNSET_QUERY = await AXIOS.get(
-    `https://api.sunrise-sunset.org/json?lat=${LA}&lng=${LO}&date=today&formatted=0&tzid=Europe/Moscow`,
+  const SUNRISE_SUNSET_QUERY_MSK = await AXIOS.get(
+    `https://api.sunrise-sunset.org/json?lat=${LA_MSK}&lng=${LO_MSK}&date=today&formatted=0&tzid=Europe/Moscow`,
+  );
+  const SUNRISE_SUNSET_QUERY_UL = await AXIOS.get(
+    `https://api.sunrise-sunset.org/json?lat=${LA_UL}&lng=${LO_UL}&date=today&formatted=0&tzid=Europe/Moscow`,
   );
 
-  const SUNRISE_TIME = new Date(
-    SUNRISE_SUNSET_QUERY.data.results.sunrise,
+  const SUNRISE_TIME_MSK = new Date(
+    SUNRISE_SUNSET_QUERY_MSK.data.results.sunrise,
   ).toLocaleString("ru-RU", {
     hour: "numeric",
     minute: "numeric",
   });
-  const SUNSET_TIME = new Date(
-    SUNRISE_SUNSET_QUERY.data.results.sunset,
+  const SUNSET_TIME_MSK = new Date(
+    SUNRISE_SUNSET_QUERY_MSK.data.results.sunset,
+  ).toLocaleString("ru-RU", {
+    hour: "numeric",
+    minute: "numeric",
+  });
+
+  const SUNRISE_TIME_UL = new Date(
+    SUNRISE_SUNSET_QUERY_UL.data.results.sunrise,
+  ).toLocaleString("ru-RU", {
+    hour: "numeric",
+    minute: "numeric",
+  });
+  const SUNSET_TIME_UL = new Date(
+    SUNRISE_SUNSET_QUERY_UL.data.results.sunset,
   ).toLocaleString("ru-RU", {
     hour: "numeric",
     minute: "numeric",
@@ -463,8 +481,8 @@ const setSunriseSunsetData = async () => {
 
   await bot.telegram.sendMessage(
     MY_ID,
-    `${SUNRISE_TIME} (sunrise)
-${SUNSET_TIME} (sunset)`,
+    `Sunrise. MSK: ${SUNRISE_TIME_MSK}. KRD: ${SUNRISE_TIME_UL} 
+      Sunset. MSK: ${SUNSET_TIME_MSK}. KRD: ${SUNSET_TIME_UL}`,
   );
 };
 
@@ -497,25 +515,40 @@ ${SUNSET_TIME} (sunset)`,
 };
 
 const sendLeraTemperature1pm = async () => {
-  const LA = "55.82595";
-  const LO = "37.51342";
+  const LA_MSK = "55.82595";
+  const LO_MSK = "37.51342";
+  const LA_UL = "55.82595";
+  const LO_UL = "37.51342";
 
-  const OUTDOOR_TEMPERATURE_QUERY = await AXIOS.get(
-    `https://api.open-meteo.com/v1/forecast?latitude=${LA}&longitude=${LO}&hourly=temperature_2m&timezone=Europe%2FMoscow&forecast_hours=24`,
+  const OUTDOOR_TEMPERATURE_QUERY_MSK = await AXIOS.get(
+    `https://api.open-meteo.com/v1/forecast?latitude=${LA_MSK}&longitude=${LO_MSK}&hourly=temperature_2m&timezone=Europe%2FMoscow&forecast_hours=24`,
   );
 
-  const hourlyData = OUTDOOR_TEMPERATURE_QUERY.data.hourly;
-  const idx = hourlyData.time.findIndex((t) => t.endsWith("T13:00"));
-  const OUTDOOR_TEMPERATURE =
-    idx !== -1
-      ? hourlyData.temperature_2m[idx] +
-        OUTDOOR_TEMPERATURE_QUERY.data.hourly_units.temperature_2m
+  const OUTDOOR_TEMPERATURE_QUERY_UL = await AXIOS.get(
+    `https://api.open-meteo.com/v1/forecast?latitude=${LA_UL}&longitude=${LO_UL}&hourly=temperature_2m&timezone=Europe%2FMoscow&forecast_hours=24`,
+  );
+
+  const hourlyData_MSK = OUTDOOR_TEMPERATURE_QUERY_MSK.data.hourly;
+  const idx_msk = hourlyData_MSK.time.findIndex((t) => t.endsWith("T13:00"));
+  const OUTDOOR_TEMPERATURE_MSK =
+    idx_msk !== -1
+      ? hourlyData_MSK.temperature_2m[idx_msk] +
+        OUTDOOR_TEMPERATURE_QUERY_MSK.data.hourly_units.temperature_2m
+      : "н/д";
+
+  const hourlyData_UL = OUTDOOR_TEMPERATURE_QUERY_UL.data.hourly;
+  const idx_ul = hourlyData_UL.time.findIndex((t) => t.endsWith("T13:00"));
+  const OUTDOOR_TEMPERATURE_QUERY_UL =
+    idx_ul !== -1
+      ? hourlyData_UL.temperature_2m[idx_ul] +
+        OUTDOOR_TEMPERATURE_QUERY_UL.data.hourly_units.temperature_2m
       : "н/д";
 
   await bot.telegram.sendMessage(
     MY_ID,
     `Температура на 13:00:
-${OUTDOOR_TEMPERATURE}`,
+MSK: ${OUTDOOR_TEMPERATURE_MSK}
+KRD: ${OUTDOOR_TEMPERATURE_QUERY_UL}`,
   );
 
   await bot.telegram.sendMessage(
@@ -709,7 +742,9 @@ CRON.schedule("0 21 * * *", sendLeraSSData, {
 });
 CRON.schedule("15 21 * * *", lilacAge, {});
 CRON.schedule("45 21 * * *", msgToMom, {});
-CRON.schedule("0 22 * * *", tattooReady, {});
+CRON.schedule("0 22 * * *", tattooReady, {
+  scheduled: false,
+});
 
 bot.launch().then(() => false);
 
