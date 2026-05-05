@@ -517,8 +517,8 @@ ${SUNSET_TIME} (sunset)`,
 const sendLeraTemperature1pm = async () => {
   const LA_MSK = "55.82595";
   const LO_MSK = "37.51342";
-  const LA_UL = "55.82595";
-  const LO_UL = "37.51342";
+  const LA_UL = "45.23043";
+  const LO_UL = "39.71601";
 
   const OUTDOOR_TEMPERATURE_QUERY_MSK = await AXIOS.get(
     `https://api.open-meteo.com/v1/forecast?latitude=${LA_MSK}&longitude=${LO_MSK}&hourly=temperature_2m&timezone=Europe%2FMoscow&forecast_hours=24`,
